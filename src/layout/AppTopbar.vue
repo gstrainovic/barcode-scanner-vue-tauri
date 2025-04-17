@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { getActivePinia } from "pinia"
 import { ref, onMounted } from 'vue';
+import { onlineCheck } from '@/composables/helpers';
 
 const router = useRouter();
 const { toggleDarkMode, isDarkTheme } = useLayout();
@@ -14,7 +15,7 @@ const isOnlineRef = ref(false)
 
 const checkOnlineStatus = async () => {
       try {
-        isOnlineRef.value = await window.pywebview.api.isOnline()
+        isOnlineRef.value = await onlineCheck();
       } catch (error) {
         console.error('Error checking online status:', error)
         isOnlineRef.value = false

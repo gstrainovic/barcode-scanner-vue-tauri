@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
+import { onlineCheck } from '@/composables/helpers';
 
 const { getUsersLager } = useMyFetch();
 
@@ -20,8 +21,10 @@ const barcodeInput = ref('');
 
 onMounted(async () => {
     usernames.value = await getUsersLager();
-    hist.value = await window.pywebview.api.getHistory();
-    window.pywebview.api.sync(userToken.value);
+    throw new Error('getHistory is not available in this context');
+    TODO: fix this
+    //  hist.value = await window.pywebview.api.getHistory();
+    // window.pywebview.api.sync(userToken.value);
 });
 
 const statusClass = (status: string) => {
@@ -39,11 +42,14 @@ const processBarcode = async () => {
 
     // remove from barcode all characters that are not alphanumeric and make it lowercase
     barcodeInput.value = barcodeInput.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-
-    const isOnline = await window.pywebview.api.isOnline();
+    
+    const isOnline : Boolean = await onlineCheck();
     console.log('isOnline', isOnline);
 
-    const settings = await window.pywebview.api.get_settings();
+    // const settings = await window.pywebview.api.get_settings();
+    throw new Error('get_settings is not available in this context');
+    // todo: fix this
+
     console.log('settings', settings);
 
     const status = 'OK';
@@ -56,8 +62,9 @@ const processBarcode = async () => {
     console.log('saveHistory', offline);
     console.log('saveHistory', lager_user_ids);
 
-    await window.pywebview.api.saveHistory(status, barcodeInput.value, userId.value, offline, lager_user_ids);
-    hist.value = await window.pywebview.api.getHistory();
+    throw new Error('getHistory is not available in this context');
+    // await window.pywebview.api.saveHistory(status, barcodeInput.value, userId.value, offline, lager_user_ids);
+    // hist.value = await window.pywebview.api.getHistory();
     barcodeInput.value = '';
 };
 

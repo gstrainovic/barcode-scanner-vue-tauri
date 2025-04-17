@@ -36,9 +36,10 @@ export const useMyFetch = () => {
             const response = await fetchWithAuth(config.api.strapi + 'users?filters[rolle][$eq]=Lager');
             result = Array.isArray(response) ? response : [];
         } else {
-            console.log('getUsersLager window.pywebview.api.get_lager_users');
-            result = await window.pywebview.api.get_lager_users();
-        }
+            // result = await window.pywebview.api.get_lager_users();
+            throw new Error('Offline mode not implemented yet!');
+            // TODO: Implement offline mode for getUsersLager
+        }   
         console.log('getUsersLager result', result);
         const userNameIds = result.map((user: { username: any; id: any; }) => {
             return {
