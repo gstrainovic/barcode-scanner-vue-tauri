@@ -2,6 +2,7 @@ import config from './config';
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
 const { userToken } = authStore;
+import { onlineCheck } from '@/composables/helpers';
 
 export const useMyFetch = () => {
     const token = userToken;
@@ -27,7 +28,7 @@ export const useMyFetch = () => {
     };
 
     const getUsersLager = async () => {
-        const isOnline = await window.pywebview.api.isOnline();
+        const isOnline : Boolean = await onlineCheck();
         let result = [];
         console.log('getUsersLager isOnline', isOnline);
         if (isOnline) {

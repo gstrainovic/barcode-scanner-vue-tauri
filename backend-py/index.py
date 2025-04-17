@@ -8,18 +8,7 @@ import ctypes
 from config import STRAPI_URL
 
 class Api(Sqlite):
-    def isOnline(self) -> bool:
-        url = STRAPI_URL.replace('/api', '')
-        try:
-            get = requests.get(url)
-            text = get.text
-            if get.status_code == 200 and 'The server is running successfully ' in text:
-                print('Server is online')
-                return True
-        except requests.RequestException as e:
-            print(f"An error occurred: {e}")
-        print('Server is offline')
-        return False
+
 
 def getToken() -> str:
     return window.evaluate_js('sessionStorage.getItem("token")')
