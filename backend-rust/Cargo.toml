@@ -1,0 +1,10 @@
+[workspace]
+
+members = [
+    "gui",
+    "scanner",
+    "req",
+    "fun",
+    "config",
+    "sqlite"
+]
