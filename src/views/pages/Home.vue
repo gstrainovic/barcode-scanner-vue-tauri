@@ -6,6 +6,11 @@ import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { onlineCheck } from '@/composables/helpers';
+import { invoke } from '@tauri-apps/api/core';
+
+// When using the Tauri global script (if not using the npm package)
+// Be sure to set `app.withGlobalTauri` in `tauri.conf.json` to true
+// const invoke = window.__TAURI__.core.invoke;
 
 const { getUsersLager } = useMyFetch();
 
@@ -18,11 +23,13 @@ const { userRole, userId, userToken } = storeToRefs(authStore);
 const usernames = ref([]);
 const hist = ref([]);
 const barcodeInput = ref('');
+const message = ref("")
 
 onMounted(async () => {
+    message.value = await invoke("greet", { name: "World" });
     usernames.value = await getUsersLager();
-    throw new Error('getHistory is not available in this context');
-    TODO: fix this
+    // throw new Error('getHistory is not available in this context');
+    // TODO: fix this
     //  hist.value = await window.pywebview.api.getHistory();
     // window.pywebview.api.sync(userToken.value);
 });
@@ -72,6 +79,9 @@ const hinweise = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit. N
 
 </script>
 <template>
+    <div>
+        <h1>{{ message }}</h1>
+    </div>
     <div @keyup.enter="processBarcode()" tabindex="0">
         <Fluid class="flex flex-col md:flex-row gap-8">
             <div class="md:w-1/4">
