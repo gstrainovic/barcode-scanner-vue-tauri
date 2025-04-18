@@ -18,7 +18,7 @@ const { isDarkTheme } = useLayout();
 const devices = ref<{ label: string; value: string }[]>([]);
 let selectedDevice = ref<{ label: string; value: string } | null>(null);
 
-onMounted(async () => {
+const fetchDevices = async () => {
     const rawDevices = await invoke<{ name: string }[]>("get_devices");
     devices.value = rawDevices
         .filter((device) => /VID_([0-9A-F]+)&PID_([0-9A-F]+)/i.test(device.name)) // Nur Geräte mit VID und PID behalten
@@ -39,6 +39,15 @@ onMounted(async () => {
     if (defaultDevice) {
         selectedDevice.value = defaultDevice;
     }
+};
+
+
+onMounted(async () => {
+    await fetchDevices();
+
+    setInterval(async () => {
+        await fetchDevices();
+    }, 3000);
 });
 
 const login = async () => {
