@@ -3,6 +3,8 @@ import AppConfigurator from '@/layout/AppConfigurator.vue';
 import { useLayout } from '@/layout/composables/layout';
 
 const { toggleDarkMode, isDarkTheme } = useLayout();
+
+toggleDarkMode(); // Call the function to toggle dark mode on component mount
 </script>
 
 <template>
