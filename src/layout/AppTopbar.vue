@@ -39,7 +39,7 @@ const { userName, userRole } = storeToRefs(authStore);
 <template>
     <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
-            <img :src="`/images/logo-white.svg`" alt="Gravurzeile Logo" class="w-32">
+            <img :src="isDarkTheme ? '/images/logo.svg' : '/images/logo-white.svg'" alt="Gravurzeile Logo" class="w-32">
         </div>
 
         <i class="pi pi-qrcode" style="font-size: 1.5rem"></i>
