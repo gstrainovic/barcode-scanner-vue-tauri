@@ -7,6 +7,7 @@ import { storeToRefs } from 'pinia';
 import { getActivePinia } from "pinia"
 import { ref, onMounted } from 'vue';
 import { onlineCheck } from '@/composables/helpers';
+import { config } from '@/composables/config';
 
 const router = useRouter();
 const { toggleDarkMode, isDarkTheme } = useLayout();
@@ -44,7 +45,7 @@ const { userName, userRole } = storeToRefs(authStore);
 
         <i class="pi pi-qrcode" style="font-size: 1.5rem"></i>
         <p class="text-xl ml-3">Barcode Scanner</p>
-        <p class="text-lg ml-3">V2.0.0</p>
+        <p class="text-lg ml-3">{{  config.version }}</p>
         <p class="text-lg ml-3"> {{ isOnlineRef ? 'Online' : 'Offline' }}</p>
         <p class="text-xl ml-12">{{ userName }}</p>
         <p class="text-xl ml-12">{{ userRole }}</p>

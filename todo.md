@@ -1,9 +1,9 @@
 Zwingend:
+- [ ] Wenn man scannt springt es in den Vordergrund und fängt den Barcode ab
+- [ ] Wieder zurück zum Ursprung App wenn Barcode gesendet
 - [ ] Selfupdater
 - [ ] Soll im Hingrund laufen
 - [ ] Beim Schliessen eine Abfrage ob ok
-- [ ] Wenn man scannt springt es in den Vordergrund und fängt den Barcode ab
-- [ ] Wieder zurück zum Ursprung App wenn Barcode gesendet
 
 Low Prio:
 - [ ] Sentry 
