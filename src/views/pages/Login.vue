@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
+import { invoke } from '@tauri-apps/api/core';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 const email = ref('');
@@ -13,6 +15,31 @@ const loginFailed = ref(false);
 const authStore = useAuthStore();
 const { userRole } = storeToRefs(authStore);
 const { isDarkTheme } = useLayout();
+const devices = ref<{ label: string; value: string }[]>([]);
+let selectedDevice = ref<{ label: string; value: string } | null>(null);
+
+onMounted(async () => {
+    const rawDevices = await invoke<{ name: string }[]>("get_devices");
+    devices.value = rawDevices
+        .filter((device) => /VID_([0-9A-F]+)&PID_([0-9A-F]+)/i.test(device.name)) // Nur Geräte mit VID und PID behalten
+        .map((device) => {
+            const match = device.name.match(/VID_([0-9A-F]+)&PID_([0-9A-F]+)/i);
+            const label = match ? `${match[1]} - ${match[2]}` : device.name;
+            return {
+                label: label,
+                value: device.name,
+            };
+        });
+
+    // Automatisch das Gerät mit VID_0483 und PID_5750 auswählen
+    const defaultDevice = devices.value.find((device) =>
+        /VID_0483&PID_5750/i.test(device.value)
+    );
+    
+    if (defaultDevice) {
+        selectedDevice.value = defaultDevice;
+    }
+});
 
 const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
@@ -42,7 +69,7 @@ const login = async () => {
                             class="b-8 w-16 shrink-0 mx-auto mb-12" style="width:300px; height:100px;">
                         <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Barcode Scanner
                         </div>
-                        <span class="text-muted-color font-medium">Bitte anmelden</span>
+                        <Select v-model="selectedDevice" :options="devices" optionLabel="label" placeholder="Scanner auswählen"> </Select>
                         <br>
                         <br>
                     </div>
