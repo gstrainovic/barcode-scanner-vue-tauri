@@ -2,30 +2,37 @@
 import { ref } from 'vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useConfigStore } from '@/stores/configStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { onlineCheck } from '@/composables/helpers';
+import { invoke } from '@tauri-apps/api/core';
 
-// When using the Tauri global script (if not using the npm package)
-// Be sure to set `app.withGlobalTauri` in `tauri.conf.json` to true
-// const invoke = window.__TAURI__.core.invoke;
 
 const { getUsersLager } = useMyFetch();
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
+const configStore = useConfigStore();
+const { scanner } = storeToRefs(configStore);
 
 const { team, checked } = storeToRefs(teamStore);
 const { userRole, userId, userToken } = storeToRefs(authStore);
 
-const usernames = ref([]);
+const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref([]);
 const barcodeInput = ref('');
-const message = ref("")
+const looper = ref('');
 
 onMounted(async () => {
+    console.log('device_choice', scanner.value);
+    console.log('rolle', userRole.value);
+
+    looper.value = await invoke('start_looper', { choice: scanner.value, rolle: userRole.value });
     usernames.value = await getUsersLager();
+    console.log('looper', looper.value);
+
     // throw new Error('getHistory is not available in this context');
     // TODO: fix this
     //  hist.value = await window.pywebview.api.getHistory();
@@ -52,10 +59,9 @@ const processBarcode = async () => {
     console.log('isOnline', isOnline);
 
     // const settings = await window.pywebview.api.get_settings();
-    throw new Error('get_settings is not available in this context');
+    // throw new Error('get_settings is not available in this context');
     // todo: fix this
 
-    console.log('settings', settings);
 
     const status = 'OK';
     const offline = false;
@@ -77,10 +83,10 @@ const hinweise = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit. N
 
 </script>
 <template>
-    <div>
-         {{ devices }}
-        {{ message }}
-    </div>
+
+    {{ looper }}
+    {{ scanner }}
+
     <div @keyup.enter="processBarcode()" tabindex="0">
         <Fluid class="flex flex-col md:flex-row gap-8">
             <div class="md:w-1/4">

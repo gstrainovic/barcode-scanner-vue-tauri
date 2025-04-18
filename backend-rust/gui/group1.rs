@@ -20,23 +20,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 // Statische Variable zur Verfolgung des `looper`-Threads
 static LOOPER_RUNNING: AtomicBool = AtomicBool::new(false);
 
-fn start_looper(barcode_input: fltk::input::Input, device_choice: fltk::menu::Choice, rolle: String) {
-    // Überprüfen, ob der `looper`-Thread bereits läuft
-    if !LOOPER_RUNNING.load(Ordering::SeqCst) {
-        println!("Starte Looper");
-        LOOPER_RUNNING.store(true, Ordering::SeqCst);
-        let inp_c = barcode_input.clone();
-        let chce_c = device_choice.clone();
-        let rol_c = rolle.clone();
-        let jwt_c = unsafe { GJWT.clone() };
-        std::thread::spawn(move || {
-            looper(inp_c, chce_c, rol_c, jwt_c);
-            LOOPER_RUNNING.store(false, Ordering::SeqCst); // Setzen Sie den Status zurück, wenn der Thread beendet ist
-        });
-    } else {
-        println!("Looper läuft bereits");
-    }
-}
+
 
 
 pub fn group1(

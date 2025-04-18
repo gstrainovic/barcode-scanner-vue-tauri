@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useConfigStore } from '@/stores/configStore';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
@@ -13,7 +14,9 @@ const email = ref('');
 const password = ref('');
 const loginFailed = ref(false);
 const authStore = useAuthStore();
+const configStore = useConfigStore();
 const { userRole } = storeToRefs(authStore);
+const { scanner } = storeToRefs(configStore);
 const { isDarkTheme } = useLayout();
 const devices = ref<{ label: string; value: string }[]>([]);
 let selectedDevice = ref<{ label: string; value: string } | null>(null);
@@ -38,6 +41,7 @@ const fetchDevices = async () => {
     
     if (defaultDevice) {
         selectedDevice.value = defaultDevice;
+        scanner.value = defaultDevice.value
     }
 };
 
