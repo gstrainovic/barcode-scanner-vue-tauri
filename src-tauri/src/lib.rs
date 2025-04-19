@@ -125,13 +125,6 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
 
 #[tauri::command]
 fn save_history(status: String, barcode: String, uid: i32, offline: bool, luids: Vec<i32>) {
-    // let lager_user_ids_vec: Vec<i32> = luids
-    //     .split(',')
-    //     .filter_map(|id| id.trim().parse::<i32>().ok())
-    //     .collect();
-
-    println!("save_history: status: {}, barcode: {}, uid: {}, offline: {}, luids: {:?}", status, barcode, uid, offline, luids);
-
     create_history(status.as_str(), barcode.as_str(), &uid, offline, &luids);
 }
 
