@@ -9,5 +9,5 @@ interface FetchWithAuth {
 
 interface LagerUser {
     username: string;
-    id: string;
+    id: Number;
 }

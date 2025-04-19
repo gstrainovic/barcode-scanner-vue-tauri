@@ -62,6 +62,12 @@ const processBarcode = async () => {
         return;
     }
 
+    const userID : Number = Number(userId.value);
+    if (!userID) {
+        console.error('Fehler: userId ist nicht definiert.');
+        return;
+    }
+
     // remove from barcode all characters that are not alphanumeric and make it lowercase
     barcodeInput.value = barcodeInput.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     
@@ -79,13 +85,19 @@ const processBarcode = async () => {
 
     console.log('saveHistory', status);
     console.log('saveHistory', barcodeInput.value);
-    console.log('saveHistory', userId.value);
+    console.log('saveHistory', userID);
     console.log('saveHistory', offline);
     console.log('saveHistory', lager_user_ids);
 
-    // throw new Error('getHistory is not available in this context');
-    // await window.pywebview.api.saveHistory(status, barcodeInput.value, userId.value, offline, lager_user_ids);
-     hist.value = await invoke<[]>( 'load_history');
+    await invoke('save_history', {
+        status: status,
+        barcode: barcodeInput.value,
+        uid: userID,
+        offline: offline,
+        luids: lager_user_ids,
+    })
+
+    hist.value = await invoke<[]>( 'load_history');
     barcodeInput.value = '';
 };
 

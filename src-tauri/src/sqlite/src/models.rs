@@ -22,6 +22,7 @@ pub struct History {
 
 #[derive(Insertable)]
 #[diesel(table_name = history)]
+#[derive(Debug)]
 pub struct NewHistory<'a> {
     pub status: &'a str,
     pub barcode: &'a str,
