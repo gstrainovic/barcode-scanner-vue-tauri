@@ -8,8 +8,7 @@ import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { onlineCheck } from '@/composables/helpers';
 import { invoke } from '@tauri-apps/api/core';
-
-
+// import { listen } from '@tauri-apps/api/event';
 const { getUsersLager } = useMyFetch();
 
 const teamStore = useTeamStore();
@@ -18,20 +17,28 @@ const configStore = useConfigStore();
 const { scanner } = storeToRefs(configStore);
 
 const { team, checked } = storeToRefs(teamStore);
-const { userRole, userId, userToken } = storeToRefs(authStore);
+const { userRole, userId } = storeToRefs(authStore);
 
 const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref([]);
 const barcodeInput = ref('');
 const looper = ref('');
 
-onMounted(async () => {
-    console.log('device_choice', scanner.value);
-    console.log('rolle', userRole.value);
+invoke('start_looper')
 
-    looper.value = await invoke('start_looper', { choice: scanner.value, rolle: userRole.value });
+
+// listen('keyboard-event', (event) => {
+//   console.log('Keyboard event received:', event.payload);
+// });
+
+onMounted(async () => {
+    // console.log('device_choice', scanner.value);
+    console.log('rolle', userRole.value);
+    // looper.value = await invoke('start_looper');
+
+    // looper.value = await invoke('start_looper', { choice: scanner.value, rolle: userRole.value });
     usernames.value = await getUsersLager();
-    console.log('looper', looper.value);
+    // console.log('looper', looper.value);
 
     // throw new Error('getHistory is not available in this context');
     // TODO: fix this
