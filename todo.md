@@ -1,5 +1,5 @@
 Zwingend:
-- [ ] Wenn man scannt springt es in den Vordergrund und fängt den Barcode ab
+- [x] Wenn man scannt springt es in den Vordergrund und fängt den Barcode ab
 - [ ] Wieder zurück zum Ursprung App wenn Barcode gesendet
 - [ ] Selfupdater
 - [ ] Soll im Hingrund laufen

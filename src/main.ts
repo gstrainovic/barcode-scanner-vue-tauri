@@ -9,6 +9,13 @@ import { createPinia } from 'pinia'
 import { invoke } from '@tauri-apps/api/core';
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
+import { useLayout } from '@/layout/composables/layout';
+
+const { layoutConfig } = useLayout();
+
+if (layoutConfig.darkTheme) {
+    document.documentElement.classList.add('app-dark');
+}
 
 const pinia = createPinia()
 
