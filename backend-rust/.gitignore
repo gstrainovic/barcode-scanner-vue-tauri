@@ -1,4 +1,0 @@
-target/*
-.vscode/settings.json
-db.sqlite
-.env

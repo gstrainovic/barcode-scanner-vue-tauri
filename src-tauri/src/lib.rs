@@ -4,6 +4,8 @@ use multiinput::{RawInputManager, RawEvent, KeyId, State};
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use tauri::AppHandle;
+use sqlite::get_history;
+// use sqlite::create_history;
 
 static mut ERROR_STATUS : Status = Status::Ok;
 
@@ -40,12 +42,12 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
         manager.filter_devices(vec![keyboard.name.clone()]);
         
         // let mut switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
-        let my_windows_hwnd = unsafe {
-            winapi::um::winuser::FindWindowA(
-                std::ptr::null(),
-                "BarcodeScanner\0".as_ptr() as *const i8,
-            )
-        };
+        // let my_windows_hwnd = unsafe {
+        //     winapi::um::winuser::FindWindowA(
+        //         std::ptr::null(),
+        //         "BarcodeScanner\0".as_ptr() as *const i8,
+        //     )
+        // };
 
  loop {
         // handle events
@@ -121,13 +123,32 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
 
 
 
+// #[tauri::command]
+// fn save_history(status: String, barcode: String, user_id: String, offline: bool, lager_user_ids: String)  {
+
+//     let timestampforsqlite = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+
+//     create_history(barcode.clone(), user_id.clone(), status.clone(), offline, lager_user_ids.clone()).unwrap_or_else(|e| {
+//         eprintln!("Error creating history: {}", e);
+//     });
+//     // let status = sqlite::save_history(status, barcode, user_id, offline, lager_user_ids);
+//     // match status {
+//     //     Ok(_) => Ok(()),
+//     //     Err(e) => Err(format!("Error saving history: {}", e)),
+//     // }
+// }
+
+#[tauri::command]
+fn load_history() -> Result<serde_json::Value, String> {
+    get_history()
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![start_looper])
+        .invoke_handler(tauri::generate_handler![start_looper, load_history])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -7,7 +7,6 @@ use crate::models::{NewHistory, History, User as sqliteUser, Ausnahmen as sqlite
 
 use std::path::Path;
 use schema::history::{self};
-// use schema::users::{self};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 use req::loginfn::User;
@@ -88,18 +87,38 @@ pub fn is_barcode_duplicate_sqlite(barcode_string: &str) -> bool {
     }
 }
 
-pub fn load_history() -> Vec<History> {
+    
+
+
+pub fn get_history() -> Result<serde_json::Value, String> {
     let conn = &mut establish_connection();
 
-    history::table
-        .order(history::id.asc())
+    let history_records = history::table
+        .order(history::timestamp.desc())
         .limit(500)
         .load::<History>(conn)
         .unwrap_or_else(|error| {
             eprintln!("Error loading history: {}", error);
             panic!("Failed to load history");
         })
+        .into_iter()
+        .map(|mut entry| {
+            entry.timestamp = entry.timestamp.to_string(); // convert to string
+            entry
+        })
+        .collect::<Vec<History>>();
+
+    serde_json::to_value(history_records).map_err(|e| e.to_string())
 }
+
+
+    // def getHistory(self):
+    //     json = []
+    //     for entry in History.select().dicts().order_by(History.timestamp.desc()).limit(5):
+    //         entry['timestamp'] = entry['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+    //         json.append(entry)
+    //     return json
+
 
 pub fn update_history(idi: i32) {
     use schema::history::dsl::*;

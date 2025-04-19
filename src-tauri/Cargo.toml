@@ -25,3 +25,4 @@ serde_json = "1"
 multiinput = { git = "https://github.com/Jonesey13/multiinput-rust" }
 winapi = { version = "0.3", features = ["wincon", "winuser", "basetsd", "hidpi", "winnt", "libloaderapi", "fileapi", "hidsdi", "handleapi"] }
 tauri-plugin-dialog = "2"
+sqlite = { path = "./src/sqlite" }

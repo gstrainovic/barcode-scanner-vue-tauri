@@ -7,6 +7,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { onlineCheck } from '@/composables/helpers';
+import { invoke } from '@tauri-apps/api/core';
 
 // import { listen } from '@tauri-apps/api/event';
 const { getUsersLager } = useMyFetch();
@@ -42,7 +43,9 @@ onMounted(async () => {
 
     // throw new Error('getHistory is not available in this context');
     // TODO: fix this
-    //  hist.value = await window.pywebview.api.getHistory();
+     hist.value = await invoke<[]>( 'load_history');
+    console.log('hist', hist.value);
+
     // window.pywebview.api.sync(userToken.value);
 });
 
@@ -80,9 +83,9 @@ const processBarcode = async () => {
     console.log('saveHistory', offline);
     console.log('saveHistory', lager_user_ids);
 
-    throw new Error('getHistory is not available in this context');
+    // throw new Error('getHistory is not available in this context');
     // await window.pywebview.api.saveHistory(status, barcodeInput.value, userId.value, offline, lager_user_ids);
-    // hist.value = await window.pywebview.api.getHistory();
+     hist.value = await invoke<[]>( 'load_history');
     barcodeInput.value = '';
 };
 

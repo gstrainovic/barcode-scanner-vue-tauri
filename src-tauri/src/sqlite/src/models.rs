@@ -5,9 +5,10 @@ use super::schema::einstellungen;
 use super::schema::ausnahmen;
 use super::schema::leitcodes;
 
-#[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::schema::history)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+// #[derive(Queryable, Selectable)]
+// #[diesel(table_name = crate::schema::history)]
+// #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[derive(Queryable, serde::Serialize)]
 pub struct History {
     pub id: i32,
     pub status: String,
