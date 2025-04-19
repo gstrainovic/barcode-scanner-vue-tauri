@@ -1,33 +1,29 @@
 use std::thread;
 use std::time::Duration;
+use std::sync::Arc;
 use multiinput::{RawInputManager, RawEvent, KeyId};
-
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
 
 #[tauri::command]
 fn start_looper() {
     thread::spawn(|| {
-        let mut counter = 0;
-        println!("Tastatureingabe-Thread gestartet!");
-
-        // Initialisiere den RawInputManager
-        let mut manager = match RawInputManager::new() {
-            Ok(m) => m,
-            Err(e) => {
-                eprintln!("Fehler beim Initialisieren des RawInputManagers: {:?}", e);
-                return;
-            }
-        };
-
+        let mut manager = RawInputManager::new().unwrap();
         manager.register_devices(multiinput::DeviceType::Keyboards);
+        let devices = manager.get_device_list();
+        let keyboards = Arc::new(devices.keyboards);
+
+        // find the keyboard with VID_0483 and PID_5750 in the name
+        let keyboard = keyboards
+            .iter()
+            .find(|device| device.name.contains("VID_0483") && device.name.contains("PID_5750"))
+            .unwrap_or_else(|| {
+                eprintln!("Keyboard not found!");
+                std::process::exit(1);
+            });
+        println!("Keyboard found: {:?}", keyboard.name);
+        manager.filter_devices(vec![keyboard.name.clone()]);
+
 
         loop {
-            println!("Log-Nachricht aus dem separaten Thread: {}", counter);
-            counter += 1;
             thread::sleep(Duration::from_millis(100)); // Reduziere die Wartezeit für schnellere Eingabeerkennung
 
             // Hole das nächste Event
@@ -55,7 +51,7 @@ fn start_looper() {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, start_looper]) // start_logging hinzugefügt
+        .invoke_handler(tauri::generate_handler![start_looper]) // start_logging hinzugefügt
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

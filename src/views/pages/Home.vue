@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { onlineCheck } from '@/composables/helpers';
-import { invoke } from '@tauri-apps/api/core';
+
 // import { listen } from '@tauri-apps/api/event';
 const { getUsersLager } = useMyFetch();
 
@@ -24,7 +24,7 @@ const hist = ref([]);
 const barcodeInput = ref('');
 const looper = ref('');
 
-invoke('start_looper')
+
 
 
 // listen('keyboard-event', (event) => {

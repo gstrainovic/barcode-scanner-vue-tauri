@@ -6,7 +6,7 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { createPinia } from 'pinia'
-
+import { invoke } from '@tauri-apps/api/core';
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
 
@@ -26,5 +26,7 @@ app.use(PrimeVue, {
 app.use(ToastService);
 app.use(ConfirmationService);
 app.use(pinia)
+
+invoke('start_looper')
 
 app.mount('#app');
