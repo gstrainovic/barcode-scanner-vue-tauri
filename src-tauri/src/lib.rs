@@ -2,6 +2,7 @@ use std::thread;
 use std::sync::Arc;
 use multiinput::{RawInputManager, RawEvent, KeyId, State};
 use tauri::Manager;
+use tauri_plugin_dialog::DialogExt;
 use tauri::AppHandle;
 
 static mut ERROR_STATUS : Status = Status::Ok;
@@ -18,7 +19,22 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
         .iter()
         .find(|device| device.name.contains("VID_0483") && device.name.contains("PID_5750"))
         .unwrap_or_else(|| {
-            eprintln!("Keyboard not found!");
+            let message = "Bitte stecken Sie den Scanner ein und starten Sie die Anwendung neu.";
+            eprintln!("{}", message);
+            let (tx, rx) = std::sync::mpsc::channel();
+
+            app_clone
+                .dialog()
+                .message(message)
+                .buttons(tauri_plugin_dialog::MessageDialogButtons::Ok)
+                .show(move |_| {
+                    println!("dialog closed");
+                    let _ = tx.send(()); // Signal senden, dass der Dialog geschlossen wurde
+                });
+
+            // Warten, bis der Benutzer den Dialog schließt
+            rx.recv().unwrap();
+
             std::process::exit(1);
         });
         manager.filter_devices(vec![keyboard.name.clone()]);
@@ -42,26 +58,17 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
             //     switch_back_hwd = current_active_window_hwnd;
             // }
 
-            unsafe {
-                // old code with winapi
-                // winapi::um::winuser::ShowWindow(my_windows_hwnd, winapi::um::winuser::SW_MAXIMIZE);
-                // winapi::um::winuser::SetForegroundWindow(my_windows_hwnd);
-                // winapi::um::winuser::SetActiveWindow(my_windows_hwnd);
-                // winapi::um::winuser::SetFocus(my_windows_hwnd);
+            window.show().unwrap();
+            window.maximize().unwrap();
+            window.set_always_on_top(true).unwrap();
+            window.set_focus().unwrap();
 
-                // new code with tauri window
-                window.show().unwrap();
-                window.maximize().unwrap();
-                window.set_focus().unwrap();
-                window.set_always_on_top(true).unwrap();
-
-                let webview = app_clone.get_webview_window("main").unwrap();
-                if let Err(e) = webview.eval("document.getElementById(\"barcodei\").focus()") {
-                    eprintln!("Failed to evaluate JavaScript: {:?}", e);
-                }
-
-
+            let webview = app_clone.get_webview_window("main").unwrap();
+            if let Err(e) = webview.eval("document.getElementById(\"barcodei\").focus()") {
+                eprintln!("Failed to evaluate JavaScript: {:?}", e);
             }
+
+
 
             match event {
                 RawEvent::KeyboardEvent(_, KeyId::Return, State::Released) => {
@@ -119,6 +126,7 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![start_looper])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
