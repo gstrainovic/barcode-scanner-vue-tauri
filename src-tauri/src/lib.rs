@@ -6,11 +6,9 @@ use tauri_plugin_dialog::DialogExt;
 use tauri::AppHandle;
 use sqlite::get_history;
 use sqlite::create_history;
-use std::sync::atomic::{AtomicBool, Ordering};
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
-static IS_DIALOG_OPEN: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));
 static mut ERROR_STATUS : Status = Status::Ok;
 static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
