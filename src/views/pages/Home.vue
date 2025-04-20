@@ -123,14 +123,10 @@ const hinweise = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit. N
 
 </script>
 <template>
-
-    {{ looper }}
-    {{ scanner }}
-
     <div @keyup.enter="processBarcode()" tabindex="0">
         <Fluid class="flex flex-col md:flex-row gap-8">
             <div class="md:w-1/4">
-                <div class="card flex flex-col gap-4">
+                <div class="card flex flex-col gap-3">
                     <div class="font-semibold text-xl"><i class="pi pi-qrcode"></i> Barcode</div>
                     <IconField>
                         <InputIcon class="pi pi-qrcode" />
@@ -161,7 +157,7 @@ const hinweise = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit. N
         </Fluid>
 
         <Fluid class="flex">
-            <div class="card flex flex-col gap-4 w-full">
+            <div class="card flex flex-col gap-4 w-full mt-4">
                 <div class="font-semibold text-xl"><i class="pi pi-history"></i> Verlauf</div>
                 <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1">
                     <Column field="status" header="Status" sortable style="width: 33%">
