@@ -5,7 +5,6 @@ use diesel::prelude::*;
 use std::{fs, error::Error};
 use crate::models::{NewHistory, History, User as sqliteUser, Ausnahmen as sqliteAusnahmen, Leitcodes as sqliteLeitcodes};
 
-use std::path::Path;
 use schema::history::{self};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");

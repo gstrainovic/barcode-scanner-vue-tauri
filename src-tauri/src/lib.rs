@@ -9,6 +9,19 @@ use sqlite::create_history;
 
 static mut ERROR_STATUS : Status = Status::Ok;
 
+use std::sync::Mutex;
+use once_cell::sync::Lazy;
+
+static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
+
+#[tauri::command]
+fn set_user_role(role: String) {
+    let mut user_role = USER_ROLE.lock().unwrap();
+    *user_role = role.clone();
+    println!("User role set to: {}", role);
+}
+
+
 #[tauri::command]
 fn start_looper(app: AppHandle, window: tauri::Window) {
     let app_clone = app.clone();
@@ -66,6 +79,8 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
             window.set_focus().unwrap();
 
             let webview = app_clone.get_webview_window("main").unwrap();
+
+
             if let Err(e) = webview.eval("document.getElementById(\"barcodei\").focus()") {
                 eprintln!("Failed to evaluate JavaScript: {:?}", e);
             }
@@ -78,6 +93,12 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
                     // activate the window current_active_window_hwnd again
                         match ERROR_STATUS {
                             Status::Ok => {
+
+                                // print rolle
+                                let user_role = USER_ROLE.lock().unwrap();
+                                let rolle = user_role.clone();
+                                println!("User role: {}", rolle);
+
                                 // if rolle == "Produktion" {
                                     // winapi::um::winuser::ShowWindow(
                                     //     my_windows_hwnd,
@@ -138,7 +159,8 @@ fn load_history() -> Result<serde_json::Value, String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![start_looper, load_history, save_history])
+        .plugin(tauri_plugin_dialog::init()) 
+        .invoke_handler(tauri::generate_handler![start_looper, load_history, save_history, set_user_role])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

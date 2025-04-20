@@ -278,6 +278,7 @@ name = "barcode-scanner-vue-tauri"
 version = "0.1.0"
 dependencies = [
  "multiinput",
+ "once_cell",
  "serde",
  "serde_json",
  "sqlite",

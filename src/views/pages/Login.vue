@@ -58,6 +58,7 @@ const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
         console.log(userRole.value);
+        await invoke('set_user_role', { role: userRole.value });
         if (userRole.value === 'Lager') {
             router.push('/team');
         } else {
