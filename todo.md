@@ -8,14 +8,9 @@
 - [x] Doppelte Barcodes werden abgefangen
 - [x] Leitcodes werden online geholt
 - [x] Leitcodes werden abgefangen
-- [ ] Bei nur Zahlen wird gewarnt
+- [x] Bei nur Zahlen wird gewarnt
+- [x] Lager Users werden gesendet
+- [x] Ausnahmen
+- [ ] Lager Users bleiben gespeichert beim Refresh
 - [ ] Selfupdater
 
-Low Prio:
-- [ ] Sentry 
-- [ ] Synchronisation vor dem Barcode von Postgres -> SQLITE vor dem senden von
-    - [ ] Ausnahmen
-    - [ ] Leitcodes
-- [ ] Speichern von Barcodes wenn Offline
-
-- 

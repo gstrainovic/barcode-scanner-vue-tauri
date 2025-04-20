@@ -2,20 +2,16 @@
 import { ref } from 'vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useConfigStore } from '@/stores/configStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { onlineCheck } from '@/composables/helpers';
 import { invoke } from '@tauri-apps/api/core';
 
-// import { listen } from '@tauri-apps/api/event';
 const { getUsersLager } = useMyFetch();
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
-const configStore = useConfigStore();
-const { scanner } = storeToRefs(configStore);
 
 const { team, checked } = storeToRefs(teamStore);
 const { userRole, userId, userToken } = storeToRefs(authStore);
@@ -23,38 +19,16 @@ const { userRole, userId, userToken } = storeToRefs(authStore);
 const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref([]);
 const barcodeInput = ref('');
-const looper = ref('');
-
-
-
-
-// listen('keyboard-event', (event) => {
-//   console.log('Keyboard event received:', event.payload);
-// });
 
 onMounted(async () => {
-    // console.log('device_choice', scanner.value);
     console.log('rolle', userRole.value);
-    // looper.value = await invoke('start_looper');
-
-    // looper.value = await invoke('start_looper', { choice: scanner.value, rolle: userRole.value });
     usernames.value = await getUsersLager();
-    // console.log('looper', looper.value);
-
-    // throw new Error('getHistory is not available in this context');
-    // TODO: fix this
-     hist.value = await invoke<[]>( 'load_history');
+    hist.value = await invoke<[]>( 'load_history');
     console.log('hist', hist.value);
-
     // window.pywebview.api.sync(userToken.value);
 });
 
 const statusClass = (status: string) => {
-    // return status.startsWith('@C88') ? 'text-red-500' : '';
-
-    // @C03 -> orange
-    // @C88 -> red
-
     if (status.startsWith('@C03')) {
         return 'text-orange-500';
     } else if (status.startsWith('@C88')) {
@@ -86,26 +60,7 @@ const processBarcode = async () => {
         return;
     }
 
-    // remove from barcode all characters that are not alphanumeric and make it lowercase
-    barcodeInput.value = barcodeInput.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-    
-    const isOnline : Boolean = await onlineCheck();
-    console.log('isOnline', isOnline);
-
-    // const settings = await window.pywebview.api.get_settings();
-    // throw new Error('get_settings is not available in this context');
-    // todo: fix this
-
-
-    const status = 'OK';
-    const offline = false;
     const lager_user_ids = team.value.map((user) => user.id);
-
-    console.log('saveHistory', status);
-    console.log('saveHistory', barcodeInput.value);
-    console.log('saveHistory', userID);
-    console.log('saveHistory', offline);
-    console.log('saveHistory', lager_user_ids);
 
     await invoke('process_barcode', {
         barcode: barcodeInput.value,
