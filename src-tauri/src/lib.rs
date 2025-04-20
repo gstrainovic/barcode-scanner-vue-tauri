@@ -12,6 +12,37 @@ use std::sync::Mutex;
 static mut ERROR_STATUS : Status = Status::Ok;
 static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
+use config::VERSION;
+
+pub fn update(app: AppHandle, window: tauri::Window) {
+    if let Ok(update) = self_update::backends::github::Update::configure()
+        .repo_owner("gstrainovic")
+        .repo_name("barcode-scanner-vue-tauri")
+        .bin_name("barcode_scanner.exe")
+        .show_download_progress(true)
+        .no_confirm(true)
+        .current_version(VERSION)
+        .build()
+    {
+        if let Ok(status) = update.update() {
+            if status.updated() {
+                let message = format!(
+                    "Aktualisiert zu {}. Bitte barcode_scanner.exe nochmals starten",
+                    status.version()
+                );
+                
+                app.dialog()
+                    .message(message.as_str())
+                    .kind(tauri_plugin_dialog::MessageDialogKind::Info)
+                    .title(config::DIALOG_TITLE)
+                    .blocking_show();
+
+                std::process::exit(0);
+            }
+        }
+    }
+}
+
 
 #[tauri::command]
 fn set_user_role(role: String) {

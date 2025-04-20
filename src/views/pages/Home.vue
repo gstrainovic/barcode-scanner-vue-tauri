@@ -5,7 +5,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
-import { onlineCheck } from '@/composables/helpers';
 import { invoke } from '@tauri-apps/api/core';
 
 const { getUsersLager } = useMyFetch();

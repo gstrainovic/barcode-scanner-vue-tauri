@@ -11,6 +11,7 @@
 - [x] Bei nur Zahlen wird gewarnt
 - [x] Lager Users werden gesendet
 - [x] Ausnahmen
+- [ ] Sync
 - [ ] Lager Users bleiben gespeichert beim Refresh
 - [ ] Selfupdater
 
