@@ -35,5 +35,6 @@ app.use(ConfirmationService);
 app.use(pinia)
 
 invoke('start_looper')
+invoke('update')
 
 app.mount('#app');

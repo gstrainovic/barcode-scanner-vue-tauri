@@ -5,7 +5,6 @@ use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use tauri::AppHandle;
 use sqlite::get_history;
-// use sqlite::create_history;
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
@@ -14,11 +13,13 @@ static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
 use config::VERSION;
 
-pub fn update(app: AppHandle, window: tauri::Window) {
+#[tauri::command]
+fn update(app: AppHandle) {
+    println!("Checking for updates...");
     if let Ok(update) = self_update::backends::github::Update::configure()
         .repo_owner("gstrainovic")
         .repo_name("barcode-scanner-vue-tauri")
-        .bin_name("barcode_scanner.exe")
+        .bin_name("barcode-scanner-v2.exe")
         .show_download_progress(true)
         .no_confirm(true)
         .current_version(VERSION)
@@ -38,7 +39,13 @@ pub fn update(app: AppHandle, window: tauri::Window) {
                     .blocking_show();
 
                 std::process::exit(0);
+            } else {
+                let message = "Keine neuen Updates verfügbar.";
+                println!("{}", message);
             }
+        } else {
+            let message = "Fehler beim Aktualisieren der Anwendung.";
+            println!("{}", message);
         }
     }
 }
@@ -164,7 +171,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init()) 
-        .invoke_handler(tauri::generate_handler![start_looper, load_history, process_barcode, set_user_role])
+        .invoke_handler(tauri::generate_handler![start_looper, load_history, process_barcode, set_user_role, update])
                 .on_window_event(|window, event| {
                     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                         api.prevent_close();

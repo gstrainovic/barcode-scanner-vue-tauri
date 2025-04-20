@@ -283,7 +283,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "barcode-scanner-vue-tauri"
+name = "barcode-scanner-v2"
 version = "0.1.0"
 dependencies = [
  "config",
