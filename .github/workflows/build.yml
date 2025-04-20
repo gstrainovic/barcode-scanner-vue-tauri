@@ -1,0 +1,55 @@
+name: Build and Package
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Neue Version'
+        required: true
+        default: '2.0.2'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # Checkout des Repositories
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Node.js installieren (für pnpm)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      # pnpm installieren
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      # Rust installieren (für Tauri)
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # Abhängigkeiten installieren
+      - name: Install dependencies
+        run: pnpm install
+
+      # Skript ausführen, um die Version zu aktualisieren und den Build zu erstellen
+      - name: Run build script
+        run: |
+          ./build.sh ${{ github.event.inputs.version }}
+
+      # Artefakt hochladen
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-zip
+          path: src-tauri/target/release/${{ github.event.inputs.version }}-barcode_scanner-x86_64-pc-windows-msvc.zip
