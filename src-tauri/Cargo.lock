@@ -284,7 +284,7 @@ dependencies = [
 
 [[package]]
 name = "barcode-scanner-v2"
-version = "0.1.0"
+version = "2.2.3"
 dependencies = [
  "config",
  "multiinput",

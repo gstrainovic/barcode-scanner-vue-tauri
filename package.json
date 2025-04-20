@@ -1,12 +1,12 @@
 {
     "name": "barcode-scanner-v2",
     "private": true,
-    "version": "0.1.0",
+    "version": "2.2.3",
     "scripts": {
-            "dev": "vite",
-            "build": "vite build",
-            "preview": "vite preview",
-            "tauri": "tauri"
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "tauri": "tauri"
     },
     "dependencies": {
         "@primevue/themes": "^4.0.0",
