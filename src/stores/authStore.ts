@@ -15,8 +15,9 @@ export const useAuthStore = defineStore('auth', {
     userId: (state) => state.id,
   },
   actions: {
-    async authenticateUser({ identifier, password }) {
-      const url = config.api.strapi + 'auth/local';
+    async authenticateUser({ identifier, password }: { identifier: string; password: string }) {
+      const configData = await config();
+      const url = configData.api.strapi + 'auth/local';
 
       const response = await fetch(url, {
         method: 'post',

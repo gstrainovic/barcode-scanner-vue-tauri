@@ -33,7 +33,8 @@ export const useMyFetch = () => {
         console.log('getUsersLager isOnline', isOnline);
         if (isOnline) {
             console.log('getUsersLager fetchWithAuth', fetchWithAuth);
-            const response = await fetchWithAuth(config.api.strapi + 'users?filters[rolle][$eq]=Lager');
+            const configData = await config();
+            const response = await fetchWithAuth(configData.api.strapi + 'users?filters[rolle][$eq]=Lager');
             result = Array.isArray(response) ? response : [];
         } else {
             // result = await window.pywebview.api.get_lager_users();
@@ -56,7 +57,8 @@ export const useMyFetch = () => {
         jwt: any,
         lagerUserIds: any,
         sync: any) => {
-        const url = `${config.api.strapi}barcodes`;
+        const configData = await config();
+        const url = `${configData.api.strapi}barcodes`;
 
         const body = {
             barcode,

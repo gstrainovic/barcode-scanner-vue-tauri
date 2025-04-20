@@ -13,6 +13,7 @@ const router = useRouter();
 const { toggleDarkMode, isDarkTheme } = useLayout();
 const authStore = useAuthStore();
 const isOnlineRef = ref(false)
+const version = ref('0.0.0')
 
 const checkOnlineStatus = async () => {
       try {
@@ -24,8 +25,13 @@ const checkOnlineStatus = async () => {
     }
 
 onMounted(() => {
-    checkOnlineStatus()
-})
+    const initialize = async () => {
+        await checkOnlineStatus();
+        const Config = await config();
+        version.value = Config.version;
+    };
+    initialize();
+});
 
 const logout = () => {
     authStore.removeToken();
@@ -45,7 +51,7 @@ const { userName, userRole } = storeToRefs(authStore);
 
         <i class="pi pi-qrcode" style="font-size: 1.5rem"></i>
         <p class="text-xl ml-3">Barcode Scanner</p>
-        <p class="text-lg ml-3">{{  config.version }}</p>
+        <p class="text-lg ml-3">{{  version }}</p>
         <p class="text-lg ml-3"> {{ isOnlineRef ? 'Online' : 'Offline' }}</p>
         <p class="text-xl ml-12">{{ userName }}</p>
         <p class="text-xl ml-12">{{ userRole }}</p>

@@ -1,7 +1,8 @@
 import config from './config';
 
 export const onlineCheck = async () => {
-    const url = config.api.strapi.replace('/api', '');
+    const configData = await config();
+    const url = configData.api.strapi.replace('/api', '');
     try {
         const response = await fetch(url, { method: 'GET' });
         const text = await response.text();
