@@ -5,7 +5,7 @@ use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use tauri::AppHandle;
 use sqlite::get_history;
-use sqlite::create_history;
+// use sqlite::create_history;
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
@@ -118,8 +118,9 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
 
 
 #[tauri::command]
-fn save_history(status: String, barcode: String, uid: i32, offline: bool, luids: Vec<i32>) {
-    create_history(status.as_str(), barcode.as_str(), &uid, offline, &luids);
+fn process_barcode(barcode: &str, uid: i32, jwt: String, luids: Vec<i32>, rolle:  &str) {
+    // create_history(status.as_str(), barcode.as_str(), &uid, offline, &luids);
+    sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle);
 }
 
 #[tauri::command]
@@ -132,7 +133,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init()) 
-        .invoke_handler(tauri::generate_handler![start_looper, load_history, save_history, set_user_role])
+        .invoke_handler(tauri::generate_handler![start_looper, load_history, process_barcode, set_user_role])
                 .on_window_event(|window, event| {
                     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                         api.prevent_close();

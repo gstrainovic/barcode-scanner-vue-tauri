@@ -18,7 +18,7 @@ const configStore = useConfigStore();
 const { scanner } = storeToRefs(configStore);
 
 const { team, checked } = storeToRefs(teamStore);
-const { userRole, userId } = storeToRefs(authStore);
+const { userRole, userId, userToken } = storeToRefs(authStore);
 
 const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref([]);
@@ -89,12 +89,12 @@ const processBarcode = async () => {
     console.log('saveHistory', offline);
     console.log('saveHistory', lager_user_ids);
 
-    await invoke('save_history', {
-        status: status,
+    await invoke('process_barcode', {
         barcode: barcodeInput.value,
         uid: userID,
-        offline: offline,
+        jwt: userToken.value,
         luids: lager_user_ids,
+        rolle: userRole.value,
     })
 
     hist.value = await invoke<[]>( 'load_history');

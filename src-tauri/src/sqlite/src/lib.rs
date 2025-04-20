@@ -1,5 +1,8 @@
 pub mod models;
 pub mod schema;
+pub mod process_barcode;
+pub mod errors;
+pub mod send_barcode;
 
 use diesel::prelude::*;
 use std::{fs, error::Error};
