@@ -11,8 +11,8 @@
 - [x] Bei nur Zahlen wird gewarnt
 - [x] Lager Users werden gesendet
 - [x] Ausnahmen
-- [ ] User / Lager Users Namen in History anzeigen
 - [ ] Selfupdater
+- [ ] User / Lager Users Namen in History anzeigen
 - [ ] Hinweise Produktion / Lager
 - [ ] Sync
     - [ ] Beim Starten von Online zu sqlite

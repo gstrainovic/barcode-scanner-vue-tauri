@@ -11,11 +11,11 @@ use std::sync::Mutex;
 static mut ERROR_STATUS : Status = Status::Ok;
 static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
-use config::VERSION;
+// use config::VERSION;
 
 #[tauri::command]
 fn get_version() -> String {
-    config::VERSION.to_string()
+    config::get_version()
 }
 
 #[tauri::command]
@@ -32,7 +32,7 @@ fn update(app: AppHandle) {
         .bin_name("barcode-scanner-v2.exe")
         .show_download_progress(true)
         .no_confirm(true)
-        .current_version(VERSION)
+        .current_version(get_version().as_str())
         .build()
     {
         if let Ok(status) = update.update() {
