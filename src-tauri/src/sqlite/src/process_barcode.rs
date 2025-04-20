@@ -21,20 +21,12 @@ pub fn clean_barcode(barcode: &str) -> String {
 pub fn history_add(
     status: super::errors::Error,
     barcode_c: &str,
-    // mut history: fltk::browser::HoldBrowser,
     nuser_id: i32,
     offline: bool,
     lager_user_ids: &Vec<i32>,
 ) {
-    // let utc_time_string = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-    // history.add(&format!(
-    //     "{}\t{}\t{}",
-    //     status.message, barcode_c, utc_time_string
-    // ));
-    // history.top_line(history.size());
     unsafe { ERROR_STATUS = status.status };
 
-    // save also to sqlite
     create_history(
         &status.message,
         &barcode_c,
@@ -45,33 +37,14 @@ pub fn history_add(
 }
 
 pub fn process_barcode(
-    // i: &mut input::Input,
     barcode_new: &str,
     user_id: i32,
     jwt: String,
     lager_user_ids: &Vec<i32>,
-    // history: fltk::browser::HoldBrowser,
     rolle: &str,
 ) {
-    // i.activate();
-    // let mut barcode_new = i.value();
-    // let barcode_c = barcode.clone();
-    // i.set_value("");
-
-    // let mut settings = Einstellungen {
-    //     Barcode_Mindestlaenge: 0,
-    //     Leitcodes_Aktiv: false,
-    //     Ausnahmen_Aktiv: false,
-    // };
 
     let offline = jwt.is_empty();
-
-    // if offline {
-    //     settings = get_settings_sqlite()
-    // } else {
-    //     settings = get_settings(&jwt).unwrap().data.attributes;
-    //     update_settings(get_settings(&jwt).unwrap().data.attributes);
-    // }
 
     let settings = if offline {
         get_settings_sqlite()
@@ -79,23 +52,14 @@ pub fn process_barcode(
         get_settings(&jwt).unwrap().data.attributes
     };
 
-    // printn the settings
     // println!("settings: {:?}", settings);
 
     if settings.Ausnahmen_Aktiv {
-        // let mut ausnahmen = Vec::new();
-
         let ausnahmen = if offline {
             get_ausnahmen_sqlite()
         } else {
             get_ausnahmen(&jwt).unwrap()
         };
-        // if offline {
-        //     ausnahmen = get_ausnahmen_sqlite();
-        // } else {
-        //     ausnahmen = get_ausnahmen(&jwt).unwrap();
-        //     update_ausnahmen(get_ausnahmen(&jwt).unwrap());
-        // }
 
         // if barcode ends with a string from barcode_ausnahmen, then send it directly to server
         for barcode_ausnahme in ausnahmen {
@@ -105,7 +69,6 @@ pub fn process_barcode(
                 history_add(
                     super::errors::ausnahme(barcode_ausnahme.Bedeutung),
                     &cleaned_barcode,
-                    // history,
                     user_id,
                     offline,
                     lager_user_ids,
@@ -116,17 +79,9 @@ pub fn process_barcode(
     }
 
     if barcode_new.len() < settings.Barcode_Mindestlaenge as usize {
-        // Notification::new()
-        //     .summary(&format!(
-        //         "Barcode Scanner: {} ist zu kurz, nicht gesendet",
-        //         barcode_new
-        //     ))
-        //     .show()
-        //     .unwrap();
         history_add(
             super::errors::zu_kurz(),
             &barcode_new,
-            // history,
             user_id,
             offline,
             lager_user_ids,
@@ -143,7 +98,6 @@ pub fn process_barcode(
         
         // 0327642113+99..
 
-        // let mut leitcodes = Vec::new();
 
         let leitcodes = if jwt.is_empty() {
             get_leitcodes_sql()
@@ -182,17 +136,9 @@ pub fn process_barcode(
                 }
 
                 if gefunden == anzahl_buchstaben {
-                    // Notification::new()
-                    //     .summary(&format!(
-                    //         "Barcode Scanner: {} als {} erkannt, nicht gesendet",
-                    //         barcode_new, beschreibung
-                    //     ))
-                    //     .show()
-                    //     .unwrap();
                     history_add(
                         super::errors::leitcode(beschreibung),
                         &barcode_new,
-                        // history,
                         user_id,
                         offline,
                         lager_user_ids,
@@ -233,12 +179,6 @@ pub fn process_barcode(
         }
     }
 
-    // let mut is_barcode_duplicate_bool = false;
-    // if offline {
-    //     is_barcode_duplicate_bool = is_barcode_duplicate_sqlite(&barcode_new);
-    // } else {
-    //     is_barcode_duplicate_bool = is_barcode_duplicate(&jwt, &barcode_new, &user_id).unwrap();
-    // }
 
     let cleaned_barcode = clean_barcode(&barcode_new);
     
@@ -247,6 +187,8 @@ pub fn process_barcode(
     } else {
         is_barcode_duplicate(&jwt, &cleaned_barcode, &user_id).unwrap()
     };
+
+    println!("is_barcode_duplicate_bool: {:?}", is_barcode_duplicate_bool);
 
     if !is_barcode_duplicate_bool {
         super::send_barcode::send_barcode(cleaned_barcode.clone(), user_id, &jwt, lager_user_ids);
@@ -268,22 +210,12 @@ pub fn process_barcode(
 
         history_add(err, &barcode_new, user_id, offline, lager_user_ids);
     } else {
-        // Notification::new()
-        //     .summary(&format!(
-        //         "Barcode Scanner: {} wurde bereits gesendet",
-        //         barcode_new
-        //     ))
-        //     .show()
-        //     .unwrap();
-
         history_add(
             super::errors::bereits_gesendet(),
             &barcode_new,
-            // history,
             user_id,
             offline,
             lager_user_ids,
         );
-        return;
     }
 }
