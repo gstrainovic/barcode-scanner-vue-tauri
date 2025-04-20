@@ -14,6 +14,16 @@ static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 use config::VERSION;
 
 #[tauri::command]
+fn get_version() -> String {
+    config::VERSION.to_string()
+}
+
+#[tauri::command]
+fn get_strapi_url() -> String {
+    config::STRAPI_URL.to_string()
+}
+
+#[tauri::command]
 fn update(app: AppHandle) {
     println!("Checking for updates...");
     if let Ok(update) = self_update::backends::github::Update::configure()
@@ -171,7 +181,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init()) 
-        .invoke_handler(tauri::generate_handler![start_looper, load_history, process_barcode, set_user_role, update])
+        .invoke_handler(tauri::generate_handler![start_looper, load_history, process_barcode, set_user_role, update, get_strapi_url, get_version])
                 .on_window_event(|window, event| {
                     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                         api.prevent_close();

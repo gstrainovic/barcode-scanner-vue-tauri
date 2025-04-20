@@ -11,7 +11,12 @@
 - [x] Bei nur Zahlen wird gewarnt
 - [x] Lager Users werden gesendet
 - [x] Ausnahmen
-- [ ] Sync
-- [ ] Lager Users bleiben gespeichert beim Refresh
 - [ ] Selfupdater
+- [ ] Hinweise Produktion / Lager
+- [ ] Sync
+    - [ ] Beim Starten von Online zu sqlite
+    - [ ] Offline fähig
+    - [ ] Wenn Online Barcodes synchronisieren
+- [ ] Lager Users bleiben gespeichert 
+beim Refresh
 

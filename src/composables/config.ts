@@ -1,9 +1,10 @@
+import { invoke } from '@tauri-apps/api/core';
+
 export const config = {
   api: {
-    strapi: 'https://gz-strapi.strainovic-it.ch/api/',
-    // strapi: 'http://localhost:1337/api/'
+    strapi:  await invoke('get_strapi_url') + '/api/',
   },
-  version: 'V2.0.0',
+  version: await invoke('get_version'),
 };
 
 export default config;
