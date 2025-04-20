@@ -105,11 +105,9 @@ pub fn process_barcode(
             update_leitcodes(get_leitcodes(&jwt).unwrap());
             get_leitcodes(&jwt).unwrap().data
         };
-        // if jwt.is_empty() {
-        //     leitcodes = get_leitcodes_sql();
-        // } else {
-        //     leitcodes = get_leitcodes(&jwt).unwrap().data;
-        // }
+
+        // println!("leitcodes: {:?}", leitcodes);
+
         for idatr in leitcodes {
             let attribute: Leitcode = idatr.attributes;
 

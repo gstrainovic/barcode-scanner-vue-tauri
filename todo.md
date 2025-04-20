@@ -6,6 +6,9 @@
     - [x] Barcode zu kurz wird abgefangen
 - [x] Barcodes werden gesendet
 - [x] Doppelte Barcodes werden abgefangen
+- [x] Leitcodes werden online geholt
+- [x] Leitcodes werden abgefangen
+- [ ] Bei nur Zahlen wird gewarnt
 - [ ] Selfupdater
 
 Low Prio:
