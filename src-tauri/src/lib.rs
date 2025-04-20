@@ -6,13 +6,14 @@ use tauri_plugin_dialog::DialogExt;
 use tauri::AppHandle;
 use sqlite::get_history;
 use sqlite::create_history;
-
-static mut ERROR_STATUS : Status = Status::Ok;
-
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 use once_cell::sync::Lazy;
+use std::sync::Mutex;
 
+static IS_DIALOG_OPEN: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));
+static mut ERROR_STATUS : Status = Status::Ok;
 static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
+
 
 #[tauri::command]
 fn set_user_role(role: String) {
@@ -36,31 +37,22 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
         .unwrap_or_else(|| {
             let message = "Bitte stecken Sie den Scanner ein und starten Sie die Anwendung neu.";
             eprintln!("{}", message);
-            let (tx, rx) = std::sync::mpsc::channel();
 
             app_clone
                 .dialog()
                 .message(message)
-                .buttons(tauri_plugin_dialog::MessageDialogButtons::Ok)
-                .show(move |_| {
-                    println!("dialog closed");
-                    let _ = tx.send(()); // Signal senden, dass der Dialog geschlossen wurde
-                });
-
-            // Warten, bis der Benutzer den Dialog schließt
-            rx.recv().unwrap();
+                .kind(tauri_plugin_dialog::MessageDialogKind::Error)
+                .title(config::DIALOG_TITLE)
+                .blocking_show();
 
             std::process::exit(1);
         });
         manager.filter_devices(vec![keyboard.name.clone()]);
 
  loop {
-        // handle events
         let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
 
         if let Some(event) = manager.get_event() {
-            // println!("Event: {:?}", event);
-            // add charachter from event to barcode_string
 
             window.show().unwrap();
             window.maximize().unwrap();
@@ -78,11 +70,11 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
                     // activate the window current_active_window_hwnd again
                         match ERROR_STATUS {
                             Status::Ok => {
+                                
+                                window.set_always_on_top(false).unwrap();
 
-                                // print rolle
                                 let user_role = USER_ROLE.lock().unwrap();
                                 let rolle = user_role.clone();
-                                println!("User role: {}", rolle);
 
                                 if rolle == "Produktion" {
                                     window.minimize().unwrap();
@@ -101,6 +93,7 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
             }
         } else {
             std::thread::sleep(std::time::Duration::from_millis(10));
+            window.set_always_on_top(false).unwrap();
             // let has_focus_my_windows_hwnd = unsafe {
             //     winapi::um::winuser::GetForegroundWindow() == my_windows_hwnd
             // };
@@ -136,13 +129,31 @@ fn load_history() -> Result<serde_json::Value, String> {
     get_history()
 }
 
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init()) 
         .invoke_handler(tauri::generate_handler![start_looper, load_history, save_history, set_user_role])
+                .on_window_event(|window, event| {
+                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                        api.prevent_close();
+                        let window = window.clone();
+                        let ans = window
+                            .dialog()
+                            .message("Bestätigung: Möchten Sie die Anwendung wirklich schließen?")
+                            .title(config::DIALOG_TITLE)
+                            .buttons(tauri_plugin_dialog::MessageDialogButtons::YesNo)
+                            .blocking_show();
+                        match ans {
+                            true => {
+                                std::process::exit(0);
+                            }
+                            false => {
+                            }
+                        }
+                    }
+                })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

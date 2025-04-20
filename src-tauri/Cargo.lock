@@ -277,6 +277,7 @@ dependencies = [
 name = "barcode-scanner-vue-tauri"
 version = "0.1.0"
 dependencies = [
+ "config",
  "multiinput",
  "once_cell",
  "serde",
