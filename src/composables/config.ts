@@ -1,10 +1,15 @@
 import { invoke } from '@tauri-apps/api/core';
 
-export const config = {
-  api: {
-    strapi:  await invoke('get_strapi_url') + '/api/',
-  },
-  version: await invoke('get_version'),
+export const config = async () => {
+  const strapiUrl = await invoke('get_strapi_url');
+  const version = await invoke('get_version');
+
+  return {
+    api: {
+      strapi: strapiUrl + '/api/',
+    },
+    version: version,
+  };
 };
 
 export default config;
