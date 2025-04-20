@@ -50,11 +50,29 @@ onMounted(async () => {
 });
 
 const statusClass = (status: string) => {
-    return status.startsWith('@C88') ? 'text-red-500' : '';
+    // return status.startsWith('@C88') ? 'text-red-500' : '';
+
+    // @C03 -> orange
+    // @C88 -> red
+
+    if (status.startsWith('@C03')) {
+        return 'text-orange-500';
+    } else if (status.startsWith('@C88')) {
+        return 'text-red-500';
+    } else {
+        return 'text-green-500';
+    }
+
 };
 
 const displayStatus = (status: string) => {
-    return status.startsWith('@C88') ? status.replace('@C88', '') : status;
+    if (status.startsWith('@C03')) {
+        return status.replace('@C03', '');
+    } else if (status.startsWith('@C88')) {
+        return status.replace('@C88', '');
+    } else {
+        return status;
+    }
 };
 
 const processBarcode = async () => {
