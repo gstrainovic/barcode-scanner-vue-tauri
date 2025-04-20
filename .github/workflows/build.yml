@@ -49,7 +49,7 @@ jobs:
 
       # Artefakt hochladen
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release-zip
           path: src-tauri/target/release/${{ github.event.inputs.version }}-barcode_scanner-x86_64-pc-windows-msvc.zip
