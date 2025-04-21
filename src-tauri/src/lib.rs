@@ -1,15 +1,15 @@
-use std::thread;
+use multiinput::{KeyId, RawEvent, RawInputManager, State};
+use native_dialog::{DialogBuilder, MessageLevel};
+use once_cell::sync::Lazy;
+use sqlite::get_history;
 use std::sync::Arc;
-use multiinput::{RawInputManager, RawEvent, KeyId, State};
+use std::sync::Mutex;
+use std::thread;
+use tauri::AppHandle;
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
-use tauri::AppHandle;
-use sqlite::get_history;
-use once_cell::sync::Lazy;
-use std::sync::Mutex;
-use winapi::um::winuser::{MessageBoxA, MB_OK};
-use std::ptr;
-static mut ERROR_STATUS : Status = Status::Ok;
+
+static mut ERROR_STATUS: Status = Status::Ok;
 
 static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
@@ -27,18 +27,20 @@ pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
 fn check_single_instance() {
     let hwnd_of_barcode_scanner = get_hwnd_barcode_scanner();
     if hwnd_of_barcode_scanner != std::ptr::null_mut() {
-        unsafe {
-            MessageBoxA(
-                ptr::null_mut(),
-                "Die Anwendung ist bereits geöffnet.".as_ptr() as *const i8,
-                "Info".as_ptr() as *const i8,
-                MB_OK,
-            );
-        }
+        let message = "Die Anwendung ist bereits geöffnet.";
+        println!("{}", message);
+
+        let _ = DialogBuilder::message()
+            .set_title(config::DIALOG_TITLE)
+            .set_text(message)
+            .alert()
+            .show();
+
         std::process::exit(0);
+    } else {
+        println!("No other instance found.");
     }
 }
-
 
 #[tauri::command]
 fn get_version() -> String {
@@ -68,7 +70,7 @@ fn update(app: AppHandle) {
                     "Aktualisiert zu {}. Bitte barcode_scanner.exe nochmals starten",
                     status.version()
                 );
-                
+
                 app.dialog()
                     .message(message.as_str())
                     .kind(tauri_plugin_dialog::MessageDialogKind::Info)
@@ -87,14 +89,12 @@ fn update(app: AppHandle) {
     }
 }
 
-
 #[tauri::command]
 fn set_user_role(role: String) {
     let mut user_role = USER_ROLE.lock().unwrap();
     *user_role = role.clone();
     println!("User role set to: {}", role);
 }
-
 
 #[tauri::command]
 fn start_looper(app: AppHandle, window: tauri::Window) {
@@ -105,95 +105,89 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
         let devices = manager.get_device_list();
         let keyboards = Arc::new(devices.keyboards);
         let keyboard = keyboards
-        .iter()
-        .find(|device| device.name.contains("VID_0483") && device.name.contains("PID_5750"))
-        .unwrap_or_else(|| {
-            let message = "Bitte stecken Sie den Scanner ein und starten Sie die Anwendung neu.";
-            eprintln!("{}", message);
+            .iter()
+            .find(|device| device.name.contains("VID_0483") && device.name.contains("PID_5750"))
+            .unwrap_or_else(|| {
+                let message =
+                    "Bitte stecken Sie den Scanner ein und starten Sie die Anwendung neu.";
+                eprintln!("{}", message);
 
-            app_clone
-                .dialog()
-                .message(message)
-                .kind(tauri_plugin_dialog::MessageDialogKind::Error)
-                .title(config::DIALOG_TITLE)
-                .blocking_show();
+                app_clone
+                    .dialog()
+                    .message(message)
+                    .kind(tauri_plugin_dialog::MessageDialogKind::Error)
+                    .title(config::DIALOG_TITLE)
+                    .blocking_show();
 
-            std::process::exit(1);
-        });
+                std::process::exit(1);
+            });
         manager.filter_devices(vec![keyboard.name.clone()]);
 
- loop {
-        let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
+        loop {
+            let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
 
-        if let Some(event) = manager.get_event() {
+            if let Some(event) = manager.get_event() {
+                window.show().unwrap();
+                window.maximize().unwrap();
+                window.set_always_on_top(true).unwrap();
+                window.set_focus().unwrap();
 
-            window.show().unwrap();
-            window.maximize().unwrap();
-            window.set_always_on_top(true).unwrap();
-            window.set_focus().unwrap();
+                let webview = app_clone.get_webview_window("main").unwrap();
+                if let Err(e) = webview.eval("document.getElementById(\"barcodei\").focus()") {
+                    eprintln!("Failed to evaluate JavaScript: {:?}", e);
+                }
 
-            let webview = app_clone.get_webview_window("main").unwrap();
-            if let Err(e) = webview.eval("document.getElementById(\"barcodei\").focus()") {
-                eprintln!("Failed to evaluate JavaScript: {:?}", e);
-            }
+                match event {
+                    RawEvent::KeyboardEvent(_, KeyId::Return, State::Released) => {
+                        unsafe {
+                            // activate the window current_active_window_hwnd again
+                            match ERROR_STATUS {
+                                Status::Ok => {
+                                    window.set_always_on_top(false).unwrap();
 
-            match event {
-                RawEvent::KeyboardEvent(_, KeyId::Return, State::Released) => {
-                    unsafe {
-                    // activate the window current_active_window_hwnd again
-                        match ERROR_STATUS {
-                            Status::Ok => {
-                                
-                                window.set_always_on_top(false).unwrap();
+                                    let user_role = USER_ROLE.lock().unwrap();
+                                    let rolle = user_role.clone();
 
-                                let user_role = USER_ROLE.lock().unwrap();
-                                let rolle = user_role.clone();
-
-                                if rolle == "Produktion" {
-                                    window.minimize().unwrap();
-                                    winapi::um::winuser::SetForegroundWindow(switch_back_hwd);
-                                    winapi::um::winuser::SetActiveWindow(switch_back_hwd);
-                                    winapi::um::winuser::SetFocus(switch_back_hwd);
+                                    if rolle == "Produktion" {
+                                        window.minimize().unwrap();
+                                        winapi::um::winuser::SetForegroundWindow(switch_back_hwd);
+                                        winapi::um::winuser::SetActiveWindow(switch_back_hwd);
+                                        winapi::um::winuser::SetFocus(switch_back_hwd);
+                                    }
                                 }
+                                _ => {}
                             }
-                            _ => {}
                         }
                     }
-                }
 
-                _ => {
+                    _ => {}
                 }
+            } else {
+                std::thread::sleep(std::time::Duration::from_millis(10));
+                window.set_always_on_top(false).unwrap();
+                // let has_focus_my_windows_hwnd = unsafe {
+                //     winapi::um::winuser::GetForegroundWindow() == my_windows_hwnd
+                // };
+                // let is_a_mxg_box_open = unsafe {
+                //     winapi::um::winuser::GetForegroundWindow()
+                //         == winapi::um::winuser::GetLastActivePopup(my_windows_hwnd)
+                // };
+                // // minimize the window if it has no focus, expect if there is an msgbox
+                // if !has_focus_my_windows_hwnd && !is_a_mxg_box_open {
+                //     unsafe {
+                //         winapi::um::winuser::ShowWindow(
+                //             my_windows_hwnd,
+                //             winapi::um::winuser::SW_MINIMIZE,
+                //         );
+                //     }
+                // }
             }
-        } else {
-            std::thread::sleep(std::time::Duration::from_millis(10));
-            window.set_always_on_top(false).unwrap();
-            // let has_focus_my_windows_hwnd = unsafe {
-            //     winapi::um::winuser::GetForegroundWindow() == my_windows_hwnd
-            // };
-            // let is_a_mxg_box_open = unsafe {
-            //     winapi::um::winuser::GetForegroundWindow()
-            //         == winapi::um::winuser::GetLastActivePopup(my_windows_hwnd)
-            // };
-            // // minimize the window if it has no focus, expect if there is an msgbox
-            // if !has_focus_my_windows_hwnd && !is_a_mxg_box_open {
-            //     unsafe {
-            //         winapi::um::winuser::ShowWindow(
-            //             my_windows_hwnd,
-            //             winapi::um::winuser::SW_MINIMIZE,
-            //         );
-            //     }
-            // }
-
-
         }
-    }
     });
 }
 
-
-
 #[tauri::command]
-fn process_barcode(barcode: &str, uid: i32, jwt: String, luids: Vec<i32>, rolle:  &str) {
+fn process_barcode(barcode: &str, uid: i32, jwt: String, luids: Vec<i32>, rolle: &str) {
     // create_history(status.as_str(), barcode.as_str(), &uid, offline, &luids);
     sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle);
 }
@@ -205,29 +199,37 @@ fn load_history() -> Result<serde_json::Value, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    check_single_instance();
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init()) 
-        .invoke_handler(tauri::generate_handler![start_looper, load_history, process_barcode, set_user_role, update, get_strapi_url, get_version])
-                .on_window_event(|window, event| {
-                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                        api.prevent_close();
-                        let window = window.clone();
-                        let ans = window
-                            .dialog()
-                            .message("Bestätigung: Möchten Sie die Anwendung wirklich schließen?")
-                            .title(config::DIALOG_TITLE)
-                            .buttons(tauri_plugin_dialog::MessageDialogButtons::YesNo)
-                            .blocking_show();
-                        match ans {
-                            true => {
-                                std::process::exit(0);
-                            }
-                            false => {
-                            }
-                        }
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![
+            start_looper,
+            load_history,
+            process_barcode,
+            set_user_role,
+            update,
+            get_strapi_url,
+            get_version
+        ])
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let window = window.clone();
+                let ans = window
+                    .dialog()
+                    .message("Bestätigung: Möchten Sie die Anwendung wirklich schließen?")
+                    .title(config::DIALOG_TITLE)
+                    .buttons(tauri_plugin_dialog::MessageDialogButtons::YesNo)
+                    .blocking_show();
+                match ans {
+                    true => {
+                        std::process::exit(0);
                     }
-                })
+                    false => {}
+                }
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -253,7 +255,7 @@ pub struct Error {
     pub error_type: Type,
 }
 
-pub fn ausnahme(x : String) -> Error {
+pub fn ausnahme(x: String) -> Error {
     Error {
         // message: "@C03Ausnahme".to_string(),
         message: format!("@C03{}", x),
@@ -270,7 +272,7 @@ pub fn zu_kurz() -> Error {
     }
 }
 
-pub fn leitcode(x : String) -> Error {
+pub fn leitcode(x: String) -> Error {
     Error {
         message: format!("@C88{} Leitcode", x),
         status: Status::Error,
@@ -301,5 +303,3 @@ pub fn no_numbers() -> Error {
         error_type: Type::KeineNummern,
     }
 }
-
-
