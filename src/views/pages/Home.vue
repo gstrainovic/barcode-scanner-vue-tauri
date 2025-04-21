@@ -185,12 +185,12 @@ const speichereHinweise = async () => {
                 </div>
             </div>
 
-            <div class="md:w-1/3" v-if="userRole === 'Lager'">
+            <div class="md:w-1/3 " v-if="userRole === 'Lager'">
                 <div class="card flex flex-col gap-4">
-                    <div class="flex">
+                    <div class="flex mb-1">
                         <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
                         <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch"></ToggleSwitch>
-                        <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
+                        <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleinex</label>
                     </div>
                     <MultiSelect v-model="team" :options="usernames" optionLabel="username"
                         placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
@@ -213,8 +213,8 @@ const speichereHinweise = async () => {
                                 style="display: block" />
                         </template>
                     </Galleria>
-                    <Button v-if="mediaItems.length > 0" label="Anzeigen" icon="pi pi-external-link"
-                        @click="displayBasic = true" />
+                    <Button  label="Anzeigen" icon="pi pi-external-link0" class="mt-2"
+                        @click="displayBasic = true" :disabled="mediaItems.length === 0" :class="{'p-button-secondary': mediaItems.length === 0}"></Button>
 
                 </div>
             </div>
@@ -223,23 +223,24 @@ const speichereHinweise = async () => {
         <Fluid class="flex flex-col md:flex-row gap-4">
             <div class="card flex flex-col w-1/2 mt-4">
                 <div class="font-semibold text-xl mb-6"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
-                <Editor v-model="hinweise" :style="{ height: '320px' }" />
+                <Editor v-model="hinweise" :style="{ height: '360px' }" />
+                <br>
                 <Button icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
             </div>
 
-            <div class="card flex flex-col gap-2 w-1/2 mt-4">
+            <div class="flex flex-col w-1/2 mt-4">
                 <div class="table-container">
                     <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1"
-                        paginator :rows="3">
-                        <Column field="status" header="Status" sortable style="width: 20%;font-size: 2rem;">
+                        paginator :rows="4">
+                        <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.9rem;">
                             <template #body="slotProps">
                                 <span :class="statusClass(slotProps.data.status)">{{
                                     displayStatus(slotProps.data.status)
                                     }}</span>
                             </template>
                         </Column>
-                        <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 2rem"></Column>
-                        <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 2rem"></Column>
+                        <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.9rem"></Column>
+                        <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.9rem"></Column>
                     </DataTable>
                 </div>
             </div>
