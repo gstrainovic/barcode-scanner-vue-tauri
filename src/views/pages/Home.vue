@@ -5,10 +5,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
+import { config } from '@/composables/config';
 import { invoke } from '@tauri-apps/api/core';
 import { marked } from 'marked';
+import Galleria from 'primevue/galleria'; // Importiere die Galleria-Komponente
 
-const { getUsersLager, getHinweiseFromBarcode} = useMyFetch();
+const { getUsersLager, getHinweiseFromBarcode } = useMyFetch();
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -21,11 +23,14 @@ const hist = ref([]);
 const barcodeInput = ref('');
 const hinweiseTitel = ref(' Hinweise zu ');
 const medienTitel = ref(' Medien zu ');
+const hinweise = ref('');
+const mediaItems = ref([]); // Speichert die Medien-URLs für die Galerie
+const displayBasic = ref(false);
 
 onMounted(async () => {
     console.log('rolle', userRole.value);
     usernames.value = await getUsersLager();
-    hist.value = await invoke<[]>( 'load_history');
+    hist.value = await invoke<[]>('load_history');
     console.log('hist', hist.value);
     // window.pywebview.api.sync(userToken.value);
 });
@@ -52,11 +57,35 @@ const displayStatus = (status: string) => {
 };
 
 const ladeHinweise = async () => {
-    hinweiseTitel.value = 'Hinweise zu ' + barcodeInput.value;
-    const result = await getHinweiseFromBarcode(barcodeInput.value);
-    console.log('md hinweise', result);
-    hinweise.value = marked.parse(result);
-    console.log('html hinweise', hinweise.value);
+    try {
+
+        const conf = await config();
+        const uploadUrl = conf.api.strapi.replace(/\/api\/$/, '');
+        hinweiseTitel.value = 'Hinweise zu ' + barcodeInput.value;
+        medienTitel.value = 'Medien zu ' + barcodeInput.value;
+
+        // Abrufen der Hinweise und Medien
+        const result = await getHinweiseFromBarcode(barcodeInput.value);
+        console.log('result', result);
+
+        // Hinweise verarbeiten
+        hinweise.value = marked.parse(result.hinweiseString || '');
+        console.log('html hinweise', hinweise.value);
+
+        // Medien verarbeiten
+        mediaItems.value = result.medienAttributes.map((media: any) => {
+            const formats = media.formats || {};
+            return {
+                itemImageSrc: uploadUrl + formats.large?.url || uploadUrl + media.url, // Fallback auf die Haupt-URL
+                thumbnailImageSrc: uploadUrl + formats.thumbnail?.url || uploadUrl + media.url, // Fallback auf die Haupt-URL
+                alt: media.alternativeText || media.name || 'Bild',
+                title: media.name || 'Bild',
+            };
+        });
+        console.log('mediaItems', mediaItems.value);
+    } catch (error) {
+        console.error('Fehler beim Laden der Hinweise:', error);
+    }
 };
 
 const processBarcode = async () => {
@@ -66,7 +95,7 @@ const processBarcode = async () => {
 
     ladeHinweise();
 
-    const userID : Number = Number(userId.value);
+    const userID: Number = Number(userId.value);
     if (!userID) {
         console.error('Fehler: userId ist nicht definiert.');
         return;
@@ -82,50 +111,71 @@ const processBarcode = async () => {
         rolle: userRole.value,
     })
 
-    hist.value = await invoke<[]>( 'load_history');
+    hist.value = await invoke<[]>('load_history');
     barcodeInput.value = '';
 };
 
-const hinweise = ref('');
 
 </script>
 <template>
     <div @keyup.enter="processBarcode()" tabindex="0">
         <Fluid class="flex flex-col md:flex-row pt-2 gap-4">
-            <div class="md:w-1/4">
+            <div class="md:w-1/3">
                 <div class="card flex flex-col gap-3">
                     <div class="font-semibold text-xl"><i class="pi pi-qrcode"></i> Barcode</div>
                     <IconField>
                         <InputIcon class="pi pi-qrcode" />
-                        <InputText id="barcodei"  type="text" placeholder="Barcode" v-model="barcodeInput" />
+                        <InputText id="barcodei" type="text" placeholder="Barcode" v-model="barcodeInput" />
                     </IconField>
                     <Button label="Absenden" class="w-full" icon="pi pi-send" id="sendButton"
                         @click="processBarcode()"></Button>
                 </div>
             </div>
-            <div :class="userRole === 'Lager' ? 'md:w-1/4' : 'md:w-3/4'">
-                <div class="card flex flex-col gap-4">
-                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
-                    <div v-html="hinweise" class="text-8xl text-red-500"></div>
-                </div>
-            </div>
-            <div :class="userRole === 'Lager' ? 'md:w-1/4' : 'md:w-3/4'">
-                <div class="card flex flex-col gap-4">
-                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ medienTitel }}</div>
-                    <div v-html="hinweise" class="text-8xl text-red-500"></div>
-                </div>
-            </div>
-            <div class="md:w-1/4" v-if="userRole === 'Lager'">
+
+            <div class="md:w-1/3" v-if="userRole === 'Lager'">
                 <div class="card flex flex-col gap-4">
                     <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
                     <div class="flex">
                         <ToggleSwitch v-model="checked" id="toggleSwitch"></ToggleSwitch>
                         <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
                     </div>
-                    <MultiSelect v-model="team" :options="usernames" optionLabel="username" placeholder="Mitarbeiter auswählen" :filter="true"
-                        v-show="!checked">
+                    <MultiSelect v-model="team" :options="usernames" optionLabel="username"
+                        placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
                     </MultiSelect>
                 </div>
+            </div>
+
+            <div :class="userRole === 'Lager' ? 'md:w-1/3' : 'md:w-1/3'">
+                <div class="card flex flex-col gap-4">
+                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ medienTitel }}
+                    </div>
+                    <Galleria v-model:visible="displayBasic" :value="mediaItems" :numVisible="9"
+                        containerStyle="max-width: 50%" :circular="true" :fullScreen="true" :showItemNavigators="true"
+                        :showThumbnails="true">
+                        <template #item="slotProps">
+                            <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt"
+                                style="width: 100%; display: block" />
+                        </template>
+                        <template #thumbnail="slotProps">
+                            <img :src="slotProps.item.thumbnailImageSrc" :alt="slotProps.item.alt"
+                                style="display: block" />
+                        </template>
+                    </Galleria>
+                    <Button v-if="mediaItems.length > 0" label="Anzeigen" icon="pi pi-external-link"
+                        @click="displayBasic = true" />
+
+                </div>
+            </div>
+
+        </Fluid>
+
+        <Fluid class="flex">
+            <div class="card flex flex-col w-full mt-4">
+                <div :class="userRole === 'Lager' ? 'md:w-1/1' : 'md:w-1/1'">
+                        <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
+                        <div v-html="hinweise" class="text-8xl text-red-500"></div>
+                </div>
+
             </div>
         </Fluid>
 
@@ -133,10 +183,12 @@ const hinweise = ref('');
             <div class="card flex flex-col gap-4 w-full mt-4">
                 <div class="font-semibold text-xl"><i class="pi pi-history"></i> Verlauf</div>
                 <div class="table-container">
-                    <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="4"> 
+                    <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1"
+                        paginator :rows="4">
                         <Column field="status" header="Status" sortable style="width: 20%;font-size: 2rem;">
                             <template #body="slotProps">
-                                <span :class="statusClass(slotProps.data.status)">{{ displayStatus(slotProps.data.status)
+                                <span :class="statusClass(slotProps.data.status)">{{
+                                    displayStatus(slotProps.data.status)
                                     }}</span>
                             </template>
                         </Column>

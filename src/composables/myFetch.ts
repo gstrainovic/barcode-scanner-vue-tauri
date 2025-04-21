@@ -30,7 +30,6 @@ export const useMyFetch = () => {
 
     const getHinweiseFromBarcode = async (barcode: string) => {
         const isOnline: Boolean = await onlineCheck();
-        let result = null;
         console.log('barcode', barcode);
         console.log('getHinweiseFromBarcode isOnline', isOnline);
 
@@ -50,7 +49,25 @@ export const useMyFetch = () => {
                 .filter((hinweis: string) => hinweis && hinweis.trim() !== '')
                 .join('\n\n--------------------\n\n');
             console.log('getHinweiseFromBarcode hinweiseList', hinweiseString);
-            return hinweiseString;
+
+            // Extrahiere die Medien
+            const medien = attributes.map((item: { medien: any }) => item.medien);
+            console.log('getHinweiseFromBarcode medien', medien);
+
+            // Prüfe, ob medien und data existieren
+            const medienData: Array<any> = medien
+                .filter((item: any) => item && item.data) // Filtere ungültige Einträge
+                .map((item: any) => item.data);
+            console.log('getHinweiseFromBarcode medienData', medienData);
+
+            // Extrahiere die Attribute der Medien
+            const medienAttributes = medienData
+                .flat() // Falls `data` ein Array ist, flache es ab
+                .filter((item: any) => item && item.attributes) // Filtere ungültige Einträge
+                .map((item: any) => item.attributes);
+            console.log('getHinweiseFromBarcode mediaAttributes', medienAttributes);
+
+            return { hinweiseString, medienAttributes };
         } else {
             throw new Error('Offline mode not implemented yet!');
         }
