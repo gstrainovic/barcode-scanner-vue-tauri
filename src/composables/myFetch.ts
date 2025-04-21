@@ -37,7 +37,7 @@ export const useMyFetch = () => {
         if (isOnline) {
             console.log('getHinweiseFromBarcode fetchWithAuth', fetchWithAuth);
             const configData = await config();
-            const response = await fetchWithAuth(configData.api.strapi + 'barcodes?filters[barcode][$eq]=' + barcode);
+            const response = await fetchWithAuth(configData.api.strapi + 'barcodes?filters[barcode][$eq]=' + barcode + '&populate=*');
             console.log('getHinweiseFromBarcode response', response);
 
             // Extrahiere die Hinweise aus der API-Antwort

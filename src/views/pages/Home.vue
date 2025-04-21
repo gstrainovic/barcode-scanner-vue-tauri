@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { invoke } from '@tauri-apps/api/core';
+import { marked } from 'marked';
 
 const { getUsersLager, getHinweiseFromBarcode} = useMyFetch();
 
@@ -18,6 +19,8 @@ const { userRole, userId, userToken } = storeToRefs(authStore);
 const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref([]);
 const barcodeInput = ref('');
+const hinweiseTitel = ref(' Hinweise zu ');
+const medienTitel = ref(' Medien zu ');
 
 onMounted(async () => {
     console.log('rolle', userRole.value);
@@ -49,13 +52,11 @@ const displayStatus = (status: string) => {
 };
 
 const ladeHinweise = async () => {
-    const result = await getHinweiseFromBarcode('00340434755163462478');
-    console.log('hinweise', result);
-    if (result) {
-        hinweise.value = result;
-    } else {
-        console.error('Fehler: Keine Hinweise gefunden.');
-    }
+    hinweiseTitel.value = 'Hinweise zu ' + barcodeInput.value;
+    const result = await getHinweiseFromBarcode(barcodeInput.value);
+    console.log('md hinweise', result);
+    hinweise.value = marked.parse(result);
+    console.log('html hinweise', hinweise.value);
 };
 
 const processBarcode = async () => {
@@ -102,10 +103,16 @@ const hinweise = ref('');
                         @click="processBarcode()"></Button>
                 </div>
             </div>
-            <div :class="userRole === 'Lager' ? 'md:w-2/4' : 'md:w-3/4'">
+            <div :class="userRole === 'Lager' ? 'md:w-1/4' : 'md:w-3/4'">
                 <div class="card flex flex-col gap-4">
-                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> Hinweise</div>
-                    <Textarea v-model="hinweise" rows="3" cols="30" />
+                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
+                    <div v-html="hinweise" class="text-8xl text-red-500"></div>
+                </div>
+            </div>
+            <div :class="userRole === 'Lager' ? 'md:w-1/4' : 'md:w-3/4'">
+                <div class="card flex flex-col gap-4">
+                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ medienTitel }}</div>
+                    <div v-html="hinweise" class="text-8xl text-red-500"></div>
                 </div>
             </div>
             <div class="md:w-1/4" v-if="userRole === 'Lager'">
