@@ -27,6 +27,35 @@ export const useMyFetch = () => {
         }
     };
 
+
+    const getHinweiseFromBarcode = async (barcode: string) => {
+        const isOnline: Boolean = await onlineCheck();
+        let result = null;
+        console.log('barcode', barcode);
+        console.log('getHinweiseFromBarcode isOnline', isOnline);
+
+        if (isOnline) {
+            console.log('getHinweiseFromBarcode fetchWithAuth', fetchWithAuth);
+            const configData = await config();
+            const response = await fetchWithAuth(configData.api.strapi + 'barcodes?filters[barcode][$eq]=' + barcode);
+            console.log('getHinweiseFromBarcode response', response);
+
+            // Extrahiere die Hinweise aus der API-Antwort
+            const attributes = response.data.map((item: { attributes: any }) => item.attributes);
+            console.log('getHinweiseFromBarcode attributes', attributes);
+
+            // Verkette die Hinweise
+            const hinweiseString = attributes
+                .map((item: { hinweise: any }) => item.hinweise)
+                .filter((hinweis: string) => hinweis && hinweis.trim() !== '')
+                .join('\n\n--------------------\n\n');
+            console.log('getHinweiseFromBarcode hinweiseList', hinweiseString);
+            return hinweiseString;
+        } else {
+            throw new Error('Offline mode not implemented yet!');
+        }
+    };
+
     const getUsersLager = async () => {
         const isOnline : Boolean = await onlineCheck();
         let result = [];
@@ -76,5 +105,6 @@ export const useMyFetch = () => {
     return {
         getUsersLager,
         writeBarcode,
+        getHinweiseFromBarcode,
     };
 }

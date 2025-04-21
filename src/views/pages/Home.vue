@@ -7,7 +7,7 @@ import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 import { invoke } from '@tauri-apps/api/core';
 
-const { getUsersLager } = useMyFetch();
+const { getUsersLager, getHinweiseFromBarcode} = useMyFetch();
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -48,10 +48,22 @@ const displayStatus = (status: string) => {
     }
 };
 
+const ladeHinweise = async () => {
+    const result = await getHinweiseFromBarcode('00340434755163462478');
+    console.log('hinweise', result);
+    if (result) {
+        hinweise.value = result;
+    } else {
+        console.error('Fehler: Keine Hinweise gefunden.');
+    }
+};
+
 const processBarcode = async () => {
     if (!barcodeInput.value) {
         return;
     }
+
+    ladeHinweise();
 
     const userID : Number = Number(userId.value);
     if (!userID) {
@@ -73,7 +85,7 @@ const processBarcode = async () => {
     barcodeInput.value = '';
 };
 
-const hinweise = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec pur');
+const hinweise = ref('');
 
 </script>
 <template>
