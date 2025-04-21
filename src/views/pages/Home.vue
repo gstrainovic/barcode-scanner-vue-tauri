@@ -190,7 +190,7 @@ const speichereHinweise = async () => {
                     <div class="flex mb-1">
                         <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
                         <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch"></ToggleSwitch>
-                        <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleinex</label>
+                        <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
                     </div>
                     <MultiSelect v-model="team" :options="usernames" optionLabel="username"
                         placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
