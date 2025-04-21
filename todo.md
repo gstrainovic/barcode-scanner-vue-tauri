@@ -13,7 +13,8 @@
 
 - [x] Ausnahmen
 - [x] Selfupdater
-- [ ] Hinweise Produktion / Lager
+- [x] Hinweise Produktion / Lager
+- [x] Darf nicht zwei mal gestartet werden
 - [ ] Sync
     - [ ] Beim Starten von Online zu sqlite
     - [ ] Offline fähig

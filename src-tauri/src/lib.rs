@@ -7,11 +7,38 @@ use tauri::AppHandle;
 use sqlite::get_history;
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
-
+use winapi::um::winuser::{MessageBoxA, MB_OK};
+use std::ptr;
 static mut ERROR_STATUS : Status = Status::Ok;
+
 static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
 // use config::VERSION;
+
+use winapi::shared::windef::HWND__;
+
+pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
+    let my_windows_hwnd = unsafe {
+        winapi::um::winuser::FindWindowA(std::ptr::null(), "BarcodeScanner\0".as_ptr() as *const i8)
+    };
+    return my_windows_hwnd;
+}
+
+fn check_single_instance() {
+    let hwnd_of_barcode_scanner = get_hwnd_barcode_scanner();
+    if hwnd_of_barcode_scanner != std::ptr::null_mut() {
+        unsafe {
+            MessageBoxA(
+                ptr::null_mut(),
+                "Die Anwendung ist bereits geöffnet.".as_ptr() as *const i8,
+                "Info".as_ptr() as *const i8,
+                MB_OK,
+            );
+        }
+        std::process::exit(0);
+    }
+}
+
 
 #[tauri::command]
 fn get_version() -> String {

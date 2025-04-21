@@ -11,6 +11,9 @@ import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
 import { useLayout } from '@/layout/composables/layout';
 
+invoke('start_looper')
+invoke('update')
+
 const { layoutConfig } = useLayout();
 
 if (layoutConfig.darkTheme) {
@@ -18,7 +21,6 @@ if (layoutConfig.darkTheme) {
 }
 
 const pinia = createPinia()
-
 const app = createApp(App);
 
 app.use(router);
@@ -33,8 +35,5 @@ app.use(PrimeVue, {
 app.use(ToastService);
 app.use(ConfirmationService);
 app.use(pinia)
-
-invoke('start_looper')
-invoke('update')
 
 app.mount('#app');
