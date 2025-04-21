@@ -1,20 +1,31 @@
 #!/bin/bash
 
-# Überprüfen, ob eine neue Version angegeben wurde
-if [ -z "$1" ]; then
-    echo "Bitte geben Sie die neue Version als Argument an."
-    echo "Beispiel: ./update_version.sh 0.2.0"
-    exit 1
-fi
+# Funktion, um die nächste Version zu generieren
+generate_next_version() {
+    # Abrufen der neuesten Version von GitHub-Releases
+    LATEST_VERSION=$(gh release list --limit 1 | awk 'NR==1 {print $3}' | sed 's/^v//')
+    
+    if [ -z "$LATEST_VERSION" ]; then
+        echo "Konnte die neueste Version nicht abrufen. Stellen Sie sicher, dass 'gh' korrekt konfiguriert ist."
+        exit 1
+    fi
 
-NEW_VERSION=$1
+    # Version inkrementieren (nur Patch-Level)
+    IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
+    PATCH=$((PATCH + 1))
+    echo "$MAJOR.$MINOR.$PATCH"
+}
+
+# Neue Version generieren
+NEW_VERSION=$(generate_next_version)
+echo "Neue Version: $NEW_VERSION"
 
 if [ -f "src-tauri/Cargo.toml" ]; then
     sed -i.bak -E "s/^version = \".*\"/version = \"$NEW_VERSION\"/" src-tauri/Cargo.toml
     echo "Version in src-tauri/Cargo.toml auf $NEW_VERSION geändert."
 else
     echo "src-tauri/Cargo.toml nicht gefunden!"
-    exeit 1
+    exit 1
 fi
 
 if [ -f "package.json" ]; then
@@ -33,11 +44,11 @@ else
     exit 1
 fi
 
-if [ -f "src-tauri/src/lib.rs" ]; then
-    sed -i.bak -E "s/^pub const VERSION : &str = \".*\";/pub const VERSION : &str = \"$NEW_VERSION\";/" src-tauri/src/lib.rs
-    echo "Version in src-tauri/src/lib.rs auf $NEW_VERSION geändert."
+if [ -f "src-tauri/src/config/src/lib.rs" ]; then
+    sed -i.bak -E "s/(^pub const VERSION : &str = )\".*\";/\1\"$NEW_VERSION\";/" src-tauri/src/config/src/lib.rs
+    echo "Version in src-tauri/src/config/src/lib.rs auf $NEW_VERSION geändert."
 else
-    echo "src-tauri/src/lib.rs nicht gefunden!"
+    echo "src-tauri/src/config/src/lib.rs nicht gefunden!"
     exit 1
 fi
 
@@ -51,7 +62,7 @@ pnpm tauri build
 if [ $? -eq 0 ]; then
     echo "Build erfolgreich."
     #  exe ist src-tauri\target\release\barcode-scanner-v2.exe
-    #  mit powershellzippen als $NEW_VERSION-barcode_scanner-x86_64-pc-windows-msvc.zip
+    #  mit powershell zippen als $NEW_VERSION-barcode_scanner-x86_64-pc-windows-msvc.zip
 
     #  und in den Ordner releases verschieben
 
