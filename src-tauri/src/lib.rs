@@ -15,7 +15,7 @@ static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
 #[tauri::command]
 fn get_version() -> String {
-    config::get_version()
+    config::VERSION.to_string()
 }
 
 #[tauri::command]

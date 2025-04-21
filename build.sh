@@ -33,6 +33,14 @@ else
     exit 1
 fi
 
+if [ -f "src-tauri/src/lib.rs" ]; then
+    sed -i.bak -E "s/^pub const VERSION : &str = \".*\";/pub const VERSION : &str = \"$NEW_VERSION\";/" src-tauri/src/lib.rs
+    echo "Version in src-tauri/src/lib.rs auf $NEW_VERSION geändert."
+else
+    echo "src-tauri/src/lib.rs nicht gefunden!"
+    exit 1
+fi
+
 # Backup-Dateien entfernen
 find . -name "*.bak" -type f -delete
 
