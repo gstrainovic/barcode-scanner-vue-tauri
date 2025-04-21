@@ -11,7 +11,7 @@
 - [x] Bei nur Zahlen wird gewarnt
 - [x] Lager Users werden gesendet
 - [x] Ausnahmen
-- [ ] Selfupdater
+- [x] Selfupdater
 - [ ] User / Lager Users Namen in History anzeigen
 - [ ] Hinweise Produktion / Lager
 - [ ] Sync
