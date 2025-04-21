@@ -78,7 +78,7 @@ const hinweise = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit. N
 </script>
 <template>
     <div @keyup.enter="processBarcode()" tabindex="0">
-        <Fluid class="flex flex-col md:flex-row gap-8">
+        <Fluid class="flex flex-col md:flex-row pt-2 gap-4">
             <div class="md:w-1/4">
                 <div class="card flex flex-col gap-3">
                     <div class="font-semibold text-xl"><i class="pi pi-qrcode"></i> Barcode</div>
@@ -113,19 +113,20 @@ const hinweise = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit. N
         <Fluid class="flex">
             <div class="card flex flex-col gap-4 w-full mt-4">
                 <div class="font-semibold text-xl"><i class="pi pi-history"></i> Verlauf</div>
-                <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1">
-                    <Column field="status" header="Status" sortable style="width: 33%">
-                        <template #body="slotProps">
-                            <span :class="statusClass(slotProps.data.status)">{{ displayStatus(slotProps.data.status)
-                                }}</span>
-                        </template>
-                    </Column>
-                    <Column field="barcode" header="Barcode" sortable style="width: 33%"></Column>
-                    <Column field="timestamp" header="Datum" sortable style="width: 33%"></Column>
-                </DataTable>
+                <div class="table-container">
+                    <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="4"> 
+                        <Column field="status" header="Status" sortable style="width: 20%;font-size: 2rem;">
+                            <template #body="slotProps">
+                                <span :class="statusClass(slotProps.data.status)">{{ displayStatus(slotProps.data.status)
+                                    }}</span>
+                            </template>
+                        </Column>
+                        <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 2rem"></Column>
+                        <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 2rem"></Column>
+                    </DataTable>
+                </div>
             </div>
         </Fluid>
-
         <br>
     </div>
 

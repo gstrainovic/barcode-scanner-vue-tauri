@@ -113,7 +113,7 @@ pub fn get_history() -> Result<serde_json::Value, String> {
 
     let history_records = history::table
         .order(history::timestamp.desc())
-        .limit(8)
+        .limit(200)
         .load::<History>(conn)
         .unwrap_or_else(|error| {
             eprintln!("Error loading history: {}", error);
