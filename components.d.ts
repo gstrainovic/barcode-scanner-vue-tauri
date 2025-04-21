@@ -10,7 +10,6 @@ declare module 'vue' {
     Button: typeof import('primevue/button')['default']
     Column: typeof import('primevue/column')['default']
     DataTable: typeof import('primevue/datatable')['default']
-    Editor: typeof import('primevue/editor')['default']
     FloatingConfigurator: typeof import('./src/components/FloatingConfigurator.vue')['default']
     Fluid: typeof import('primevue/fluid')['default']
     IconField: typeof import('primevue/iconfield')['default']
@@ -22,7 +21,6 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SelectButton: typeof import('primevue/selectbutton')['default']
-    Textarea: typeof import('primevue/textarea')['default']
     Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']
   }
