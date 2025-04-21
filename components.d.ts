@@ -10,6 +10,7 @@ declare module 'vue' {
     Button: typeof import('primevue/button')['default']
     Column: typeof import('primevue/column')['default']
     DataTable: typeof import('primevue/datatable')['default']
+    Editor: typeof import('primevue/editor')['default']
     FloatingConfigurator: typeof import('./src/components/FloatingConfigurator.vue')['default']
     Fluid: typeof import('primevue/fluid')['default']
     IconField: typeof import('primevue/iconfield')['default']

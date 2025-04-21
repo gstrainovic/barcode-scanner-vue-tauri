@@ -9,8 +9,9 @@ import { config } from '@/composables/config';
 import { invoke } from '@tauri-apps/api/core';
 import { marked } from 'marked';
 import Galleria from 'primevue/galleria'; // Importiere die Galleria-Komponente
+import Editor from 'primevue/editor';
 
-const { getUsersLager, getHinweiseFromBarcode } = useMyFetch();
+const { getUsersLager, getHinweiseFromBarcode, postHinweise } = useMyFetch();
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -26,6 +27,7 @@ const medienTitel = ref(' Medien zu ');
 const hinweise = ref('');
 const mediaItems = ref([]); // Speichert die Medien-URLs für die Galerie
 const displayBasic = ref(false);
+const lastBarcode = ref('');
 
 onMounted(async () => {
     console.log('rolle', userRole.value);
@@ -58,7 +60,7 @@ const displayStatus = (status: string) => {
 
 const ladeHinweise = async () => {
     try {
-
+        lastBarcode.value = barcodeInput.value;
         const conf = await config();
         const uploadUrl = conf.api.strapi.replace(/\/api\/$/, '');
         hinweiseTitel.value = 'Hinweise zu ' + barcodeInput.value;
@@ -116,10 +118,32 @@ const processBarcode = async () => {
 };
 
 
+const speichereHinweise = async () => {
+    if (!hinweise.value) {
+        return;
+    }
+
+    const userID: Number = Number(userId.value);
+    if (!userID) {
+        console.error('Fehler: userId ist nicht definiert.');
+        return;
+    }
+
+    console.log('speichere hinweise', hinweise.value, lastBarcode.value);
+    const data = {
+        barcode: lastBarcode.value,
+        hinweise: hinweise.value,
+    }
+
+    const result = await postHinweise({data});
+    console.log('result', result);
+};
+
+
 </script>
 <template>
     <div @keyup.enter="processBarcode()" tabindex="0">
-        <Fluid class="flex flex-col md:flex-row pt-2 gap-4">
+        <Fluid class="flex flex-col md:flex-row gap-4">
             <div class="md:w-1/3">
                 <div class="card flex flex-col gap-3">
                     <div class="font-semibold text-xl"><i class="pi pi-qrcode"></i> Barcode</div>
@@ -147,8 +171,7 @@ const processBarcode = async () => {
 
             <div :class="userRole === 'Lager' ? 'md:w-1/3' : 'md:w-1/3'">
                 <div class="card flex flex-col gap-4">
-                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ medienTitel }}
-                    </div>
+                    <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle "></i> {{ medienTitel }} </div>
                     <Galleria v-model:visible="displayBasic" :value="mediaItems" :numVisible="9"
                         containerStyle="max-width: 50%" :circular="true" :fullScreen="true" :showItemNavigators="true"
                         :showThumbnails="true">
@@ -166,16 +189,13 @@ const processBarcode = async () => {
 
                 </div>
             </div>
-
         </Fluid>
 
         <Fluid class="flex">
             <div class="card flex flex-col w-full mt-4">
-                <div :class="userRole === 'Lager' ? 'md:w-1/1' : 'md:w-1/1'">
-                        <div class="font-semibold text-xl"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
-                        <div v-html="hinweise" class="text-8xl text-red-500"></div>
-                </div>
-
+                <div class="font-semibold text-xl mb-6"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
+                <Editor v-model="hinweise"  />
+                <Button icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
             </div>
         </Fluid>
 

@@ -27,6 +27,19 @@ export const useMyFetch = () => {
         }
     };
 
+    const postHinweise = async (body: any, barcode: string) => {
+        const isOnline: Boolean = await onlineCheck();
+        console.log('speichereHinweise isOnline', isOnline);
+        if (isOnline) {
+            console.log('speichereHinweise fetchWithAuth', fetchWithAuth);
+            const configData = await config();
+            console.log('speichereHinweise body', body);
+            const response = await fetchWithAuth(configData.api.strapi + 'barcodes', null, body);
+            console.log('speichereHinweise response', response);
+            return response;
+        }
+    }
+
 
     const getHinweiseFromBarcode = async (barcode: string) => {
         const isOnline: Boolean = await onlineCheck();
@@ -123,5 +136,6 @@ export const useMyFetch = () => {
         getUsersLager,
         writeBarcode,
         getHinweiseFromBarcode,
+        postHinweise,
     };
 }
