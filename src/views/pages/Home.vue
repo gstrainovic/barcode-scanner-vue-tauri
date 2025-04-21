@@ -10,7 +10,9 @@ import { invoke } from '@tauri-apps/api/core';
 import { marked } from 'marked';
 import Galleria from 'primevue/galleria'; // Importiere die Galleria-Komponente
 import Editor from 'primevue/editor';
+import { useToast } from "primevue/usetoast";
 
+const toast = useToast();
 const { getUsersLager, getHinweiseFromBarcode, postHinweise } = useMyFetch();
 
 const teamStore = useTeamStore();
@@ -36,6 +38,21 @@ onMounted(async () => {
     console.log('hist', hist.value);
     // window.pywebview.api.sync(userToken.value);
 });
+
+const showToast = (erfolg: boolean, message : string) => {
+
+    if (!message || message === '') {
+        return;
+    }
+
+    toast.add({
+        severity: erfolg ? 'success' : 'error',
+        summary: erfolg ? 'Erfolg' : 'Fehler',
+        detail: message,
+        life: 3000,
+    });
+
+};
 
 const statusClass = (status: string) => {
     if (status.startsWith('@C03')) {
@@ -119,7 +136,13 @@ const processBarcode = async () => {
 
 
 const speichereHinweise = async () => {
-    if (!hinweise.value) {
+    if (!hinweise.value || hinweise.value === '') {
+        showToast(false, 'Bitte Hinweise eingeben.');
+        return;
+    }
+
+    if (!lastBarcode.value || lastBarcode.value === '') {
+        showToast(false, 'Bitte Barcode scannen.');
         return;
     }
 
@@ -137,6 +160,13 @@ const speichereHinweise = async () => {
 
     const result = await postHinweise({data});
     console.log('result', result);
+
+    // wenn der result den barcode und die hinweise enthält, dann ist es erfolgreich
+    if (result.data.attributes.barcode && result.data.attributes.hinweise) {
+        showToast(true, 'Hinweise gespeichert.');
+    } else {
+        showToast(false, 'Fehler beim Speichern der Hinweise.');
+    }
 };
 
 
@@ -146,7 +176,6 @@ const speichereHinweise = async () => {
         <Fluid class="flex flex-col md:flex-row gap-4">
             <div class="md:w-1/3">
                 <div class="card flex flex-col gap-3">
-                    <div class="font-semibold text-xl"><i class="pi pi-qrcode"></i> Barcode</div>
                     <IconField>
                         <InputIcon class="pi pi-qrcode" />
                         <InputText id="barcodei" type="text" placeholder="Barcode" v-model="barcodeInput" />
@@ -158,9 +187,9 @@ const speichereHinweise = async () => {
 
             <div class="md:w-1/3" v-if="userRole === 'Lager'">
                 <div class="card flex flex-col gap-4">
-                    <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
                     <div class="flex">
-                        <ToggleSwitch v-model="checked" id="toggleSwitch"></ToggleSwitch>
+                        <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
+                        <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch"></ToggleSwitch>
                         <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
                     </div>
                     <MultiSelect v-model="team" :options="usernames" optionLabel="username"
@@ -191,20 +220,17 @@ const speichereHinweise = async () => {
             </div>
         </Fluid>
 
-        <Fluid class="flex">
-            <div class="card flex flex-col w-full mt-4">
+        <Fluid class="flex flex-col md:flex-row gap-4">
+            <div class="card flex flex-col w-1/2 mt-4">
                 <div class="font-semibold text-xl mb-6"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
-                <Editor v-model="hinweise"  />
+                <Editor v-model="hinweise" :style="{ height: '320px' }" />
                 <Button icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
             </div>
-        </Fluid>
 
-        <Fluid class="flex">
-            <div class="card flex flex-col gap-4 w-full mt-4">
-                <div class="font-semibold text-xl"><i class="pi pi-history"></i> Verlauf</div>
+            <div class="card flex flex-col gap-2 w-1/2 mt-4">
                 <div class="table-container">
                     <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1"
-                        paginator :rows="4">
+                        paginator :rows="3">
                         <Column field="status" header="Status" sortable style="width: 20%;font-size: 2rem;">
                             <template #body="slotProps">
                                 <span :class="statusClass(slotProps.data.status)">{{
