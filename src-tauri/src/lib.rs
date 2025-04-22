@@ -124,13 +124,24 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
         manager.filter_devices(vec![keyboard.name.clone()]);
 
         loop {
-            let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
+            // let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
 
+            
             if let Some(event) = manager.get_event() {
                 window.show().unwrap();
                 window.maximize().unwrap();
                 window.set_always_on_top(true).unwrap();
                 window.set_focus().unwrap();
+                
+                let my_windows_hwnd = get_hwnd_barcode_scanner();
+                unsafe {
+                    winapi::um::winuser::ShowWindow(my_windows_hwnd, winapi::um::winuser::SW_MAXIMIZE);
+                    winapi::um::winuser::SetForegroundWindow(my_windows_hwnd);
+                    winapi::um::winuser::SetActiveWindow(my_windows_hwnd);
+                    winapi::um::winuser::SetFocus(my_windows_hwnd);
+                    // let _ = inp.take_focus();
+                }
+
 
                 let webview = app_clone.get_webview_window("main").unwrap();
                 if let Err(e) = webview.eval("document.getElementById(\"barcodei\").focus()") {
@@ -143,17 +154,17 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
                             // activate the window current_active_window_hwnd again
                             match ERROR_STATUS {
                                 Status::Ok => {
-                                    window.set_always_on_top(false).unwrap();
+                                    // window.set_always_on_top(false).unwrap();
 
-                                    let user_role = USER_ROLE.lock().unwrap();
-                                    let rolle = user_role.clone();
+                                    // let user_role = USER_ROLE.lock().unwrap();
+                                    // let rolle = user_role.clone();
 
-                                    if rolle == "Produktion" {
-                                        window.minimize().unwrap();
-                                        winapi::um::winuser::SetForegroundWindow(switch_back_hwd);
-                                        winapi::um::winuser::SetActiveWindow(switch_back_hwd);
-                                        winapi::um::winuser::SetFocus(switch_back_hwd);
-                                    }
+                                    // if rolle == "Produktion" {
+                                    //     window.minimize().unwrap();
+                                    //     winapi::um::winuser::SetForegroundWindow(switch_back_hwd);
+                                    //     winapi::um::winuser::SetActiveWindow(switch_back_hwd);
+                                    //     winapi::um::winuser::SetFocus(switch_back_hwd);
+                                    // }
                                 }
                                 _ => {}
                             }
