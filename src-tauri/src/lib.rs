@@ -124,21 +124,37 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
         manager.filter_devices(vec![keyboard.name.clone()]);
 
         loop {
-            // let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
+            let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
 
             
             if let Some(event) = manager.get_event() {
+                
+
+
+
                 window.show().unwrap();
                 window.maximize().unwrap();
                 window.set_always_on_top(true).unwrap();
                 window.set_focus().unwrap();
+                window.request_user_attention(tauri::UserAttentionType::Critical).unwrap();
+               
                 
-                let my_windows_hwnd = get_hwnd_barcode_scanner();
+                let my_windows_hwnd = match window.hwnd() {
+                    Ok(hwnd) => hwnd,
+                    Err(e) => {
+                        eprintln!("Failed to get window HWND: {:?}", e);
+                        continue;
+                    }
+                };
+
+                // Convert HWND (windows crate) to *mut HWND__ (winapi crate)
+                let my_windows_hwnd_ptr = my_windows_hwnd.0 as *mut HWND__;
+
                 unsafe {
-                    winapi::um::winuser::ShowWindow(my_windows_hwnd, winapi::um::winuser::SW_MAXIMIZE);
-                    winapi::um::winuser::SetForegroundWindow(my_windows_hwnd);
-                    winapi::um::winuser::SetActiveWindow(my_windows_hwnd);
-                    winapi::um::winuser::SetFocus(my_windows_hwnd);
+                    winapi::um::winuser::ShowWindow(my_windows_hwnd_ptr, winapi::um::winuser::SW_MAXIMIZE);
+                    winapi::um::winuser::SetForegroundWindow(my_windows_hwnd_ptr);
+                    winapi::um::winuser::SetActiveWindow(my_windows_hwnd_ptr);
+                    winapi::um::winuser::SetFocus(my_windows_hwnd_ptr);
                     // let _ = inp.take_focus();
                 }
 
