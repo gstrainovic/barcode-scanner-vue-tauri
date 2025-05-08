@@ -1,13 +1,14 @@
 use multiinput::{KeyId, RawEvent, RawInputManager, State};
-use native_dialog::{DialogBuilder, MessageLevel};
+use native_dialog::DialogBuilder;
 use once_cell::sync::Lazy;
 use sqlite::get_history;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread;
 use tauri::AppHandle;
-use tauri::Manager;
+use tauri::Emitter;
 use tauri_plugin_dialog::DialogExt;
+
 
 static mut ERROR_STATUS: Status = Status::Ok;
 
@@ -93,7 +94,7 @@ fn update(app: AppHandle) {
 fn set_user_role(role: String) {
     let mut user_role = USER_ROLE.lock().unwrap();
     *user_role = role.clone();
-    println!("User role set to: {}", role);
+    println!("User role set to: {}", *user_role);
 }
 
 #[tauri::command]
@@ -123,22 +124,24 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
             });
         manager.filter_devices(vec![keyboard.name.clone()]);
 
+        let mut barcode_buffer = String::new();
+
         loop {
             let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
 
-            
             if let Some(event) = manager.get_event() {
-                
+                println!("Event: {:?}", event);
 
+                if let RawEvent::KeyboardEvent(_, key_id, state) = &event {
+                    if let State::Pressed = state {
+                        if let Some(c) = key_id_to_char(key_id) {
+                            if *key_id != KeyId::Return {
+                                barcode_buffer.push(c);
+                            }
+                        }
+                    }
+                }
 
-
-                window.show().unwrap();
-                window.maximize().unwrap();
-                window.set_always_on_top(true).unwrap();
-                window.set_focus().unwrap();
-                window.request_user_attention(tauri::UserAttentionType::Critical).unwrap();
-               
-                
                 let my_windows_hwnd = match window.hwnd() {
                     Ok(hwnd) => hwnd,
                     Err(e) => {
@@ -151,21 +154,26 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
                 let my_windows_hwnd_ptr = my_windows_hwnd.0 as *mut HWND__;
 
                 unsafe {
-                    winapi::um::winuser::ShowWindow(my_windows_hwnd_ptr, winapi::um::winuser::SW_MAXIMIZE);
+                    winapi::um::winuser::ShowWindow(
+                        my_windows_hwnd_ptr,
+                        winapi::um::winuser::SW_MAXIMIZE,
+                    );
                     winapi::um::winuser::SetForegroundWindow(my_windows_hwnd_ptr);
                     winapi::um::winuser::SetActiveWindow(my_windows_hwnd_ptr);
                     winapi::um::winuser::SetFocus(my_windows_hwnd_ptr);
                     // let _ = inp.take_focus();
                 }
 
-
-                let webview = app_clone.get_webview_window("main").unwrap();
-                if let Err(e) = webview.eval("document.getElementById(\"barcodei\").focus()") {
-                    eprintln!("Failed to evaluate JavaScript: {:?}", e);
-                }
-
                 match event {
                     RawEvent::KeyboardEvent(_, KeyId::Return, State::Released) => {
+                        println!("Key released: Return");
+                        println!("Barcode: {}", barcode_buffer);
+                        app.emit("sendebarcode", barcode_buffer.as_str()).unwrap();
+
+
+
+                        barcode_buffer.clear();
+
                         unsafe {
                             // activate the window current_active_window_hwnd again
                             match ERROR_STATUS {
@@ -213,9 +221,51 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
     });
 }
 
+fn key_id_to_char(key_id: &KeyId) -> Option<char> {
+    use multiinput::KeyId::*;
+    match key_id {
+        A => Some('a'),
+        B => Some('b'),
+        C => Some('c'),
+        D => Some('d'),
+        E => Some('e'),
+        F => Some('f'),
+        G => Some('g'),
+        H => Some('h'),
+        I => Some('i'),
+        J => Some('j'),
+        K => Some('k'),
+        L => Some('l'),
+        M => Some('m'),
+        N => Some('n'),
+        O => Some('o'),
+        P => Some('p'),
+        Q => Some('q'),
+        R => Some('r'),
+        S => Some('s'),
+        T => Some('t'),
+        U => Some('u'),
+        V => Some('v'),
+        W => Some('w'),
+        X => Some('x'),
+        Y => Some('y'),
+        Z => Some('z'),
+        Zero => Some('0'),
+        One => Some('1'),
+        Two => Some('2'),
+        Three => Some('3'),
+        Four => Some('4'),
+        Five => Some('5'),
+        Six => Some('6'),
+        Seven => Some('7'),
+        Eight => Some('8'),
+        Nine => Some('9'),
+        _ => None,
+    }
+}
+
 #[tauri::command]
 fn process_barcode(barcode: &str, uid: i32, jwt: String, luids: Vec<i32>, rolle: &str) {
-    // create_history(status.as_str(), barcode.as_str(), &uid, offline, &luids);
     sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle);
 }
 

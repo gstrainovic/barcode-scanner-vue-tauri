@@ -1,14 +1,15 @@
+use crate::{
+    create_history, get_ausnahmen as get_ausnahmen_sqlite, get_leitcodes_sql,
+    get_settings as get_settings_sqlite, is_barcode_duplicate_sqlite, update_leitcodes,
+};
+use notify_rust::Notification;
 use req::{
     check_duplicate_barcode::is_barcode_duplicate, get_ausnahmen::get_ausnahmen,
     get_leitcodes::get_leitcodes, get_leitcodes::IdAtrBuchstaben, get_leitcodes::Leitcode,
     get_leitcodes::LeitcodeBuchstabe, get_settings::get_settings,
 };
-use crate::{
-    create_history, get_ausnahmen as get_ausnahmen_sqlite, get_leitcodes_sql,
-    get_settings as get_settings_sqlite, update_leitcodes, is_barcode_duplicate_sqlite
-};
 
-static mut ERROR_STATUS : super::errors::Status = super::errors::Status::Ok;
+static mut ERROR_STATUS: super::errors::Status = super::errors::Status::Ok;
 
 pub fn clean_barcode(barcode: &str) -> String {
     barcode
@@ -34,6 +35,36 @@ pub fn history_add(
         offline,
         lager_user_ids,
     );
+
+    // ...existing code...
+    let prefix_warn_icon = if status.message.starts_with("@C88") {
+        "❗"
+    } else if status.message.starts_with("@C03") {
+        "⚠️"
+    } else {
+        "✅"
+    };
+    // ...existing code...
+
+    // ersetzen @C88, @C03 und @C00 durch ''
+    let new_status_message = status
+        .message
+        .replace("@C88", "")
+        .replace("@C03", "")
+        .replace("@C00", "");
+
+    // // ersetze bei status.message @C88 mit ❗, @C03 mit ⚠️ und @C00 mit ✅
+    // let new_status_message = status
+    //     .message
+    //     .replace("@C88", "❗")
+    //     .replace("@C03", "⚠️")
+    //     .replace("OK", "✅ OK");
+
+
+    Notification::new()
+        .summary(&format!("{} {} ist {}", prefix_warn_icon, barcode_c, new_status_message))
+        .show()
+        .unwrap();
 }
 
 pub fn process_barcode(
@@ -43,7 +74,6 @@ pub fn process_barcode(
     lager_user_ids: &Vec<i32>,
     rolle: &str,
 ) {
-
     let offline = jwt.is_empty();
 
     let settings = if offline {
@@ -65,7 +95,12 @@ pub fn process_barcode(
         for barcode_ausnahme in ausnahmen {
             if barcode_new.ends_with(barcode_ausnahme.Barcode.to_lowercase().as_str()) {
                 let cleaned_barcode = clean_barcode(&barcode_new);
-                super::send_barcode::send_barcode(cleaned_barcode.clone(), user_id, &jwt, &lager_user_ids);
+                super::send_barcode::send_barcode(
+                    cleaned_barcode.clone(),
+                    user_id,
+                    &jwt,
+                    &lager_user_ids,
+                );
                 history_add(
                     super::errors::ausnahme(barcode_ausnahme.Bedeutung),
                     &cleaned_barcode,
@@ -95,9 +130,8 @@ pub fn process_barcode(
         // ¨C140327628203`99000900033018
 
         // ¨C140327647661`99000900000000
-        
-        // 0327642113+99..
 
+        // 0327642113+99..
 
         let leitcodes = if jwt.is_empty() {
             get_leitcodes_sql()
@@ -115,7 +149,7 @@ pub fn process_barcode(
             if attribute.Produktion && rolle != "Produktion" {
                 continue;
             }
-            
+
             if barcode_new.len() > attribute.Mindeslaenge as usize {
                 let beschreibung = attribute.Beschreibung;
                 let data_buchstaben: Vec<IdAtrBuchstaben> = attribute.Leitcode_Buchstabe.data;
@@ -177,9 +211,8 @@ pub fn process_barcode(
         }
     }
 
-
     let cleaned_barcode = clean_barcode(&barcode_new);
-    
+
     let is_barcode_duplicate_bool = if offline {
         is_barcode_duplicate_sqlite(&cleaned_barcode)
     } else {
@@ -203,7 +236,7 @@ pub fn process_barcode(
         let err = if contains_number {
             super::errors::ok()
         } else {
-           super::errors::no_numbers()
+            super::errors::no_numbers()
         };
 
         history_add(err, &barcode_new, user_id, offline, lager_user_ids);

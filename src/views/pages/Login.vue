@@ -15,7 +15,7 @@ const password = ref('');
 const loginFailed = ref(false);
 const authStore = useAuthStore();
 // const configStore = useConfigStore();
-const { userRole } = storeToRefs(authStore);
+const { userRole, userId } = storeToRefs(authStore);
 // const { scanner } = storeToRefs(configStore);
 const { isDarkTheme } = useLayout();
 const devices = ref<{ label: string; value: string }[]>([]);
@@ -57,7 +57,10 @@ let selectedDevice = ref<{ label: string; value: string } | null>(null);
 const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
-        console.log(userRole.value);
+        console.log('userrole', userRole.value);
+        console.log('userid', userId.value);
+        console.log('userToken', authStore.userToken);
+        
         await invoke('set_user_role', { role: userRole.value });
         if (userRole.value === 'Lager') {
             router.push('/team');
