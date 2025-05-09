@@ -11,6 +11,7 @@ import { marked } from 'marked';
 import Editor from 'primevue/editor';
 import { useToast } from "primevue/usetoast";
 import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 const toast = useToast();
 const { getUsersLager, getHinweiseFromBarcode, postHinweise } = useMyFetch();
@@ -22,7 +23,7 @@ const { team, checked } = storeToRefs(teamStore);
 const { userRole, userId, userToken } = storeToRefs(authStore);
 
 const usernames = ref<{ username: any; id: any }[]>([]);
-const hist = ref([]);
+const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
 const hinweiseTitel = ref(' Hinweise zu ');
 const hinweise = ref('');
@@ -115,6 +116,18 @@ const processBarcode = async (binp = '') => {
     })
 
     hist.value = await invoke<[]>('load_history');
+
+    const lastHistory = hist.value[0] as { status: string; barcode: string; timestamp: string };
+    if (lastHistory.status.startsWith('@C88')) {
+        await getCurrentWindow().maximize();
+        showToast(false, lastHistory.status.replace('@C88', ''));
+    } else if (lastHistory.status.startsWith('@C03')) {
+        await getCurrentWindow().maximize();
+        showToast(false, lastHistory.status.replace('@C03', ''));
+    } else {
+        showToast(true, 'Barcode erfolgreich verarbeitet.');
+    }
+
     barcodeInput.value = '';
 };
 

@@ -7,6 +7,10 @@
   ],
   "permissions": [
     "core:default",
-    "opener:default"
+    "opener:default",
+    "core:window:allow-maximize",
+    "core:window:allow-set-enabled",
+    "core:window:allow-set-focus",
+    "core:window:allow-set-always-on-top"
   ]
 }
