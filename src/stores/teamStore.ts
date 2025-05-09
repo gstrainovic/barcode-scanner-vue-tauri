@@ -5,4 +5,7 @@ export const useTeamStore = defineStore('team', {
     team: [] as LagerUser[],
     checked: false,
   }),
+  persist: {
+    storage: sessionStorage, // Speichert den Zustand im sessionStorage
+  },
 });

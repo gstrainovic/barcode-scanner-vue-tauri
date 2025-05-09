@@ -6,6 +6,7 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { invoke } from '@tauri-apps/api/core';
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
@@ -21,6 +22,7 @@ if (layoutConfig.darkTheme) {
 }
 
 const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate);
 const app = createApp(App);
 
 app.use(router);
