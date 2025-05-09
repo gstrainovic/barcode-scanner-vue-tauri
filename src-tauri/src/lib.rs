@@ -1,22 +1,14 @@
 use multiinput::{KeyId, RawEvent, RawInputManager, State};
 use native_dialog::DialogBuilder;
-use once_cell::sync::Lazy;
 use sqlite::get_history;
 use std::sync::Arc;
-use std::sync::Mutex;
 use std::thread;
 use tauri::AppHandle;
 use tauri::Emitter;
 use tauri_plugin_dialog::DialogExt;
-
+use winapi::shared::windef::HWND__;
 
 static mut ERROR_STATUS: Status = Status::Ok;
-
-static USER_ROLE: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
-
-// use config::VERSION;
-
-use winapi::shared::windef::HWND__;
 
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
     let my_windows_hwnd = unsafe {
@@ -91,14 +83,7 @@ fn update(app: AppHandle) {
 }
 
 #[tauri::command]
-fn set_user_role(role: String) {
-    let mut user_role = USER_ROLE.lock().unwrap();
-    *user_role = role.clone();
-    println!("User role set to: {}", *user_role);
-}
-
-#[tauri::command]
-fn start_looper(app: AppHandle, window: tauri::Window) {
+fn start_looper(app: AppHandle) {
     let app_clone = app.clone();
     thread::spawn(move || {
         let mut manager = RawInputManager::new().unwrap();
@@ -123,15 +108,9 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
                 std::process::exit(1);
             });
         manager.filter_devices(vec![keyboard.name.clone()]);
-
         let mut barcode_buffer = String::new();
-
         loop {
-            let switch_back_hwd = unsafe { winapi::um::winuser::GetForegroundWindow() };
-
             if let Some(event) = manager.get_event() {
-                println!("Event: {:?}", event);
-
                 if let RawEvent::KeyboardEvent(_, key_id, state) = &event {
                     if let State::Pressed = state {
                         if let Some(c) = key_id_to_char(key_id) {
@@ -141,81 +120,17 @@ fn start_looper(app: AppHandle, window: tauri::Window) {
                         }
                     }
                 }
-
-                let my_windows_hwnd = match window.hwnd() {
-                    Ok(hwnd) => hwnd,
-                    Err(e) => {
-                        eprintln!("Failed to get window HWND: {:?}", e);
-                        continue;
-                    }
-                };
-
-                // Convert HWND (windows crate) to *mut HWND__ (winapi crate)
-                let my_windows_hwnd_ptr = my_windows_hwnd.0 as *mut HWND__;
-
-                unsafe {
-                    winapi::um::winuser::ShowWindow(
-                        my_windows_hwnd_ptr,
-                        winapi::um::winuser::SW_MAXIMIZE,
-                    );
-                    winapi::um::winuser::SetForegroundWindow(my_windows_hwnd_ptr);
-                    winapi::um::winuser::SetActiveWindow(my_windows_hwnd_ptr);
-                    winapi::um::winuser::SetFocus(my_windows_hwnd_ptr);
-                    // let _ = inp.take_focus();
-                }
-
                 match event {
                     RawEvent::KeyboardEvent(_, KeyId::Return, State::Released) => {
                         println!("Key released: Return");
                         println!("Barcode: {}", barcode_buffer);
                         app.emit("sendebarcode", barcode_buffer.as_str()).unwrap();
-
-
-
                         barcode_buffer.clear();
-
-                        unsafe {
-                            // activate the window current_active_window_hwnd again
-                            match ERROR_STATUS {
-                                Status::Ok => {
-                                    // window.set_always_on_top(false).unwrap();
-
-                                    // let user_role = USER_ROLE.lock().unwrap();
-                                    // let rolle = user_role.clone();
-
-                                    // if rolle == "Produktion" {
-                                    //     window.minimize().unwrap();
-                                    //     winapi::um::winuser::SetForegroundWindow(switch_back_hwd);
-                                    //     winapi::um::winuser::SetActiveWindow(switch_back_hwd);
-                                    //     winapi::um::winuser::SetFocus(switch_back_hwd);
-                                    // }
-                                }
-                                _ => {}
-                            }
-                        }
                     }
-
                     _ => {}
                 }
             } else {
                 std::thread::sleep(std::time::Duration::from_millis(10));
-                window.set_always_on_top(false).unwrap();
-                // let has_focus_my_windows_hwnd = unsafe {
-                //     winapi::um::winuser::GetForegroundWindow() == my_windows_hwnd
-                // };
-                // let is_a_mxg_box_open = unsafe {
-                //     winapi::um::winuser::GetForegroundWindow()
-                //         == winapi::um::winuser::GetLastActivePopup(my_windows_hwnd)
-                // };
-                // // minimize the window if it has no focus, expect if there is an msgbox
-                // if !has_focus_my_windows_hwnd && !is_a_mxg_box_open {
-                //     unsafe {
-                //         winapi::um::winuser::ShowWindow(
-                //             my_windows_hwnd,
-                //             winapi::um::winuser::SW_MINIMIZE,
-                //         );
-                //     }
-                // }
             }
         }
     });
@@ -284,7 +199,6 @@ pub fn run() {
             start_looper,
             load_history,
             process_barcode,
-            set_user_role,
             update,
             get_strapi_url,
             get_version
@@ -334,7 +248,6 @@ pub struct Error {
 
 pub fn ausnahme(x: String) -> Error {
     Error {
-        // message: "@C03Ausnahme".to_string(),
         message: format!("@C03{}", x),
         status: Status::Warn,
         error_type: Type::Ausnahme,

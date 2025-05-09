@@ -36,7 +36,6 @@ pub fn history_add(
         lager_user_ids,
     );
 
-    // ...existing code...
     let prefix_warn_icon = if status.message.starts_with("@C88") {
         "❗"
     } else if status.message.starts_with("@C03") {
@@ -44,22 +43,12 @@ pub fn history_add(
     } else {
         "✅"
     };
-    // ...existing code...
 
-    // ersetzen @C88, @C03 und @C00 durch ''
     let new_status_message = status
         .message
         .replace("@C88", "")
         .replace("@C03", "")
         .replace("@C00", "");
-
-    // // ersetze bei status.message @C88 mit ❗, @C03 mit ⚠️ und @C00 mit ✅
-    // let new_status_message = status
-    //     .message
-    //     .replace("@C88", "❗")
-    //     .replace("@C03", "⚠️")
-    //     .replace("OK", "✅ OK");
-
 
     Notification::new()
         .summary(&format!("{} {} ist {}", prefix_warn_icon, barcode_c, new_status_message))
