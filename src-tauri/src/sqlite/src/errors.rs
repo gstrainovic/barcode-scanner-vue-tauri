@@ -21,7 +21,6 @@ pub struct Error {
 
 pub fn ausnahme(x : String) -> Error {
     Error {
-        // message: "@C03Ausnahme".to_string(),
         message: format!("@C03{}", x),
         status: Status::Warn,
         error_type: Type::Ausnahme,

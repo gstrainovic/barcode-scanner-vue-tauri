@@ -7,14 +7,13 @@ import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
 // import { config } from '@/composables/config';
 import { invoke } from '@tauri-apps/api/core';
-// import { marked } from 'marked';
+import { marked } from 'marked';
 import Editor from 'primevue/editor';
 import { useToast } from "primevue/usetoast";
 import { listen } from '@tauri-apps/api/event';
 
 const toast = useToast();
-// const { getUsersLager, getHinweiseFromBarcode, postHinweise } = useMyFetch();
-const { getUsersLager } = useMyFetch();
+const { getUsersLager, getHinweiseFromBarcode, postHinweise } = useMyFetch();
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -27,7 +26,7 @@ const hist = ref([]);
 const barcodeInput = ref('');
 const hinweiseTitel = ref(' Hinweise zu ');
 const hinweise = ref('');
-// const lastBarcode = ref('');
+const lastBarcode = ref('');
 
 listen('sendebarcode', (event) => {
   processBarcode(event.payload as string);
@@ -39,18 +38,15 @@ onMounted(async () => {
 });
 
 const showToast = (erfolg: boolean, message : string) => {
-
     if (!message || message === '') {
         return;
     }
-
     toast.add({
         severity: erfolg ? 'success' : 'error',
         summary: erfolg ? 'Erfolg' : 'Fehler',
         detail: message,
         life: 3000,
     });
-
 };
 
 const statusClass = (status: string) => {
@@ -74,38 +70,33 @@ const displayStatus = (status: string) => {
     }
 };
 
-// const ladeHinweise = async () => {
-//     try {
-//         lastBarcode.value = barcodeInput.value;
-//         hinweiseTitel.value = 'Hinweise zu ' + barcodeInput.value;
+const ladeHinweise = async () => {
+    try {
+        lastBarcode.value = barcodeInput.value;
+        hinweiseTitel.value = 'Hinweise zu ' + barcodeInput.value;
 
-//         // Abrufen der Hinweise und Medien
-//         const result = await getHinweiseFromBarcode(barcodeInput.value);
-//         console.log('result', result);
+        // Abrufen der Hinweise und Medien
+        const result = await getHinweiseFromBarcode(barcodeInput.value);
+        console.log('result', result);
 
-//         // Hinweise verarbeiten
-//         hinweise.value = await marked.parse(result.hinweiseString || '');
-//         console.log('html hinweise', hinweise.value);
+        // Hinweise verarbeiten
+        hinweise.value = await marked.parse(result.hinweiseString || '');
+        console.log('html hinweise', hinweise.value);
 
-//     } catch (error) {
-//         console.error('Fehler beim Laden der Hinweise:', error);
-//     }
-// };
+    } catch (error) {
+        console.error('Fehler beim Laden der Hinweise:', error);
+    }
+};
 
 const processBarcode = async (binp = '') => {
-    console.log('barcode', barcodeInput.value);
-    console.log('binp', binp);
-
     const barcodeInputValue = binp || barcodeInput.value;
-    console.log('barcodeInputValue', barcodeInputValue);
-
     if (!barcodeInputValue || barcodeInputValue === '') {
         console.error('Fehler: Barcode ist nicht definiert.', barcodeInputValue);
         showToast(false, 'Bitte Barcode scannen.');
         return;
     }
 
-    // ladeHinweise();
+    ladeHinweise();
 
     const userID: Number = Number(userId.value);
     if (!userID) {
@@ -125,43 +116,38 @@ const processBarcode = async (binp = '') => {
 
     hist.value = await invoke<[]>('load_history');
     barcodeInput.value = '';
-
 };
 
 
-// const speichereHinweise = async () => {
-//     if (!hinweise.value || hinweise.value === '') {
-//         showToast(false, 'Bitte Hinweise eingeben.');
-//         return;
-//     }
+const speichereHinweise = async () => {
+    if (!hinweise.value || hinweise.value === '') {
+        showToast(false, 'Bitte Hinweise eingeben.');
+        return;
+    }
 
-//     if (!lastBarcode.value || lastBarcode.value === '') {
-//         showToast(false, 'Bitte Barcode scannen.');
-//         return;
-//     }
+    if (!lastBarcode.value || lastBarcode.value === '') {
+        showToast(false, 'Bitte Barcode scannen.');
+        return;
+    }
 
-//     const userID: Number = Number(userId.value);
-//     if (!userID) {
-//         console.error('Fehler: userId ist nicht definiert.');
-//         return;
-//     }
+    const userID: Number = Number(userId.value);
+    if (!userID) {
+        console.error('Fehler: userId ist nicht definiert.');
+        return;
+    }
 
-//     console.log('speichere hinweise', hinweise.value, lastBarcode.value);
-//     const data = {
-//         barcode: lastBarcode.value,
-//         hinweise: hinweise.value,
-//     }
+    console.log('speichere hinweise', hinweise.value, lastBarcode.value);
 
-//     const result = await postHinweise({data});
-//     console.log('result', result);
+    const result = await postHinweise(hinweise.value, lastBarcode.value);
+    console.log('result', result);
 
-//     // wenn der result den barcode und die hinweise enthält, dann ist es erfolgreich
-//     if (result.data.attributes.barcode && result.data.attributes.hinweise) {
-//         showToast(true, 'Hinweise gespeichert.');
-//     } else {
-//         showToast(false, 'Fehler beim Speichern der Hinweise.');
-//     }
-// };
+    // wenn der result den barcode und die hinweise enthält, dann ist es erfolgreich
+    if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweise) {
+        showToast(true, 'Hinweise gespeichert.');
+    } else {
+        showToast(false, 'Fehler beim Speichern der Hinweise.');
+    }
+};
 </script>
 
 <template>
@@ -198,7 +184,7 @@ const processBarcode = async (binp = '') => {
                 <div class="font-semibold text-xl mb-6"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
                 <Editor v-model="hinweise" :style="{ height: '360px' }" />
                 <br>
-                <!-- <Button icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button> -->
+                <Button icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
             </div>
 
             <div class="flex flex-col w-1/2 mt-4">

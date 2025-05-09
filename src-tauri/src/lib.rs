@@ -8,8 +8,6 @@ use tauri::Emitter;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
 
-static mut ERROR_STATUS: Status = Status::Ok;
-
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
     let my_windows_hwnd = unsafe {
         winapi::um::winuser::FindWindowA(std::ptr::null(), "BarcodeScanner\0".as_ptr() as *const i8)

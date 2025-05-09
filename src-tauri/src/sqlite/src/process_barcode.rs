@@ -71,8 +71,6 @@ pub fn process_barcode(
         get_settings(&jwt).unwrap().data.attributes
     };
 
-    // println!("settings: {:?}", settings);
-
     if settings.Ausnahmen_Aktiv {
         let ausnahmen = if offline {
             get_ausnahmen_sqlite()
@@ -115,21 +113,12 @@ pub fn process_barcode(
 
     if settings.Leitcodes_Aktiv {
         // block DHL Leitcode like
-        // ¨C140327619348`99000900190051
-        // ¨C140327628203`99000900033018
-
-        // ¨C140327647661`99000900000000
-
-        // 0327642113+99..
-
         let leitcodes = if jwt.is_empty() {
             get_leitcodes_sql()
         } else {
             update_leitcodes(get_leitcodes(&jwt).unwrap());
             get_leitcodes(&jwt).unwrap().data
         };
-
-        // println!("leitcodes: {:?}", leitcodes);
 
         for idatr in leitcodes {
             let attribute: Leitcode = idatr.attributes;
@@ -147,7 +136,6 @@ pub fn process_barcode(
                 for buchstabe_atr_id in data_buchstaben {
                     let buchstabe_attr: LeitcodeBuchstabe = buchstabe_atr_id.attributes;
                     let position: usize = buchstabe_attr.Position_Null_Beginnend as usize;
-                    // does the barcode match witch buchstabe at position?
                     if barcode_new.len() > position {
                         let barcode_buchstabe = barcode_new.chars().nth(position).unwrap();
                         if buchstabe_attr.Buchstabe == barcode_buchstabe.to_string() {
