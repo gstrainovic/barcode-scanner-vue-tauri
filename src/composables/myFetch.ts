@@ -6,9 +6,6 @@ import { onlineCheck } from '@/composables/helpers';
 
 export const useMyFetch = () => {
     const token = userToken;
-
-    console.log('useMyFetch token', token);
-
     const fetchWithAuth: FetchWithAuth = async (endpoint, queryList = null, body = null) => {
         console.log('fetchWithAuth', endpoint, queryList, body);
         try {
@@ -29,13 +26,9 @@ export const useMyFetch = () => {
 
     const postHinweise = async (body: any, barcode: string) => {
         const isOnline: Boolean = await onlineCheck();
-        console.log('speichereHinweise isOnline', isOnline);
         if (isOnline) {
-            console.log('speichereHinweise fetchWithAuth', fetchWithAuth);
             const configData = await config();
-            console.log('speichereHinweise body', body);
             const response = await fetchWithAuth(configData.api.strapi + 'barcodes', null, body);
-            console.log('speichereHinweise response', response);
             return response;
         }
     }
@@ -43,44 +36,20 @@ export const useMyFetch = () => {
 
     const getHinweiseFromBarcode = async (barcode: string) => {
         const isOnline: Boolean = await onlineCheck();
-        console.log('barcode', barcode);
-        console.log('getHinweiseFromBarcode isOnline', isOnline);
-
         if (isOnline) {
-            console.log('getHinweiseFromBarcode fetchWithAuth', fetchWithAuth);
             const configData = await config();
             const response = await fetchWithAuth(configData.api.strapi + 'barcodes?filters[barcode][$eq]=' + barcode + '&populate=*');
-            console.log('getHinweiseFromBarcode response', response);
 
             // Extrahiere die Hinweise aus der API-Antwort
             const attributes = response.data.map((item: { attributes: any }) => item.attributes);
-            console.log('getHinweiseFromBarcode attributes', attributes);
 
             // Verkette die Hinweise
             const hinweiseString = attributes
                 .map((item: { hinweise: any }) => item.hinweise)
                 .filter((hinweis: string) => hinweis && hinweis.trim() !== '')
                 .join('\n\n--------------------\n\n');
-            console.log('getHinweiseFromBarcode hinweiseList', hinweiseString);
 
-            // Extrahiere die Medien
-            const medien = attributes.map((item: { medien: any }) => item.medien);
-            console.log('getHinweiseFromBarcode medien', medien);
-
-            // Prüfe, ob medien und data existieren
-            const medienData: Array<any> = medien
-                .filter((item: any) => item && item.data) // Filtere ungültige Einträge
-                .map((item: any) => item.data);
-            console.log('getHinweiseFromBarcode medienData', medienData);
-
-            // Extrahiere die Attribute der Medien
-            const medienAttributes = medienData
-                .flat() // Falls `data` ein Array ist, flache es ab
-                .filter((item: any) => item && item.attributes) // Filtere ungültige Einträge
-                .map((item: any) => item.attributes);
-            console.log('getHinweiseFromBarcode mediaAttributes', medienAttributes);
-
-            return { hinweiseString, medienAttributes };
+            return { hinweiseString };
         } else {
             throw new Error('Offline mode not implemented yet!');
         }
@@ -89,9 +58,7 @@ export const useMyFetch = () => {
     const getUsersLager = async () => {
         const isOnline : Boolean = await onlineCheck();
         let result = [];
-        console.log('getUsersLager isOnline', isOnline);
         if (isOnline) {
-            console.log('getUsersLager fetchWithAuth', fetchWithAuth);
             const configData = await config();
             const response = await fetchWithAuth(configData.api.strapi + 'users?filters[rolle][$eq]=Lager');
             result = Array.isArray(response) ? response : [];
@@ -100,14 +67,12 @@ export const useMyFetch = () => {
             throw new Error('Offline mode not implemented yet!');
             // TODO: Implement offline mode for getUsersLager
         }   
-        console.log('getUsersLager result', result);
         const userNameIds = result.map((user: { username: any; id: any; }) => {
             return {
                 username: user.username,
                 id: user.id,
             }
         });
-        console.log('getUsersLager usernames', userNameIds);
         return await userNameIds;
     }
 
@@ -128,7 +93,6 @@ export const useMyFetch = () => {
         };
 
         const result = await fetchWithAuth(url, null, body);
-        console.log('writeBarcode result', result);
         return result;
     }
 
