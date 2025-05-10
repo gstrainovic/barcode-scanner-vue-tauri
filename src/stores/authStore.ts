@@ -30,8 +30,6 @@ export const useAuthStore = defineStore('auth', {
 
       const data = await response.json();
 
-      console.log('authStore.authenticateUser', data);
-
       if (data.jwt) {
         this.token = data.jwt;
         this.rolle = data.user.rolle; // Rolle speichern
@@ -41,9 +39,6 @@ export const useAuthStore = defineStore('auth', {
         sessionStorage.setItem('rolle', data.user.rolle); // Rolle im sessionStorage speichern
         sessionStorage.setItem('username', data.user.username); // Benutzername im sessionStorage speichern
         sessionStorage.setItem('id', data.user.id); // Benutzername im sessionStorage speichern
-
-        console.log('authStore.authenticateUser2', this.token, this.rolle, this.username, this.id);
-
         return true;
       } else {
         return false;
