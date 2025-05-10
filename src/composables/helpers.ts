@@ -15,11 +15,24 @@ export const onlineCheck = async () => {
     return false;
 }
 
-export const getToastMessage = (erfolg: boolean, message: string) => {
-    return {
-        severity: erfolg ? 'success' : 'error',
-        summary: erfolg ? 'Erfolg' : 'Fehler',
-        detail: message,
+const privateGetToastMessage = (severity: string, message: string) => {
+    return {             
+        severity: severity,   
+        summary: message,
         life: 3000,
     };
+};
+
+export const getWarningToastMessage = (message: string) => {
+    return privateGetToastMessage('warn', message);
+};
+
+export const getErrorToastMessage = (message: string) => {
+    const err = privateGetToastMessage('error', message);
+    console.log('Error Toast:', err);
+    return err;
+};
+
+export const getSuccessToastMessage = (message: string) => {
+    return privateGetToastMessage('success', message);
 };
