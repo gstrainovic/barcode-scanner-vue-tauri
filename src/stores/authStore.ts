@@ -3,10 +3,10 @@ import config from '../composables/config';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: sessionStorage.getItem('token') || null, // Token aus sessionStorage laden
-    rolle: sessionStorage.getItem('rolle') || null, // Rolle aus sessionStorage laden
-    username: sessionStorage.getItem('username') || null, // Benutzername aus sessionStorage laden
-    id: sessionStorage.getItem('id') || null, // Benutzername aus sessionStorage laden
+    token: sessionStorage.getItem('token') || undefined, // Token aus sessionStorage laden
+    rolle: sessionStorage.getItem('rolle') || undefined, // Rolle aus sessionStorage laden
+    username: sessionStorage.getItem('username') || undefined, // Benutzername aus sessionStorage laden
+    id: sessionStorage.getItem('id') || undefined, // Benutzername aus sessionStorage laden
   }),
   getters: {
     userRole: (state) => state.rolle,
@@ -45,10 +45,10 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     removeToken() {
-      this.token = null;
-      this.rolle = null;
-      this.username = null;
-      this.id = null;
+      this.token = undefined;
+      this.rolle = undefined;
+      this.username = undefined;
+      this.id = undefined;
       sessionStorage.removeItem('token'); // Token aus sessionStorage entfernen
       sessionStorage.removeItem('rolle'); // Rolle aus sessionStorage entfernen
       sessionStorage.removeItem('username'); // Benutzername aus sessionStorage entfernen
