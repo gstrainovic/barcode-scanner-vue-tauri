@@ -11,6 +11,9 @@ importers:
       '@primevue/themes':
         specifier: ^4.0.0
         version: 4.3.3
+      '@strapi/client':
+        specifier: ^1.4.0
+        version: 1.4.0
       '@tauri-apps/api':
         specifier: ^2.5.0
         version: 2.5.0
@@ -624,6 +627,10 @@ packages:
 
   '@soda/get-current-script@1.0.2':
     resolution: {integrity: sha512-T7VNNlYVM1SgQ+VsMYhnDkcGmWhQdL0bDyGm5TlQ3GBXnJscEClUUOKduWTmm2zCnvNLC1hc3JpuXjs/nFOc5w==}
+
+  '@strapi/client@1.4.0':
+    resolution: {integrity: sha512-A4mS6y52sI5CP9LOgB2iB5NOh1w1nonRlF4tWWtAe4+qquO59fp1tXOf08A1oXnSST1NSSifpQwrUiHi4LmWwQ==}
+    engines: {node: '>=20.18.2 <=22.x.x'}
 
   '@tauri-apps/api@2.5.0':
     resolution: {integrity: sha512-Ldux4ip+HGAcPUmuLT8EIkk6yafl5vK0P0c0byzAKzxJh7vxelVtdPONjfgTm96PbN24yjZNESY8CKo8qniluA==}
@@ -3109,6 +3116,10 @@ packages:
     resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
     engines: {node: '>=0.6'}
 
+  qs@6.14.0:
+    resolution: {integrity: sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==}
+    engines: {node: '>=0.6'}
+
   quansync@0.2.10:
     resolution: {integrity: sha512-t41VRkMYbkHyCYmOvx/6URnN80H7k4X0lLdBMGsz+maAwrJQYB1djpV6vHrQIBE0WBSGqhtEHrK9U3DWWH8v7A==}
 
@@ -4408,6 +4419,13 @@ snapshots:
       webpack: 5.99.5
 
   '@soda/get-current-script@1.0.2': {}
+
+  '@strapi/client@1.4.0':
+    dependencies:
+      debug: 4.4.0
+      qs: 6.14.0
+    transitivePeerDependencies:
+      - supports-color
 
   '@tauri-apps/api@2.5.0': {}
 
@@ -6919,6 +6937,10 @@ snapshots:
   punycode@2.3.1: {}
 
   qs@6.13.0:
+    dependencies:
+      side-channel: 1.1.0
+
+  qs@6.14.0:
     dependencies:
       side-channel: 1.1.0
 
