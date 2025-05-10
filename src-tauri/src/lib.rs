@@ -120,8 +120,8 @@ fn start_looper(app: AppHandle) {
                 }
                 match event {
                     RawEvent::KeyboardEvent(_, KeyId::Return, State::Released) => {
-                        println!("Key released: Return");
-                        println!("Barcode: {}", barcode_buffer);
+                        // println!("Key released: Return");
+                        // println!("Barcode: {}", barcode_buffer);
                         app.emit("sendebarcode", barcode_buffer.as_str()).unwrap();
                         barcode_buffer.clear();
                     }

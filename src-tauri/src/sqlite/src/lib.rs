@@ -49,16 +49,16 @@ pub fn establish_connection() -> SqliteConnection {
 }
 
 pub fn create_history<'a>(status: &'a str, barcode: &'a str, nuser_id: &'a i32, offline: bool, lager_user_ids: &Vec<i32>)  {
-    println!("create_history: status: {}, barcode: {}, nuser_id: {}, offline: {}, lager_user_ids: {:?}", status, barcode, nuser_id, offline, lager_user_ids);
+    // println!("create_history: status: {}, barcode: {}, nuser_id: {}, offline: {}, lager_user_ids: {:?}", status, barcode, nuser_id, offline, lager_user_ids);
     let conn = &mut establish_connection();
 
 
     let lager_user_ids_string = lager_user_ids.into_iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",");
     
-    println!("lager_user_ids_string: {}", lager_user_ids_string);
+    // println!("lager_user_ids_string: {}", lager_user_ids_string);
 
     let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-    println!("timestamp: {}", timestamp);
+    // println!("timestamp: {}", timestamp);
 
     let new_history = NewHistory {
         status,
@@ -70,19 +70,19 @@ pub fn create_history<'a>(status: &'a str, barcode: &'a str, nuser_id: &'a i32, 
         lager_user_ids: &lager_user_ids_string,
     };
 
-    println!("Debug: {:?}", new_history);
+    // println!("Debug: {:?}", new_history);
 
     let status = diesel::insert_into(history::table)
         .values(&new_history)
         .execute(conn);
 
-    match status {
-        Ok(rows) => println!("Inserted {} rows", rows),
-        Err(e) => {
-            eprintln!("Error saving new history: {}", e);
-            return; // Beende die Funktion, um den Fehler zu behandeln
-        }
-    }
+    // match status {
+    //     Ok(rows) => println!("Inserted {} rows", rows),
+    //     Err(e) => {
+    //         eprintln!("Error saving new history: {}", e);
+    //         return; // Beende die Funktion, um den Fehler zu behandeln
+    //     }
+    // }
 
     // history::table.order(history::id.asc()).first(conn).unwrap()
 }

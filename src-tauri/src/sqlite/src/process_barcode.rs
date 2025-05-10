@@ -196,7 +196,7 @@ pub fn process_barcode(
         is_barcode_duplicate(&jwt, &cleaned_barcode, &user_id).unwrap()
     };
 
-    println!("is_barcode_duplicate_bool: {:?}", is_barcode_duplicate_bool);
+    // println!("is_barcode_duplicate_bool: {:?}", is_barcode_duplicate_bool);
 
     if !is_barcode_duplicate_bool {
         super::send_barcode::send_barcode(cleaned_barcode.clone(), user_id, &jwt, lager_user_ids);
