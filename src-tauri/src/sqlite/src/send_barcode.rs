@@ -1,4 +1,3 @@
-// use fltk::dialog;
 // use notify_rust::Notification;
 use req::write_barcode::write_barcode;
 
