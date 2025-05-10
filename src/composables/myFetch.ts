@@ -3,18 +3,23 @@ import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
 const { userToken } = authStore;
 import { onlineCheck } from '@/composables/helpers';
+import { strapi } from '@strapi/client';
 
 export const useMyFetch = async () => {
     const token = userToken;
     const configData = await config();
     const isOnline: Boolean = await onlineCheck();
 
-    const fetchWithAuth: FetchWithAuth = async (endpoint, queryList = null, body = null) => {
-        console.log('fetchWithAuth', endpoint, queryList, body);
+    const client = strapi({
+        baseURL: configData.api.strapi,
+        auth: token,
+    });
+
+    const fetchWithAuth: FetchWithAuth = async (endpoint, body = null) => {
         try {
             const response = await fetch(configData.api.strapi + endpoint, {
                 headers: {
-                    'Authorization': `Bearer ${token}`, // Token im Header verwenden
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 method: body ? 'POST' : 'GET',
@@ -27,27 +32,43 @@ export const useMyFetch = async () => {
         }
     };
 
-    const postHinweise = async (body: any, barcode: string) => {
+    const postHinweise = async ( id: string, hinweise: string) => {
+        console.log('postHinweise called with id:', id, 'and hinweise:', hinweise);
         if (isOnline) {
-            const response = await fetchWithAuth('barcodes', null, body);
-            return response;
+            const barcodes = client.collection('barcodes');
+
+            const updatedBarcode = await barcodes.update(id, {hinweise});
+
+            console.log('Hinweise updated:', updatedBarcode);
+            return updatedBarcode;
         }
     }
 
     const getHinweiseFromBarcode = async (barcode: string) => {
+        console.log('Barcode:', barcode);
+
         if (isOnline) {
-            const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*');
+            const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1');
+            console.log('Barcode response:', response);
 
             // Extrahiere die Hinweise aus der API-Antwort
-            const attributes = response.data.map((item: { attributes: any }) => item.attributes);
+            // const attributes = response.data.map((item: { attributes: any }) => item.attributes);
+
+            // console.log('Hinweise:', attributes);
+
+            // const hinweise = attributes.map((item: { hinweise: any }) => item.hinweise);
+            // console.log('Hinweise:', hinweise);
+
+            // const hinweis = attributes.find((item: { hinweise: any }) => item.hinweise);
+            // console.log('Hinweis:', hinweis);
 
             // Verkette die Hinweise
-            const hinweiseString = attributes
-                .map((item: { hinweise: any }) => item.hinweise)
-                .filter((hinweis: string) => hinweis && hinweis.trim() !== '')
-                .join('\n\n--------------------\n\n');
+            // const hinweiseString = attributes
+            //     .map((item: { hinweise: any }) => item.hinweise)
+            //     .filter((hinweis: string) => hinweis && hinweis.trim() !== '')
+            //     .join('\n\n--------------------\n\n');
 
-            return { hinweiseString };
+            return response.data[0];
         } else {
             throw new Error('Offline mode not implemented yet!');
         }
@@ -72,26 +93,9 @@ export const useMyFetch = async () => {
         return await userNameIds;
     }
 
-    const writeBarcode = async (barcode: any,
-        user: any,
-        jwt: any,
-        lagerUserIds: any,
-        sync: any) => {
-        const body = {
-            barcode,
-            user,
-            jwt,
-            lagerUserIds,
-            sync,
-        };
-
-        const result = await fetchWithAuth('barcodes', null, body);
-        return result;
-    }
 
     return {
         getUsersLager,
-        writeBarcode,
         getHinweiseFromBarcode,
         postHinweise,
     };

@@ -11,7 +11,7 @@ import Editor from 'primevue/editor';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useToast } from "primevue/usetoast";
-import { getToastMessage } from '@/composables/helpers';
+import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/composables/helpers';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -21,9 +21,9 @@ const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
 const hinweise = ref('');
-const lastBarcode = ref('');
 const barcode = ref('');
 const toast = useToast();
+const barcodeId = ref('');
 
 listen('sendebarcode', (event) => {
   processBarcode(event.payload as string);
@@ -34,10 +34,6 @@ onMounted(async () => {
     usernames.value = await getUsersLager();
     hist.value = await invoke<[]>('load_history');
 });
-
-const showToast = (success: boolean, message: string) => {
-    toast.add(getToastMessage(success, message));
-};
 
 const statusClass = (status: string) => {
     if (status.startsWith('@C03')) {
@@ -61,25 +57,35 @@ const displayStatus = (status: string) => {
 };
 
 const ladeHinweise = async () => {
-    try {
-        const { getHinweiseFromBarcode } = await useMyFetch();
-        lastBarcode.value = barcodeInput.value;
-        const result = await getHinweiseFromBarcode(barcodeInput.value);
-        hinweise.value = await marked.parse(result.hinweiseString || '');
-    } catch (error) {
-        console.error('Fehler beim Laden der Hinweise:', error);
+    const { getHinweiseFromBarcode } = await useMyFetch();
+    const result = await getHinweiseFromBarcode(barcode.value);
+    console.log('result ladehinweise', result);
+    if (!result?.id) {
+        hinweise.value = '';
+        return;
     }
+    barcodeId.value = result.id;
+    console.log('barcodeId', barcodeId.value);
+    hinweise.value = await marked.parse(result.attributes.hinweise || '');
+};
+
+const bringWindowToFront = async () => {
+  const currentWindow = getCurrentWindow();
+  const isminimized = await currentWindow.isMinimized();
+  if (isminimized) {
+      await currentWindow.maximize();
+      await currentWindow.setFocus();
+  }
 };
 
 const processBarcode = async (binp = '') => {
     barcode.value = binp || barcodeInput.value;
     if (!barcode.value || barcode.value === '') {
         console.error('Fehler: Barcode ist nicht definiert.', barcode.value);
-        showToast(false, 'Bitte Barcode scannen.');
+        toast.add(getErrorToastMessage('Bitte Barcode scannen.'));
         return;
     }
 
-    ladeHinweise();
 
     const userID: Number = Number(userId.value);
     if (!userID) {
@@ -89,26 +95,30 @@ const processBarcode = async (binp = '') => {
 
     const lager_user_ids = team.value.map((user) => user.id);
 
-    await invoke('process_barcode', {
+    const barcodeId = await invoke('process_barcode', {
         barcode: barcode.value,
         uid: userID,
         jwt: userToken.value,
         luids: lager_user_ids,
         rolle: userRole.value,
-    })
+    });
+
+    console.log('barcodeId', barcodeId);
 
     hist.value = await invoke<[]>('load_history');
 
     const lastHistory = hist.value[0] as { status: string; barcode: string; timestamp: string };
     if (lastHistory.status.startsWith('@C88')) {
-        await getCurrentWindow().maximize();
-        showToast(false, lastHistory.status.replace('@C88', ''));
+        await bringWindowToFront();
+        toast.add(getErrorToastMessage(lastHistory.status.replace('@C88', '')));
     } else if (lastHistory.status.startsWith('@C03')) {
-        await getCurrentWindow().maximize();
-        showToast(false, lastHistory.status.replace('@C03', ''));
+        await bringWindowToFront();
+        toast.add(getWarningToastMessage(lastHistory.status.replace('@C03', '')));
     } else {
-        showToast(true, 'Barcode erfolgreich verarbeitet.');
+        toast.add(getSuccessToastMessage('Barcode erfolgreich verarbeitet.'));
     }
+
+    ladeHinweise();
 
     barcodeInput.value = '';
 };
@@ -118,12 +128,13 @@ const speichereHinweise = async () => {
     console.log('starte speichereHinweisex');
 
     if (!hinweise.value || hinweise.value === '') {
-        showToast(false, 'Bitte Hinweise eingeben.');
+        // showToast(false, 'Bitte Hinweise eingeben.');
+        toast.add(getErrorToastMessage('Bitte Hinweise eingeben.'));
         return;
     }
 
-    if (!lastBarcode.value || lastBarcode.value === '') {
-        showToast(false, 'Bitte Barcode scannen.');
+    if (!barcode.value || barcode.value === '') {
+        toast.add(getErrorToastMessage('Bitte Barcode scannen.'));
         return;
     }
 
@@ -133,16 +144,16 @@ const speichereHinweise = async () => {
         return;
     }
 
-    console.log('speichere hinweise', hinweise.value, lastBarcode.value);
+    console.log('speichere hinweise', hinweise.value,  barcodeId.value, barcode.value);
     const { postHinweise } = await useMyFetch();
-    const result = await postHinweise(hinweise.value, lastBarcode.value);
+    const result = await postHinweise(barcodeId.value, hinweise.value);
     console.log('result', result);
 
     // wenn der result den barcode und die hinweise enthält, dann ist es erfolgreich
     if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweise) {
-        showToast(true, 'Hinweise gespeichert.');
+        toast.add(getSuccessToastMessage('Hinweise gespeichert.'));
     } else {
-        showToast(false, 'Fehler beim Speichern der Hinweise.');
+        toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweise.'));
     }
 };
 
