@@ -5,13 +5,13 @@ import { useTeamStore } from '@/stores/teamStore';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
-const { getUsersLager } = useMyFetch();
 const teamStore = useTeamStore();
 const router = useRouter();
-const usernames = ref([]);
+const usernames = ref<{ username: any; id: any }[]>([]);
 const { team, checked } = storeToRefs(teamStore);
 
 onMounted(async () => {
+    const { getUsersLager } = await useMyFetch();
     usernames.value = await getUsersLager();
 });
 

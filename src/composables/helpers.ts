@@ -14,3 +14,12 @@ export const onlineCheck = async () => {
     }
     return false;
 }
+
+export const getToastMessage = (erfolg: boolean, message: string) => {
+    return {
+        severity: erfolg ? 'success' : 'error',
+        summary: erfolg ? 'Erfolg' : 'Fehler',
+        detail: message,
+        life: 3000,
+    };
+};

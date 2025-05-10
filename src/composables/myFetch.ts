@@ -4,12 +4,15 @@ const authStore = useAuthStore();
 const { userToken } = authStore;
 import { onlineCheck } from '@/composables/helpers';
 
-export const useMyFetch = () => {
+export const useMyFetch = async () => {
     const token = userToken;
+    const configData = await config();
+    const isOnline: Boolean = await onlineCheck();
+
     const fetchWithAuth: FetchWithAuth = async (endpoint, queryList = null, body = null) => {
         console.log('fetchWithAuth', endpoint, queryList, body);
         try {
-            const response = await fetch(endpoint, {
+            const response = await fetch(configData.api.strapi + endpoint, {
                 headers: {
                     'Authorization': `Bearer ${token}`, // Token im Header verwenden
                     'Content-Type': 'application/json'
@@ -25,20 +28,15 @@ export const useMyFetch = () => {
     };
 
     const postHinweise = async (body: any, barcode: string) => {
-        const isOnline: Boolean = await onlineCheck();
         if (isOnline) {
-            const configData = await config();
-            const response = await fetchWithAuth(configData.api.strapi + 'barcodes', null, body);
+            const response = await fetchWithAuth('barcodes', null, body);
             return response;
         }
     }
 
-
     const getHinweiseFromBarcode = async (barcode: string) => {
-        const isOnline: Boolean = await onlineCheck();
         if (isOnline) {
-            const configData = await config();
-            const response = await fetchWithAuth(configData.api.strapi + 'barcodes?filters[barcode][$eq]=' + barcode + '&populate=*');
+            const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*');
 
             // Extrahiere die Hinweise aus der API-Antwort
             const attributes = response.data.map((item: { attributes: any }) => item.attributes);
@@ -56,11 +54,9 @@ export const useMyFetch = () => {
     };
 
     const getUsersLager = async () => {
-        const isOnline : Boolean = await onlineCheck();
         let result = [];
         if (isOnline) {
-            const configData = await config();
-            const response = await fetchWithAuth(configData.api.strapi + 'users?filters[rolle][$eq]=Lager');
+            const response = await fetchWithAuth('users?filters[rolle][$eq]=Lager');
             result = Array.isArray(response) ? response : [];
         } else {
             // result = await window.pywebview.api.get_lager_users();
@@ -81,9 +77,6 @@ export const useMyFetch = () => {
         jwt: any,
         lagerUserIds: any,
         sync: any) => {
-        const configData = await config();
-        const url = `${configData.api.strapi}barcodes`;
-
         const body = {
             barcode,
             user,
@@ -92,7 +85,7 @@ export const useMyFetch = () => {
             sync,
         };
 
-        const result = await fetchWithAuth(url, null, body);
+        const result = await fetchWithAuth('barcodes', null, body);
         return result;
     }
 
