@@ -25,9 +25,9 @@ const { userRole, userId, userToken } = storeToRefs(authStore);
 const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
-const hinweiseTitel = ref(' Hinweise zu ');
 const hinweise = ref('');
 const lastBarcode = ref('');
+const barcode = ref('');
 
 listen('sendebarcode', (event) => {
   processBarcode(event.payload as string);
@@ -74,7 +74,6 @@ const displayStatus = (status: string) => {
 const ladeHinweise = async () => {
     try {
         lastBarcode.value = barcodeInput.value;
-        hinweiseTitel.value = 'Hinweise zu ' + barcodeInput.value;
 
         // Abrufen der Hinweise und Medien
         const result = await getHinweiseFromBarcode(barcodeInput.value);
@@ -90,9 +89,9 @@ const ladeHinweise = async () => {
 };
 
 const processBarcode = async (binp = '') => {
-    const barcodeInputValue = binp || barcodeInput.value;
-    if (!barcodeInputValue || barcodeInputValue === '') {
-        console.error('Fehler: Barcode ist nicht definiert.', barcodeInputValue);
+    barcode.value = binp || barcodeInput.value;
+    if (!barcode.value || barcode.value === '') {
+        console.error('Fehler: Barcode ist nicht definiert.', barcode.value);
         showToast(false, 'Bitte Barcode scannen.');
         return;
     }
@@ -108,7 +107,7 @@ const processBarcode = async (binp = '') => {
     const lager_user_ids = team.value.map((user) => user.id);
 
     await invoke('process_barcode', {
-        barcode: barcodeInputValue,
+        barcode: barcode.value,
         uid: userID,
         jwt: userToken.value,
         luids: lager_user_ids,
@@ -133,6 +132,8 @@ const processBarcode = async (binp = '') => {
 
 
 const speichereHinweise = async () => {
+    console.log('starte speichereHinweisex');
+
     if (!hinweise.value || hinweise.value === '') {
         showToast(false, 'Bitte Hinweise eingeben.');
         return;
@@ -194,10 +195,10 @@ const speichereHinweise = async () => {
 
         <Fluid class="flex flex-col md:flex-row gap-4">
             <div class="card flex flex-col w-1/2 mt-4">
-                <div class="font-semibold text-xl mb-6"><i class="pi pi-exclamation-triangle"></i> {{ hinweiseTitel }}</div>
-                <Editor v-model="hinweise" :style="{ height: '360px' }" />
+                <div class="font-semibold text-xl mb-6"><i class="pi pi-exclamation-triangle"></i> Hinweise zu {{ barcode }}</div>
+                <Editor :readonly="!barcode" v-model="hinweise" :style="{ height: '360px' }" />
                 <br>
-                <Button icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
+                <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
             </div>
 
             <div class="flex flex-col w-1/2 mt-4">
