@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
+import { getToastMessage } from '@/composables/helpers';
+import { useToast } from "primevue/usetoast";
 
 const router = useRouter();
 const email = ref('');
@@ -13,6 +15,7 @@ const loginFailed = ref(false);
 const authStore = useAuthStore();
 const { userRole } = storeToRefs(authStore);
 const { isDarkTheme } = useLayout();
+const toast = useToast();
 
 const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
@@ -23,7 +26,7 @@ const login = async () => {
             router.push('/');
         }
     } else {
-        loginFailed.value = true;
+        toast.add(getToastMessage(false, 'Anmeldung fehlgeschlagen'));
     }
 };
 </script>
@@ -49,7 +52,6 @@ const login = async () => {
                         <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Passwort</label>
                         <Password id="password1" v-model="password" placeholder="Passwort" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
                         <Button @click.prevent="login" label="Anmelden" class="w-full p-3 text-xl" />
-                        <Message v-if="loginFailed" severity="error">Anmeldung fehlgeschlagen</Message>
                     </div>
                 </div>
             </div>
