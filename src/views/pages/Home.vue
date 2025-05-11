@@ -255,20 +255,38 @@ const speichereHinweis = async () => {
 
             <div v-if="userRole === 'Lager'">
                 <div class="card flex flex-col gap-4">
-                    <div class="flex mb-1">
+                    <div class="flex flex-col items-start gap-2">
                         <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
-                        <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch"
-                            @update:modelValue="onToggleChangeVerpackeAlleine"></ToggleSwitch>
-                        <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
+                        <div class="flex items-center gap-2">
+                            <ToggleSwitch v-model="checked" id="toggleSwitch"
+                                @update:modelValue="onToggleChangeVerpackeAlleine"></ToggleSwitch>
+                            <label for="toggleSwitch" class="text-lg">Ich verpacke alleine</label>
+                        </div>
                     </div>
                     <MultiSelect v-model="team" :options="usernames" optionLabel="username"
                         placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
                     </MultiSelect>
                 </div>
             </div>
+
+            <div class="flex flex-col" v-if="userRole === 'Produktion'">
+                <div class="table-container">
+                    <DataTable :value="hinweisVorlagen" :sortField="'nummer'" :sortOrder="+1" :paginator="false" :rows="10">
+                        <template #header>
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-xl font-bold">Vorlagen</span>
+                            </div>
+                        </template>
+                        <Column field="titel" header="Titel" sortable style="width: 60%;font-size: 0.8rem;">
+                        </Column>
+                        <Column field="strg" header="STRG +" sortable style="width: 40%;font-size: 0.8rem"></Column>
+                    </DataTable>
+                </div>
+            </div>
+
         </div>
 
-        <div class="flex flex-col w-1/3 mt-1">
+        <div class="flex flex-col w-1/2 mt-1">
             <div class="card flex flex-col mt-1">
                 <section>
                     <div class="font-semibold text-xl mb-6 flex items-center justify-between">
@@ -286,9 +304,9 @@ const speichereHinweis = async () => {
                             </Select>
                         </div>
                     </div>
-                    <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '500px' }" />
+                    <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '450px' }" />
                     <br>
-                    <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full"
+                    <Button :disabled="!barcode" icon="pi pi-send" label="Speichern" class="w-full"
                         @click="speichereHinweis()"></Button>
                 </section>
             </div>
@@ -302,41 +320,18 @@ const speichereHinweis = async () => {
                             <span class="text-xl font-bold">Verlauf</span>
                         </div>
                     </template>
-                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 2rem;">
+                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.7rem;">
                         <template #body="slotProps">
                             <span :class="statusClass(slotProps.data.status)">{{
                                 displayStatus(slotProps.data.status)
                             }}</span>
                         </template>
                     </Column>
-                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 2rem"></Column>
-                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 2rem"></Column>
+                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.7rem"></Column>
+                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.7rem"></Column>
                 </DataTable>
             </div>
         </div>
-    </Fluid>
-
-
-    <Fluid class="flex flex-col md:flex-row gap-4">
-
-
-        <div class="flex flex-col w-1/6 mt-1" v-if="userRole === 'Produktion' && barcode">
-            <div class="table-container">
-                <DataTable :value="hinweisVorlagen" :sortField="'nummer'" :sortOrder="+1" :paginator="false" :rows="10">
-                    <template #header>
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <span class="text-xl font-bold">Vorlagen</span>
-                        </div>
-                    </template>
-                    <Column field="titel" header="Titel" sortable style="width: 70%;font-size: 0.9rem;">
-                    </Column>
-                    <Column field="strg" header="STRG +" sortable style="width: 30%;font-size: 0.9rem"></Column>
-                </DataTable>
-            </div>
-        </div>
-
-
     </Fluid>
     <br>
-
 </template>
