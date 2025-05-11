@@ -44,6 +44,11 @@ fn get_strapi_url() -> String {
 }
 
 #[tauri::command]
+fn get_dialog_title() -> String {
+    config::DIALOG_TITLE.to_string()
+}
+
+#[tauri::command]
 fn update(app: AppHandle) {
     println!("Checking for updates...");
     if let Ok(update) = self_update::backends::github::Update::configure()
@@ -199,7 +204,8 @@ pub fn run() {
             process_barcode,
             update,
             get_strapi_url,
-            get_version
+            get_version,
+            get_dialog_title,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
@@ -207,7 +213,7 @@ pub fn run() {
                 let window = window.clone();
                 let ans = window
                     .dialog()
-                    .message("Bestätigung: Möchten Sie die Anwendung wirklich schließen?")
+                    .message("Möchten Sie die Anwendung wirklich schließen?")
                     .title(config::DIALOG_TITLE)
                     .buttons(tauri_plugin_dialog::MessageDialogButtons::YesNo)
                     .blocking_show();
