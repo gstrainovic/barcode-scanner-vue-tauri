@@ -39,6 +39,10 @@ onMounted(async () => {
     const { getUsersLager } = await useMyFetch();
     usernames.value = await getUsersLager();
     hist.value = await invoke<[]>('load_history');
+    if (userRole.value === 'Produktion') {
+        await ladeHinweisVorlagen();
+        await registerHinweisVorlagenShortcuts();
+    }
 });
 
 const registerHinweisVorlagenShortcuts = async () => {
@@ -58,6 +62,7 @@ const registerHinweisVorlagenShortcuts = async () => {
                 } else {
                     hinweis.value = await marked.parse(vorlage.text) || '';
                 }
+                selectedVorlage.value = vorlage.text;
                 speichereHinweis();
             }
         });
@@ -158,20 +163,47 @@ const onToggleChangeHinweisUmgesetzt = (newValue: boolean) => {
     }
 };
 
+const checkBarcodeMatchWithVorlageBarcode = async (barcodeInput: string) => {
+    if (hinweisVorlagen.value.length > 0 && barcodeInput) {
+        const barcodeVorlage = hinweisVorlagen.value.find((vorlage) => vorlage.barcode === barcodeInput);
+        if (barcodeVorlage) {
+            if (barcodeVorlage.text.length < 2) {
+                hinweis.value = '';
+            } else {
+                hinweis.value = await marked.parse(barcodeVorlage.text) || '';
+            }
+            selectedVorlage.value = barcodeVorlage.text;
+            await speichereHinweis();
+            return true;
+        }
+    }
+    return false;
+};
+
 const processBarcode = async (binp = '') => {
-    barcode.value = binp || barcodeInput.value;
+    selectedVorlage.value = '';
+    const barcodeValue = binp || barcodeInput.value;
+    const barcodeMatch = await checkBarcodeMatchWithVorlageBarcode(barcodeValue);
+    if (barcodeMatch) {
+        console.log('Barcode match found with Vorlage Barcode.');
+        barcodeInput.value = '';
+        return;
+    }
+
+    barcode.value = barcodeValue;
     if (!barcode.value || barcode.value === '') {
         console.error('Fehler: Barcode ist nicht definiert.', barcode.value);
         toast.add(getErrorToastMessage('Bitte Barcode scannen.'));
         return;
     }
-
+    barcodeInput.value = '';
 
     const userID: Number = Number(userId.value);
     if (!userID) {
         console.error('Fehler: userId ist nicht definiert.');
         return;
     }
+
 
     const lager_user_ids = team.value.map((user) => user.id);
 
@@ -198,12 +230,9 @@ const processBarcode = async (binp = '') => {
 
     ladeHinweis();
 
-    if (userRole.value === 'Produktion') {
-        await ladeHinweisVorlagen();
-        registerHinweisVorlagenShortcuts();
-    }
 
-    barcodeInput.value = '';
+
+
 };
 
 const ladeHinweisVorlagen = async () => {
@@ -271,7 +300,7 @@ const speichereHinweis = async () => {
 
             <div class="flex flex-col" v-if="userRole === 'Produktion'">
                 <div class="table-container">
-                    <DataTable :value="hinweisVorlagen" :sortField="'nummer'" :sortOrder="+1" :paginator="false" :rows="10">
+                    <DataTable :value="hinweisVorlagen" :sortField="'strg'" :sortOrder="+1" :paginator="false" :rows="10">
                         <template #header>
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <span class="text-xl font-bold">Vorlagen</span>

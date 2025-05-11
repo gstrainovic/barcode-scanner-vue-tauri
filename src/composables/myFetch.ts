@@ -60,12 +60,12 @@ export const useMyFetch = async () => {
     const getHinweisVorlagen = async () => {
         let result = [];
         if (isOnline) {
-            const response = await fetchWithAuth('hinweis-vorlagen');
+            const response = await fetchWithAuth('hinweis-vorlagen?sort=strg:asc');
             const attributes = response.data.map((item: { attributes: any; }) => item.attributes);
 
             // Füge 'Keine Vorlage' als erstes Element hinzu
-            const keinHinweis = { "strg": 0, "text": "-", "createdAt": "2025-05-11T09:19:21.238Z", "updatedAt": "2025-05-11T09:21:12.608Z", "titel": "Kein Hinweis" };
-            attributes.unshift(keinHinweis);
+            // const keinHinweis = { "barcode""strg": 0, "text": "-", "createdAt": "2025-05-11T09:19:21.238Z", "updatedAt": "2025-05-11T09:21:12.608Z", "titel": "Kein Hinweis" };
+            // attributes.unshift(keinHinweis);
             result = Array.isArray(attributes) ? attributes : [];
         } else {
             throw new Error('Offline mode not implemented yet!');
