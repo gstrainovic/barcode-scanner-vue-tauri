@@ -18,7 +18,7 @@ import config from '@/composables/config';
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 const { team, checked } = storeToRefs(teamStore);
-const { userName, userRole, userId, userToken } = storeToRefs(authStore);
+const {userRole, userId, userToken } = storeToRefs(authStore);
 const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
