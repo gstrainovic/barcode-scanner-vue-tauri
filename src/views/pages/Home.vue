@@ -18,11 +18,11 @@ import config from '@/composables/config';
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 const { team, checked } = storeToRefs(teamStore);
-const { userRole, userId, userToken } = storeToRefs(authStore);
+const { userName, userRole, userId, userToken } = storeToRefs(authStore);
 const usernames = ref<{ username: any; id: any }[]>([]);
 const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
-const hinweise = ref('');
+const hinweis = ref('');
 const barcode = ref('');
 const toast = useToast();
 const barcodeId = ref('');
@@ -64,12 +64,12 @@ const ladeHinweise = async () => {
     const result = await getHinweiseFromBarcode(barcode.value);
     console.log('result ladehinweise', result);
     if (!result?.id) {
-        hinweise.value = '';
+        hinweis.value = '';
         return;
     }
     barcodeId.value = result.id;
     console.log('barcodeId', barcodeId.value);
-    hinweise.value = await marked.parse(result.attributes.hinweise || '');
+    hinweis.value = await marked.parse(result.attributes.hinweise || '');
 
     if (result.attributes.hinweise) {
         const Config = await config();
@@ -86,6 +86,47 @@ const bringWindowToFront = async () => {
   if (isminimized) {
       await currentWindow.maximize();
       await currentWindow.setFocus();
+  }
+};
+
+const onToggleChangeVerpackeAlleine = (newValue: boolean) => {
+  console.log('ToggleSwitch geändert:', newValue);
+  if (newValue) {
+    team.value = [];
+  }
+};
+
+const onToggleChangeHinweisUmgesetzt = (newValue: boolean) => {
+  console.log('ToggleSwitch geändert:', newValue);
+//   const teamUserNames = team.value.map((user) => user.username).join(', ');
+//   const userNameUndTeamUsernames = userName.value + (teamUserNames ? ' (' + teamUserNames + ')' : '');
+//   const nochNichtUmgesetzt = '<br>' + 'Hinweis noch nicht umgesetzt';
+//   const hinweisUmgesetzt = '<br>' + 'Hinweis umgesetzt am ' + new Date().toLocaleDateString('de-DE') + ' von ' + userNameUndTeamUsernames;
+
+  speichereHinweise();
+
+  if (newValue) {
+    // console.log(hinweisUmgesetzt);
+    // Wenn der "Hinweis noch nicht umgesetzt" Text vorhanden ist, dann wird er entfernt
+    // if (hinweis.value.includes(nochNichtUmgesetzt)) {
+    //     hinweis.value = hinweis.value.replace(nochNichtUmgesetzt, '');
+    // }
+
+    // // Wenn es noch kein "Hinweis umgesetzt" gibt, dann wird der Text hinzugefügt
+    // if (!hinweis.value.includes(hinweisUmgesetzt)) {
+    //     hinweis.value = hinweis.value + hinweisUmgesetzt;
+    // }
+  } else {
+    // console.log(nochNichtUmgesetzt);
+    // Wenn der "Hinweis umgesetzt" Text vorhanden ist, dann wird er entfernt
+    // if (hinweis.value.includes(hinweisUmgesetzt)) {
+    //     hinweis.value = hinweis.value.replace(hinweisUmgesetzt, '');
+    // }
+
+    // // Wenn es noch kein "Hinweis noch nicht umgesetzt" gibt, dann wird der Text hinzugefügt
+    // if (!hinweis.value.includes(nochNichtUmgesetzt)) {
+    //     hinweis.value = hinweis.value  + nochNichtUmgesetzt;
+    // }
   }
 };
 
@@ -136,7 +177,7 @@ const processBarcode = async (binp = '') => {
 
 
 const speichereHinweise = async () => {
-    if (!hinweise.value || hinweise.value === '') {
+    if (!hinweis.value || hinweis.value === '') {
         toast.add(getErrorToastMessage('Bitte Hinweise eingeben.'));
         return;
     }
@@ -152,10 +193,16 @@ const speichereHinweise = async () => {
         return;
     }
 
+    const teamIds = team.value.map((user) => user.id);
+    console.log('teamIds', teamIds);
+    const teamUndUserIds = teamIds.concat(userID);
+    console.log('teamUndUserIds', teamUndUserIds);
+
     const createdBy  = userRole.value === 'Produktion' ? userID : null;
+    const hinweisUmgesetztVon = hinweisUmgesetzt.value ? teamUndUserIds : [];
 
     const { postHinweise } = await useMyFetch();
-    const result = await postHinweise(barcodeId.value, hinweise.value, createdBy);
+    const result = await postHinweise(barcodeId.value, hinweis.value, createdBy, hinweisUmgesetztVon);
     console.log('result', result);
 
     // wenn der result den barcode und die hinweise enthält, dann ist es erfolgreich
@@ -186,7 +233,7 @@ const speichereHinweise = async () => {
                 <div class="card flex flex-col gap-4">
                     <div class="flex mb-1">
                         <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
-                        <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch"></ToggleSwitch>
+                        <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch" @update:modelValue="onToggleChangeVerpackeAlleine"></ToggleSwitch>
                         <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
                     </div>
                     <MultiSelect v-model="team" :options="usernames" optionLabel="username"
@@ -198,14 +245,21 @@ const speichereHinweise = async () => {
 
         <Fluid class="flex flex-col md:flex-row gap-4">
             <div class="card flex flex-col w-1/2 mt-4">
-                <div class="font-semibold text-xl mb-6">
-                    <i class="pi pi-exclamation-triangle"></i> Hinweis zu {{ barcode }}
-                    <div class="flex items-center gap-2">
-                        <ToggleSwitch  v-model="hinweisUmgesetzt" inputId="hinweis_umgesetzt" name="size" value="Small" size="large" />
+                <div class="font-semibold text-xl mb-6 flex items-center justify-between">
+                    <div>
+                        <i class="pi pi-exclamation-triangle"></i> Hinweis zu {{ barcode }}
+                    </div>
+                    <div class="flex items-center gap-2" v-if="userRole === 'Lager' && hinweis">
+                        <ToggleSwitch
+                            v-model="hinweisUmgesetzt"
+                            @update:modelValue="onToggleChangeHinweisUmgesetzt"
+                            inputId="hinweis_umgesetzt"
+                            name="size" value="Small"
+                            size="large" />
                         <label for="hinweis_umgesetzt">Hinweis umgesetzt</label>
                     </div>
                 </div>
-                <Editor :readonly="!barcode" v-model="hinweise" :style="{ height: '360px' }" />
+                <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '360px' }" />
                 <br>
                 <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
             </div>

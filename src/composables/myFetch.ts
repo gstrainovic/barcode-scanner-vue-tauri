@@ -32,7 +32,7 @@ export const useMyFetch = async () => {
         }
     };
 
-    const postHinweise = async (id: string, hinweise: string, erstelltVon: Number | null = null) => {
+    const postHinweise = async (id: string, hinweise: string, erstelltVon: Number | null = null, hinweisUmgesetztVon: Number[]) => {
         if (isOnline) {
             const barcodes = client.collection('barcodes');
     
@@ -40,7 +40,9 @@ export const useMyFetch = async () => {
             if (erstelltVon !== null && erstelltVon !== undefined) {
                 updateData.hinweis_erstellt_von = erstelltVon;
             }
-    
+            
+            updateData.hinweis_umgesetzt_von = hinweisUmgesetztVon;
+
             const updatedBarcode = await barcodes.update(id, updateData);
             return updatedBarcode;
         }
