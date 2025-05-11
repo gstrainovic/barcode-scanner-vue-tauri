@@ -33,41 +33,16 @@ export const useMyFetch = async () => {
     };
 
     const postHinweise = async ( id: string, hinweise: string) => {
-        console.log('postHinweise called with id:', id, 'and hinweise:', hinweise);
         if (isOnline) {
             const barcodes = client.collection('barcodes');
-
             const updatedBarcode = await barcodes.update(id, {hinweise});
-
-            console.log('Hinweise updated:', updatedBarcode);
             return updatedBarcode;
         }
     }
 
     const getHinweiseFromBarcode = async (barcode: string) => {
-        console.log('Barcode:', barcode);
-
         if (isOnline) {
-            const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1');
-            console.log('Barcode response:', response);
-
-            // Extrahiere die Hinweise aus der API-Antwort
-            // const attributes = response.data.map((item: { attributes: any }) => item.attributes);
-
-            // console.log('Hinweise:', attributes);
-
-            // const hinweise = attributes.map((item: { hinweise: any }) => item.hinweise);
-            // console.log('Hinweise:', hinweise);
-
-            // const hinweis = attributes.find((item: { hinweise: any }) => item.hinweise);
-            // console.log('Hinweis:', hinweis);
-
-            // Verkette die Hinweise
-            // const hinweiseString = attributes
-            //     .map((item: { hinweise: any }) => item.hinweise)
-            //     .filter((hinweis: string) => hinweis && hinweis.trim() !== '')
-            //     .join('\n\n--------------------\n\n');
-
+            const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1&sort=id:asc');
             return response.data[0];
         } else {
             throw new Error('Offline mode not implemented yet!');
@@ -92,7 +67,6 @@ export const useMyFetch = async () => {
         });
         return await userNameIds;
     }
-
 
     return {
         getUsersLager,
