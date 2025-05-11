@@ -26,6 +26,7 @@ const hinweise = ref('');
 const barcode = ref('');
 const toast = useToast();
 const barcodeId = ref('');
+const hinweisUmgesetzt = ref(false);
 
 listen('sendebarcode', (event) => {
   processBarcode(event.payload as string);
@@ -197,7 +198,13 @@ const speichereHinweise = async () => {
 
         <Fluid class="flex flex-col md:flex-row gap-4">
             <div class="card flex flex-col w-1/2 mt-4">
-                <div class="font-semibold text-xl mb-6"><i class="pi pi-exclamation-triangle"></i> Hinweise zu {{ barcode }}</div>
+                <div class="font-semibold text-xl mb-6">
+                    <i class="pi pi-exclamation-triangle"></i> Hinweis zu {{ barcode }}
+                    <div class="flex items-center gap-2">
+                        <ToggleSwitch  v-model="hinweisUmgesetzt" inputId="hinweis_umgesetzt" name="size" value="Small" size="large" />
+                        <label for="hinweis_umgesetzt">Hinweis umgesetzt</label>
+                    </div>
+                </div>
                 <Editor :readonly="!barcode" v-model="hinweise" :style="{ height: '360px' }" />
                 <br>
                 <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full" @click="speichereHinweise()"></Button>
