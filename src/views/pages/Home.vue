@@ -241,7 +241,7 @@ const speichereHinweis = async () => {
 
 <template>
     <Fluid class="flex flex-col md:flex-row gap-4">
-        <div class="flex flex-col w-3/8">
+        <div class="flex flex-col w-1/4">
             <div class="card flex flex-col gap-4">
                 <div @keyup.enter="processBarcode()" tabindex="0">
                     <IconField>
@@ -268,17 +268,17 @@ const speichereHinweis = async () => {
             </div>
         </div>
 
-        <div class="flex flex-col w-1/8 mt-1">
+        <div class="flex flex-col w-1/3 mt-1">
             <div class="card flex flex-col mt-1">
                 <section>
                     <div class="font-semibold text-xl mb-6 flex items-center justify-between">
                         <div>
-                            <i class="pi pi-exclamation-triangle"></i> Hinweis zu {{ barcode }}
+                            <i class="pi pi-exclamation-triangle"></i> Hinweis zu: {{ barcode }}
                         </div>
                         <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
                             <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="onToggleChangeHinweisUmgesetzt"
-                                inputId="hinweis_umgesetzt" name="size" value="Small" size="large" />
-                            <label for="hinweis_umgesetzt">Hinweis umgesetzt</label>
+                                inputId="hinweis_umgesetzt" name="size" value="Small" size="small" />
+                            <label for="hinweis_umgesetzt">Beachtet</label>
                         </div>
                         <div class="flex items-center gap-2" v-if="userRole === 'Produktion'">
                             <Select v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
@@ -286,7 +286,7 @@ const speichereHinweis = async () => {
                             </Select>
                         </div>
                     </div>
-                    <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '130px' }" />
+                    <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '500px' }" />
                     <br>
                     <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full"
                         @click="speichereHinweis()"></Button>
@@ -294,23 +294,23 @@ const speichereHinweis = async () => {
             </div>
         </div>
 
-        <div class="flex flex-col w-1/8 mt-1">
+        <div class="flex flex-col w-1/2 mt-1">
             <div class="table-container">
-                <DataTable :value="hist" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="4">
+                <DataTable :value="hist" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="5">
                     <template #header>
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <span class="text-xl font-bold">Verlauf</span>
                         </div>
                     </template>
-                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.5rem;">
+                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 2rem;">
                         <template #body="slotProps">
                             <span :class="statusClass(slotProps.data.status)">{{
                                 displayStatus(slotProps.data.status)
-                                }}</span>
+                            }}</span>
                         </template>
                     </Column>
-                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.5rem"></Column>
-                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.5rem"></Column>
+                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 2rem"></Column>
+                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 2rem"></Column>
                 </DataTable>
             </div>
         </div>
