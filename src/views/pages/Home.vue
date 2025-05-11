@@ -50,7 +50,10 @@ const registerHinweisVorlagenShortcuts = async () => {
         // Registriere den Hotkey
         await register(hotkey, async (event) => {
             if (event.state === "Released") {
-                if (vorlage.text < 2) {
+                console.log('Hotkey released:', hotkey);
+                console.log('Vorlage:', vorlage);
+
+                if (hotkey === 'CommandOrControl+0') {
                     hinweis.value = '';
                 } else {
                     hinweis.value = await marked.parse(vorlage.text) || '';
@@ -192,9 +195,9 @@ const processBarcode = async (binp = '') => {
     } else {
         toast.add(getSuccessToastMessage('Barcode erfolgreich verarbeitet.'));
     }
-    
+
     ladeHinweis();
-    
+
     if (userRole.value === 'Produktion') {
         await ladeHinweisVorlagen();
         registerHinweisVorlagenShortcuts();
@@ -238,8 +241,8 @@ const speichereHinweis = async () => {
 
 <template>
     <Fluid class="flex flex-col md:flex-row gap-4">
-        <div class="md:w-1/3">
-            <div class="card flex flex-col gap-3">
+        <div class="flex flex-col w-3/8">
+            <div class="card flex flex-col gap-4">
                 <div @keyup.enter="processBarcode()" tabindex="0">
                     <IconField>
                         <InputIcon class="pi pi-qrcode" />
@@ -249,52 +252,77 @@ const speichereHinweis = async () => {
                         @click="processBarcode()"></Button>
                 </div>
             </div>
+
+            <div v-if="userRole === 'Lager'">
+                <div class="card flex flex-col gap-4">
+                    <div class="flex mb-1">
+                        <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
+                        <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch"
+                            @update:modelValue="onToggleChangeVerpackeAlleine"></ToggleSwitch>
+                        <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
+                    </div>
+                    <MultiSelect v-model="team" :options="usernames" optionLabel="username"
+                        placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
+                    </MultiSelect>
+                </div>
+            </div>
         </div>
 
-        <div class="md:w-1/3 " v-if="userRole === 'Lager'">
-            <div class="card flex flex-col gap-4">
-                <div class="flex mb-1">
-                    <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
-                    <ToggleSwitch class="ml-14" v-model="checked" id="toggleSwitch"
-                        @update:modelValue="onToggleChangeVerpackeAlleine"></ToggleSwitch>
-                    <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
-                </div>
-                <MultiSelect v-model="team" :options="usernames" optionLabel="username"
-                    placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
-                </MultiSelect>
+        <div class="flex flex-col w-1/8 mt-1">
+            <div class="card flex flex-col mt-1">
+                <section>
+                    <div class="font-semibold text-xl mb-6 flex items-center justify-between">
+                        <div>
+                            <i class="pi pi-exclamation-triangle"></i> Hinweis zu {{ barcode }}
+                        </div>
+                        <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
+                            <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="onToggleChangeHinweisUmgesetzt"
+                                inputId="hinweis_umgesetzt" name="size" value="Small" size="large" />
+                            <label for="hinweis_umgesetzt">Hinweis umgesetzt</label>
+                        </div>
+                        <div class="flex items-center gap-2" v-if="userRole === 'Produktion'">
+                            <Select v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
+                                optionLabel="titel" option-value="text" :filter="true" @change="onSelectVorlageChange">
+                            </Select>
+                        </div>
+                    </div>
+                    <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '130px' }" />
+                    <br>
+                    <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full"
+                        @click="speichereHinweis()"></Button>
+                </section>
+            </div>
+        </div>
+
+        <div class="flex flex-col w-1/8 mt-1">
+            <div class="table-container">
+                <DataTable :value="hist" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="4">
+                    <template #header>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-xl font-bold">Verlauf</span>
+                        </div>
+                    </template>
+                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.5rem;">
+                        <template #body="slotProps">
+                            <span :class="statusClass(slotProps.data.status)">{{
+                                displayStatus(slotProps.data.status)
+                                }}</span>
+                        </template>
+                    </Column>
+                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.5rem"></Column>
+                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.5rem"></Column>
+                </DataTable>
             </div>
         </div>
     </Fluid>
 
+
     <Fluid class="flex flex-col md:flex-row gap-4">
-        <div class="card flex flex-col w-2/6 mt-1 " v-if="barcode">
-            <section>
-                <div class="font-semibold text-xl mb-6 flex items-center justify-between">
-                    <div>
-                        <i class="pi pi-exclamation-triangle"></i> Hinweis zu {{ barcode }}
-                    </div>
-                    <div class="flex items-center gap-2" v-if="userRole === 'Lager' && hinweis">
-                        <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="onToggleChangeHinweisUmgesetzt"
-                            inputId="hinweis_umgesetzt" name="size" value="Small" size="large" />
-                        <label for="hinweis_umgesetzt">Hinweis umgesetzt</label>
-                    </div>
-                    <div class="flex items-center gap-2" v-if="userRole === 'Produktion' && barcode">
-                        <Select v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
-                            optionLabel="titel" option-value="text" :filter="true" @change="onSelectVorlageChange">
-                        </Select>
-                    </div>
-                </div>
-                <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '260px' }" />
-                <br>
-                <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full"
-                    @click="speichereHinweis()"></Button>
-            </section>
-        </div>
+
 
         <div class="flex flex-col w-1/6 mt-1" v-if="userRole === 'Produktion' && barcode">
             <div class="table-container">
-                <DataTable :value="hinweisVorlagen"  :sortField="'nummer'"
-                    :sortOrder="+1" :paginator="false" :rows="10">
+                <DataTable :value="hinweisVorlagen" :sortField="'nummer'" :sortOrder="+1" :paginator="false" :rows="10">
                     <template #header>
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <span class="text-xl font-bold">Vorlagen</span>
@@ -307,27 +335,7 @@ const speichereHinweis = async () => {
             </div>
         </div>
 
-        <div class="flex flex-col w-3/6 mt-1">
-            <div class="table-container">
-                <DataTable :value="hist"  :sortField="'timestamp'" :sortOrder="-1"
-                    paginator :rows="4">
-                    <template #header>
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <span class="text-xl font-bold">Verlauf</span>
-                        </div>
-                    </template>
-                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 1rem;">
-                        <template #body="slotProps">
-                            <span :class="statusClass(slotProps.data.status)">{{
-                                displayStatus(slotProps.data.status)
-                            }}</span>
-                        </template>
-                    </Column>
-                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1rem"></Column>
-                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1rem"></Column>
-                </DataTable>
-            </div>
-        </div>
+
     </Fluid>
     <br>
 

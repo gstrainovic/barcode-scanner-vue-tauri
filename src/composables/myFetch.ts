@@ -66,11 +66,13 @@ export const useMyFetch = async () => {
             // Füge 'Keine Vorlage' als erstes Element hinzu
             const keinHinweis = { "strg": 0, "text": "-", "createdAt": "2025-05-11T09:19:21.238Z", "updatedAt": "2025-05-11T09:21:12.608Z", "titel": "Kein Hinweis" };
             attributes.unshift(keinHinweis);
-
             result = Array.isArray(attributes) ? attributes : [];
         } else {
             throw new Error('Offline mode not implemented yet!');
         }
+
+        console.log('Hinweis Vorlagen:', result);
+
         return result;
     };
 
@@ -96,7 +98,7 @@ export const useMyFetch = async () => {
     return {
         getUsersLager,
         getHinweisFromBarcode,
-        postHinweis: postHinweis,
+        postHinweis,
         getHinweisVorlagen,
     };
 }
