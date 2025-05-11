@@ -24,6 +24,6 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
         - [ ] Ausnahmen
     - [ ] Offline fähig
     - [ ] Wenn Online Barcodes synchronisieren
-* [ ] Lager Users bleiben gespeichert beim F5 Refresh
+* [x] Lager Users bleiben gespeichert beim F5 Refresh
 * [ ] Alle Versionen hochladen in package.json und alle cargo.toml
 
