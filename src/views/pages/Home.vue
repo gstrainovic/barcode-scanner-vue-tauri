@@ -15,6 +15,7 @@ import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } 
 import { message } from '@tauri-apps/plugin-dialog';
 import config from '@/composables/config';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
+import { event } from '@tauri-apps/api';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -57,13 +58,15 @@ const registerHinweisVorlagenShortcuts = async () => {
                 console.log('Hotkey released:', hotkey);
                 console.log('Vorlage:', vorlage);
 
-                if (hotkey === 'CommandOrControl+0') {
-                    hinweis.value = '';
-                } else {
-                    hinweis.value = await marked.parse(vorlage.text) || '';
-                }
-                selectedVorlage.value = vorlage.text;
-                speichereHinweis();
+                // if (hotkey === 'CommandOrControl+0') {
+                //     hinweis.value = '';
+                // } else {
+                //     hinweis.value = await marked.parse(vorlage.text) || '';
+                // }
+                // selectedVorlage.value = vorlage.text;
+
+                await setHinweis(vorlage);
+                await speichereHinweis();
             }
         });
     }
@@ -123,14 +126,6 @@ const onToggleChangeVerpackeAlleine = (newValue: boolean) => {
     }
 };
 
-const onSelectVorlageChange = async (event: any) => {
-    if (event.value.length < 2) {
-        hinweis.value = '';
-    } else {
-        hinweis.value = await marked.parse(event.value) || '';
-    }
-    speichereHinweis();
-};
 
 const onToggleChangeHinweisUmgesetzt = (newValue: boolean) => {
     //   const teamUserNames = team.value.map((user) => user.username).join(', ');
@@ -167,13 +162,7 @@ const checkBarcodeMatchWithVorlageBarcode = async (barcodeInput: string) => {
     if (hinweisVorlagen.value.length > 0 && barcodeInput) {
         const barcodeVorlage = hinweisVorlagen.value.find((vorlage) => vorlage.barcode === barcodeInput);
         if (barcodeVorlage) {
-            if (barcodeVorlage.text.length < 2) {
-                hinweis.value = '';
-            } else {
-                hinweis.value = await marked.parse(barcodeVorlage.text) || '';
-            }
-            selectedVorlage.value = barcodeVorlage.text;
-            await speichereHinweis();
+            await setHinweis(barcodeVorlage);
             return true;
         }
     }
@@ -269,12 +258,14 @@ const speichereHinweis = async () => {
 
 const setHinweis = async (event: any) => {
     console.log('setHinweis', event);
-    if (event.text && event.text.length > 2) {
-        hinweis.value = await marked.parse(event.text);
+    const hinweisInput = event.text || event.value;
+    console.log('hinweisInput', hinweisInput);
+    if (hinweisInput && hinweisInput.length > 2) {
+        hinweis.value = await marked.parse(hinweisInput) || '';
     } else {
         hinweis.value = '';
     }
-    selectedVorlage.value = event.text;
+    selectedVorlage.value = hinweisInput;
     await speichereHinweis();
 };
 </script>
@@ -349,7 +340,7 @@ const setHinweis = async (event: any) => {
                         </div>
                         <div class="flex items-center gap-2" v-if="userRole === 'Produktion'">
                             <Select v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
-                                optionLabel="titel" option-value="text" :filter="true" @change="onSelectVorlageChange">
+                                optionLabel="titel" option-value="text" :filter="true" @change="setHinweis">
                             </Select>
                         </div>
                     </div>
