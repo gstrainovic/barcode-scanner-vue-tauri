@@ -12,6 +12,8 @@ import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useToast } from "primevue/usetoast";
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/composables/helpers';
+import { message } from '@tauri-apps/plugin-dialog';
+import config from '@/composables/config';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -67,6 +69,14 @@ const ladeHinweise = async () => {
     barcodeId.value = result.id;
     console.log('barcodeId', barcodeId.value);
     hinweise.value = await marked.parse(result.attributes.hinweise || '');
+
+    if (result.attributes.hinweise) {
+        const Config = await config();
+        message('Es gibt einen Hinweis zu Barcode ' + barcode.value, {
+            title: Config.dialog.title, 
+            kind: 'warning',
+        });
+    }
 };
 
 const bringWindowToFront = async () => {
@@ -125,10 +135,7 @@ const processBarcode = async (binp = '') => {
 
 
 const speichereHinweise = async () => {
-    console.log('starte speichereHinweisex');
-
     if (!hinweise.value || hinweise.value === '') {
-        // showToast(false, 'Bitte Hinweise eingeben.');
         toast.add(getErrorToastMessage('Bitte Hinweise eingeben.'));
         return;
     }
@@ -144,9 +151,10 @@ const speichereHinweise = async () => {
         return;
     }
 
-    console.log('speichere hinweise', hinweise.value,  barcodeId.value, barcode.value);
+    const createdBy  = userRole.value === 'Produktion' ? userID : null;
+
     const { postHinweise } = await useMyFetch();
-    const result = await postHinweise(barcodeId.value, hinweise.value);
+    const result = await postHinweise(barcodeId.value, hinweise.value, createdBy);
     console.log('result', result);
 
     // wenn der result den barcode und die hinweise enthält, dann ist es erfolgreich
@@ -156,7 +164,6 @@ const speichereHinweise = async () => {
         toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweise.'));
     }
 };
-
 </script>
 
 <template>
