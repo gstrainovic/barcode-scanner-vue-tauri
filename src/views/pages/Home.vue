@@ -14,6 +14,7 @@ import { useToast } from "primevue/usetoast";
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/composables/helpers';
 import { message } from '@tauri-apps/plugin-dialog';
 import config from '@/composables/config';
+import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -35,11 +36,30 @@ listen('sendebarcode', (event) => {
 });
 
 onMounted(async () => {
-    const { getUsersLager, getHinweisVorlagen } = await useMyFetch();
+    const { getUsersLager } = await useMyFetch();
     usernames.value = await getUsersLager();
     hist.value = await invoke<[]>('load_history');
-    hinweisVorlagen.value = await getHinweisVorlagen();
 });
+
+const registerHinweisVorlagenShortcuts = async () => {
+    for (const vorlage of hinweisVorlagen.value) {
+        const hotkey = 'CommandOrControl+' + vorlage.strg;
+        // Deregistriere den Hotkey, falls er bereits registriert ist
+        await unregister(hotkey);
+
+        // Registriere den Hotkey
+        await register(hotkey, async (event) => {
+            if (event.state === "Released") {
+                if (vorlage.text < 2) {
+                    hinweis.value = '';
+                } else {
+                    hinweis.value = await marked.parse(vorlage.text) || '';
+                }
+                speichereHinweis();
+            }
+        });
+    }
+};
 
 const statusClass = (status: string) => {
     if (status.startsWith('@C03')) {
@@ -62,19 +82,16 @@ const displayStatus = (status: string) => {
     }
 };
 
-const ladeHinweise = async () => {
-    const { getHinweiseFromBarcode } = await useMyFetch();
-    const result = await getHinweiseFromBarcode(barcode.value);
-    console.log('result ladehinweise', result);
+const ladeHinweis = async () => {
+    const { getHinweisFromBarcode } = await useMyFetch();
+    const result = await getHinweisFromBarcode(barcode.value);
     if (!result?.id) {
         hinweis.value = '';
         return;
     }
     barcodeId.value = result.id;
-    console.log('barcodeId', barcodeId.value);
-    hinweis.value = await marked.parse(result.attributes.hinweise || '');
-
-    if (result.attributes.hinweise) {
+    hinweis.value = await marked.parse(result.attributes.hinweis || '');
+    if (result.attributes.hinweis) {
         const Config = await config();
         message('Es gibt einen Hinweis zu Barcode ' + barcode.value, {
             title: Config.dialog.title,
@@ -93,7 +110,6 @@ const bringWindowToFront = async () => {
 };
 
 const onToggleChangeVerpackeAlleine = (newValue: boolean) => {
-    console.log('ToggleSwitch geändert:', newValue);
     if (newValue) {
         team.value = [];
     }
@@ -105,20 +121,18 @@ const onSelectVorlageChange = async (event: any) => {
     } else {
         hinweis.value = await marked.parse(event.value) || '';
     }
-    speichereHinweise();
+    speichereHinweis();
 };
 
 const onToggleChangeHinweisUmgesetzt = (newValue: boolean) => {
-    console.log('ToggleSwitch geändert:', newValue);
     //   const teamUserNames = team.value.map((user) => user.username).join(', ');
     //   const userNameUndTeamUsernames = userName.value + (teamUserNames ? ' (' + teamUserNames + ')' : '');
     //   const nochNichtUmgesetzt = '<br>' + 'Hinweis noch nicht umgesetzt';
     //   const hinweisUmgesetzt = '<br>' + 'Hinweis umgesetzt am ' + new Date().toLocaleDateString('de-DE') + ' von ' + userNameUndTeamUsernames;
 
-    speichereHinweise();
+    speichereHinweis();
 
     if (newValue) {
-        // console.log(hinweisUmgesetzt);
         // Wenn der "Hinweis noch nicht umgesetzt" Text vorhanden ist, dann wird er entfernt
         // if (hinweis.value.includes(nochNichtUmgesetzt)) {
         //     hinweis.value = hinweis.value.replace(nochNichtUmgesetzt, '');
@@ -129,7 +143,6 @@ const onToggleChangeHinweisUmgesetzt = (newValue: boolean) => {
         //     hinweis.value = hinweis.value + hinweisUmgesetzt;
         // }
     } else {
-        // console.log(nochNichtUmgesetzt);
         // Wenn der "Hinweis umgesetzt" Text vorhanden ist, dann wird er entfernt
         // if (hinweis.value.includes(hinweisUmgesetzt)) {
         //     hinweis.value = hinweis.value.replace(hinweisUmgesetzt, '');
@@ -159,15 +172,13 @@ const processBarcode = async (binp = '') => {
 
     const lager_user_ids = team.value.map((user) => user.id);
 
-    const barcodeId = await invoke('process_barcode', {
+    await invoke('process_barcode', {
         barcode: barcode.value,
         uid: userID,
         jwt: userToken.value,
         luids: lager_user_ids,
         rolle: userRole.value,
     });
-
-    console.log('barcodeId', barcodeId);
 
     hist.value = await invoke<[]>('load_history');
 
@@ -181,14 +192,23 @@ const processBarcode = async (binp = '') => {
     } else {
         toast.add(getSuccessToastMessage('Barcode erfolgreich verarbeitet.'));
     }
-
-    ladeHinweise();
+    
+    ladeHinweis();
+    
+    if (userRole.value === 'Produktion') {
+        await ladeHinweisVorlagen();
+        registerHinweisVorlagenShortcuts();
+    }
 
     barcodeInput.value = '';
 };
 
+const ladeHinweisVorlagen = async () => {
+    const { getHinweisVorlagen } = await useMyFetch();
+    hinweisVorlagen.value = await getHinweisVorlagen();
+}
 
-const speichereHinweise = async () => {
+const speichereHinweis = async () => {
     if (!barcode.value || barcode.value === '') {
         toast.add(getErrorToastMessage('Bitte Barcode scannen.'));
         return;
@@ -201,22 +221,17 @@ const speichereHinweise = async () => {
     }
 
     const teamIds = team.value.map((user) => user.id);
-    console.log('teamIds', teamIds);
     const teamUndUserIds = teamIds.concat(userID);
-    console.log('teamUndUserIds', teamUndUserIds);
-
     const createdBy = userRole.value === 'Produktion' ? userID : null;
     const hinweisUmgesetztVon = hinweisUmgesetzt.value ? teamUndUserIds : [];
+    const { postHinweis } = await useMyFetch();
+    const result = await postHinweis(barcodeId.value, hinweis.value, createdBy, hinweisUmgesetztVon);
 
-    const { postHinweise } = await useMyFetch();
-    const result = await postHinweise(barcodeId.value, hinweis.value, createdBy, hinweisUmgesetztVon);
-    console.log('result xy', result);
-
-    // wenn der result den barcode und die hinweise enthält, dann ist es erfolgreich
-    if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweise == hinweis.value) {
-        toast.add(getSuccessToastMessage('Hinweise gespeichert.'));
+    // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
+    if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == hinweis.value) {
+        toast.add(getSuccessToastMessage('Hinweis gespeichert.'));
     } else {
-        toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweise.'));
+        toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweis.'));
     }
 };
 </script>
@@ -252,8 +267,8 @@ const speichereHinweise = async () => {
     </Fluid>
 
     <Fluid class="flex flex-col md:flex-row gap-4">
-        <div class="card flex flex-col w-1/2 mt-4">
-            <section v-if="barcode">
+        <div class="card flex flex-col w-2/6 mt-1 " v-if="barcode">
+            <section>
                 <div class="font-semibold text-xl mb-6 flex items-center justify-between">
                     <div>
                         <i class="pi pi-exclamation-triangle"></i> Hinweis zu {{ barcode }}
@@ -269,26 +284,47 @@ const speichereHinweise = async () => {
                         </Select>
                     </div>
                 </div>
-                <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '360px' }" />
+                <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '260px' }" />
                 <br>
                 <Button v-if="barcode" icon="pi pi-send" label="Speichern" class="w-full"
-                    @click="speichereHinweise()"></Button>
+                    @click="speichereHinweis()"></Button>
             </section>
         </div>
 
-        <div class="flex flex-col w-1/2 mt-4">
+        <div class="flex flex-col w-1/6 mt-1" v-if="userRole === 'Produktion' && barcode">
             <div class="table-container">
-                <DataTable :value="hist" tableStyle="min-width: 50rem" :sortField="'timestamp'" :sortOrder="-1"
+                <DataTable :value="hinweisVorlagen"  :sortField="'nummer'"
+                    :sortOrder="+1" :paginator="false" :rows="10">
+                    <template #header>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-xl font-bold">Vorlagen</span>
+                        </div>
+                    </template>
+                    <Column field="titel" header="Titel" sortable style="width: 70%;font-size: 0.9rem;">
+                    </Column>
+                    <Column field="strg" header="STRG +" sortable style="width: 30%;font-size: 0.9rem"></Column>
+                </DataTable>
+            </div>
+        </div>
+
+        <div class="flex flex-col w-3/6 mt-1">
+            <div class="table-container">
+                <DataTable :value="hist"  :sortField="'timestamp'" :sortOrder="-1"
                     paginator :rows="4">
-                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.9rem;">
+                    <template #header>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-xl font-bold">Verlauf</span>
+                        </div>
+                    </template>
+                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 1rem;">
                         <template #body="slotProps">
                             <span :class="statusClass(slotProps.data.status)">{{
                                 displayStatus(slotProps.data.status)
-                                }}</span>
+                            }}</span>
                         </template>
                     </Column>
-                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.9rem"></Column>
-                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.9rem"></Column>
+                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1rem"></Column>
+                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1rem"></Column>
                 </DataTable>
             </div>
         </div>

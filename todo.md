@@ -13,10 +13,11 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Lager Users werden auch gesendet, wenn ausgewählt
 * [x] Ausnahmen holen und anwenden
 * [x] Selfupdater
-* [x] Hinweise Produktion / Lager
+* [x] Hinweis Produktion / Lager
 * [x] Darf nicht zweimal gestartet werden
 * [x] Hinweis umgsetzt toggle
 * [x] Hinweis Vorlagen
+* [x] Hotkey für Vorlagen
 * [ ] Beim Starten sqlite kürzen auf 10'000 Barcodes Einträge, verhindert zu grosse Dateien
 * [ ] Sync
     - [ ] Beim Starten von Online zu sqlite synchronisieren

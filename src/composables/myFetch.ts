@@ -32,11 +32,11 @@ export const useMyFetch = async () => {
         }
     };
 
-    const postHinweise = async (id: string, hinweise: string, erstelltVon: Number | null = null, hinweisUmgesetztVon: Number[]) => {
+    const postHinweis = async (id: string, hinweis: string, erstelltVon: Number | null = null, hinweisUmgesetztVon: Number[]) => {
         if (isOnline) {
             const barcodes = client.collection('barcodes');
     
-            const updateData: Record<string, any> = { hinweise };
+            const updateData: Record<string, any> = { hinweis: hinweis };
             if (erstelltVon !== null && erstelltVon !== undefined) {
                 updateData.hinweis_erstellt_von = erstelltVon;
             }
@@ -48,7 +48,7 @@ export const useMyFetch = async () => {
         }
     };
 
-    const getHinweiseFromBarcode = async (barcode: string) => {
+    const getHinweisFromBarcode = async (barcode: string) => {
         if (isOnline) {
             const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1&sort=id:asc');
             return response.data[0];
@@ -61,11 +61,10 @@ export const useMyFetch = async () => {
         let result = [];
         if (isOnline) {
             const response = await fetchWithAuth('hinweis-vorlagen');
-            console.log('Hinweis Vorlagen:', response);
             const attributes = response.data.map((item: { attributes: any; }) => item.attributes);
 
             // Füge 'Keine Vorlage' als erstes Element hinzu
-            const keinHinweis = { "text": "-", "createdAt": "2025-05-11T09:19:21.238Z", "updatedAt": "2025-05-11T09:21:12.608Z", "titel": "Kein Hinweis" };
+            const keinHinweis = { "strg": 0, "text": "-", "createdAt": "2025-05-11T09:19:21.238Z", "updatedAt": "2025-05-11T09:21:12.608Z", "titel": "Kein Hinweis" };
             attributes.unshift(keinHinweis);
 
             result = Array.isArray(attributes) ? attributes : [];
@@ -96,8 +95,8 @@ export const useMyFetch = async () => {
 
     return {
         getUsersLager,
-        getHinweiseFromBarcode,
-        postHinweise,
+        getHinweisFromBarcode,
+        postHinweis: postHinweis,
         getHinweisVorlagen,
     };
 }

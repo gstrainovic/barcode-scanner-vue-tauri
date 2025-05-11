@@ -29,7 +29,6 @@ export const getWarningToastMessage = (message: string) => {
 
 export const getErrorToastMessage = (message: string) => {
     const err = privateGetToastMessage('error', message);
-    console.log('Error Toast:', err);
     return err;
 };
 
