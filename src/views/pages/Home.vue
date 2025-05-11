@@ -266,6 +266,17 @@ const speichereHinweis = async () => {
         toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweis.'));
     }
 };
+
+const setHinweis = async (event: any) => {
+    console.log('setHinweis', event);
+    if (event.text && event.text.length > 2) {
+        hinweis.value = await marked.parse(event.text);
+    } else {
+        hinweis.value = '';
+    }
+    selectedVorlage.value = event.text;
+    await speichereHinweis();
+};
 </script>
 
 <template>
@@ -300,13 +311,22 @@ const speichereHinweis = async () => {
 
             <div class="flex flex-col" v-if="userRole === 'Produktion'">
                 <div class="table-container">
-                    <DataTable :value="hinweisVorlagen" :sortField="'strg'" :sortOrder="+1" :paginator="false" :rows="10">
+                    <DataTable :value="hinweisVorlagen" :sortField="'strg'" :sortOrder="+1" :paginator="false"
+                        :rows="10">
                         <template #header>
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <span class="text-xl font-bold">Vorlagen</span>
                             </div>
                         </template>
                         <Column field="titel" header="Titel" sortable style="width: 60%;font-size: 0.8rem;">
+                          <template #body="slotProps">
+                            <a 
+                              href="javascript:void(0)" 
+                              class="text-blue-500 hover:underline cursor-pointer" 
+                              @click="setHinweis(slotProps.data)">
+                              {{ slotProps.data.titel }}
+                            </a>
+                          </template>
                         </Column>
                         <Column field="strg" header="STRG +" sortable style="width: 40%;font-size: 0.8rem"></Column>
                     </DataTable>
@@ -353,7 +373,7 @@ const speichereHinweis = async () => {
                         <template #body="slotProps">
                             <span :class="statusClass(slotProps.data.status)">{{
                                 displayStatus(slotProps.data.status)
-                            }}</span>
+                                }}</span>
                         </template>
                     </Column>
                     <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.7rem"></Column>
