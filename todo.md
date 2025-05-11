@@ -15,6 +15,8 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Selfupdater
 * [x] Hinweise Produktion / Lager
 * [x] Darf nicht zweimal gestartet werden
+* [x] Hinweis umgsetzt toggle
+* [x] Hinweis Vorlagen
 * [ ] Beim Starten sqlite kürzen auf 10'000 Barcodes Einträge, verhindert zu grosse Dateien
 * [ ] Sync
     - [ ] Beim Starten von Online zu sqlite synchronisieren

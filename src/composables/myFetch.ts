@@ -57,6 +57,24 @@ export const useMyFetch = async () => {
         }
     };
 
+    const getHinweisVorlagen = async () => {
+        let result = [];
+        if (isOnline) {
+            const response = await fetchWithAuth('hinweis-vorlagen');
+            console.log('Hinweis Vorlagen:', response);
+            const attributes = response.data.map((item: { attributes: any; }) => item.attributes);
+
+            // Füge 'Keine Vorlage' als erstes Element hinzu
+            const keinHinweis = { "text": "-", "createdAt": "2025-05-11T09:19:21.238Z", "updatedAt": "2025-05-11T09:21:12.608Z", "titel": "Kein Hinweis" };
+            attributes.unshift(keinHinweis);
+
+            result = Array.isArray(attributes) ? attributes : [];
+        } else {
+            throw new Error('Offline mode not implemented yet!');
+        }
+        return result;
+    };
+
     const getUsersLager = async () => {
         let result = [];
         if (isOnline) {
@@ -80,5 +98,6 @@ export const useMyFetch = async () => {
         getUsersLager,
         getHinweiseFromBarcode,
         postHinweise,
+        getHinweisVorlagen,
     };
 }
