@@ -15,7 +15,6 @@ import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } 
 import { message } from '@tauri-apps/plugin-dialog';
 import config from '@/composables/config';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
-import { event } from '@tauri-apps/api';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -49,22 +48,10 @@ onMounted(async () => {
 const registerHinweisVorlagenShortcuts = async () => {
     for (const vorlage of hinweisVorlagen.value) {
         const hotkey = 'CommandOrControl+' + vorlage.strg;
-        // Deregistriere den Hotkey, falls er bereits registriert ist
         await unregister(hotkey);
 
-        // Registriere den Hotkey
         await register(hotkey, async (event) => {
             if (event.state === "Released") {
-                console.log('Hotkey released:', hotkey);
-                console.log('Vorlage:', vorlage);
-
-                // if (hotkey === 'CommandOrControl+0') {
-                //     hinweis.value = '';
-                // } else {
-                //     hinweis.value = await marked.parse(vorlage.text) || '';
-                // }
-                // selectedVorlage.value = vorlage.text;
-
                 await setHinweis(vorlage);
                 await speichereHinweis();
             }
@@ -127,37 +114,6 @@ const onToggleChangeVerpackeAlleine = (newValue: boolean) => {
 };
 
 
-const onToggleChangeHinweisUmgesetzt = (newValue: boolean) => {
-    //   const teamUserNames = team.value.map((user) => user.username).join(', ');
-    //   const userNameUndTeamUsernames = userName.value + (teamUserNames ? ' (' + teamUserNames + ')' : '');
-    //   const nochNichtUmgesetzt = '<br>' + 'Hinweis noch nicht umgesetzt';
-    //   const hinweisUmgesetzt = '<br>' + 'Hinweis umgesetzt am ' + new Date().toLocaleDateString('de-DE') + ' von ' + userNameUndTeamUsernames;
-
-    speichereHinweis();
-
-    if (newValue) {
-        // Wenn der "Hinweis noch nicht umgesetzt" Text vorhanden ist, dann wird er entfernt
-        // if (hinweis.value.includes(nochNichtUmgesetzt)) {
-        //     hinweis.value = hinweis.value.replace(nochNichtUmgesetzt, '');
-        // }
-
-        // // Wenn es noch kein "Hinweis umgesetzt" gibt, dann wird der Text hinzugefügt
-        // if (!hinweis.value.includes(hinweisUmgesetzt)) {
-        //     hinweis.value = hinweis.value + hinweisUmgesetzt;
-        // }
-    } else {
-        // Wenn der "Hinweis umgesetzt" Text vorhanden ist, dann wird er entfernt
-        // if (hinweis.value.includes(hinweisUmgesetzt)) {
-        //     hinweis.value = hinweis.value.replace(hinweisUmgesetzt, '');
-        // }
-
-        // // Wenn es noch kein "Hinweis noch nicht umgesetzt" gibt, dann wird der Text hinzugefügt
-        // if (!hinweis.value.includes(nochNichtUmgesetzt)) {
-        //     hinweis.value = hinweis.value  + nochNichtUmgesetzt;
-        // }
-    }
-};
-
 const checkBarcodeMatchWithVorlageBarcode = async (barcodeInput: string) => {
     if (hinweisVorlagen.value.length > 0 && barcodeInput) {
         const barcodeVorlage = hinweisVorlagen.value.find((vorlage) => vorlage.barcode === barcodeInput);
@@ -218,10 +174,6 @@ const processBarcode = async (binp = '') => {
     }
 
     ladeHinweis();
-
-
-
-
 };
 
 const ladeHinweisVorlagen = async () => {
@@ -334,7 +286,7 @@ const setHinweis = async (event: any) => {
                             <i class="pi pi-exclamation-triangle"></i> Hinweis zu: {{ barcode }}
                         </div>
                         <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
-                            <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="onToggleChangeHinweisUmgesetzt"
+                            <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis"
                                 inputId="hinweis_umgesetzt" name="size" value="Small" size="small" />
                             <label for="hinweis_umgesetzt">Beachtet</label>
                         </div>
