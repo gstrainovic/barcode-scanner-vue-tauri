@@ -18,6 +18,9 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Hinweis umgsetzt toggle
 * [x] Hinweis Vorlagen
 * [x] Hotkey für Vorlagen
+* [x] Lager Users bleiben gespeichert beim F5 Refresh
+* [ ] Toast und Notification oder nur Notification verwenden?
+* [ ] Mit Ziffernblock auch CTRL + Vorlagen laden
 * [ ] Beim Starten sqlite kürzen auf 10'000 Barcodes Einträge, verhindert zu grosse Dateien
 * [ ] Sync
     - [ ] Beim Starten von Online zu sqlite synchronisieren
@@ -27,6 +30,5 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
         - [ ] Ausnahmen
     - [ ] Offline fähig
     - [ ] Wenn Online Barcodes synchronisieren
-* [x] Lager Users bleiben gespeichert beim F5 Refresh
 * [ ] Alle Versionen hochladen in package.json und alle cargo.toml
 

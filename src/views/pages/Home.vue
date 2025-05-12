@@ -183,7 +183,7 @@ const ladeHinweisVorlagen = async () => {
 
 const speichereHinweis = async () => {
     if (!barcode.value || barcode.value === '') {
-        toast.add(getErrorToastMessage('Bitte Barcode scannen.'));
+        toast.add(getErrorToastMessage('Bitte Barcode zuerst scannen.'));
         return;
     }
 
