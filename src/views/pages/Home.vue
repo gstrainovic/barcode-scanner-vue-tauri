@@ -14,7 +14,7 @@ import { useToast } from "primevue/usetoast";
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/composables/helpers';
 import { message } from '@tauri-apps/plugin-dialog';
 import config from '@/composables/config';
-import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
+import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { sendNotification } from '@tauri-apps/plugin-notification';
 
 const teamStore = useTeamStore();
@@ -47,11 +47,20 @@ onMounted(async () => {
 });
 
 const registerHinweisVorlagenShortcuts = async () => {
+    // Erst abmelden, dann beide Varianten registrieren
+    await unregisterAll();
     for (const vorlage of hinweisVorlagen.value) {
-        const hotkey = 'CommandOrControl+' + vorlage.strg;
-        await unregister(hotkey);
+        const hotkeyMain = 'CommandOrControl+' + vorlage.strg; // z.B. CommandOrControl+1
+        const hotkeyNumpad = 'CommandOrControl+Numpad' + vorlage.strg; // z.B. CommandOrControl+Numpad1
 
-        await register(hotkey, async (event) => {
+
+        await register(hotkeyMain, async (event) => {
+            if (event.state === "Released") {
+                await setHinweis(vorlage);
+                await speichereHinweis();
+            }
+        });
+        await register(hotkeyNumpad, async (event) => {
             if (event.state === "Released") {
                 await setHinweis(vorlage);
                 await speichereHinweis();
@@ -206,11 +215,21 @@ const speichereHinweis = async () => {
     const { postHinweis } = await useMyFetch();
     const result = await postHinweis(barcodeId.value, hinweis.value, createdBy, hinweisUmgesetztVon);
 
+    const Config = await config();
+
     // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
     if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == hinweis.value) {
         toast.add(getSuccessToastMessage('Hinweis gespeichert.'));
+        sendNotification({
+            title: Config.dialog.title,
+            body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
+        });
     } else {
         toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweis.'));
+        sendNotification({
+            title: Config.dialog.title,
+            body: 'Fehler beim Speichern der Hinweis.',
+        });
     }
 };
 
