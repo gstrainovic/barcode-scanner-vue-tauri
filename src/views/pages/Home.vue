@@ -15,6 +15,7 @@ import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } 
 import { message } from '@tauri-apps/plugin-dialog';
 import config from '@/composables/config';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
+import { sendNotification } from '@tauri-apps/plugin-notification';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -137,8 +138,7 @@ const processBarcode = async (binp = '') => {
 
     barcode.value = barcodeValue;
     if (!barcode.value || barcode.value === '') {
-        console.error('Fehler: Barcode ist nicht definiert.', barcode.value);
-        toast.add(getErrorToastMessage('Bitte Barcode scannen.'));
+        toast.add(getErrorToastMessage('Bitte Barcode scannen'));
         return;
     }
     barcodeInput.value = '';
@@ -183,7 +183,13 @@ const ladeHinweisVorlagen = async () => {
 
 const speichereHinweis = async () => {
     if (!barcode.value || barcode.value === '') {
-        toast.add(getErrorToastMessage('Bitte Barcode zuerst scannen.'));
+        const Config = await config();
+        const message = 'Bitte Barcode zuerst scannen';
+        toast.add(getErrorToastMessage(message));
+        sendNotification({
+            title: Config.dialog.title,
+            body: message,
+        });
         return;
     }
 

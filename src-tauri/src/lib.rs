@@ -98,7 +98,7 @@ fn start_looper(app: AppHandle) {
             .find(|device| device.name.contains("VID_0483") && device.name.contains("PID_5750"))
             .unwrap_or_else(|| {
                 let message =
-                    "Bitte stecken Sie den Scanner ein und starten Sie die Anwendung neu.";
+                    "Bitte Barcode Scanner anschließen und einschalten";
                 eprintln!("{}", message);
 
                 app_clone
@@ -183,8 +183,8 @@ fn key_id_to_char(key_id: &KeyId) -> Option<char> {
 }
 
 #[tauri::command]
-fn process_barcode(barcode: &str, uid: i32, jwt: String, luids: Vec<i32>, rolle: &str) {
-    sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle);
+fn process_barcode(barcode: &str, uid: i32, jwt: String, luids: Vec<i32>, rolle: &str, app: tauri::AppHandle) {
+    sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle, &app);
 }
 
 #[tauri::command]

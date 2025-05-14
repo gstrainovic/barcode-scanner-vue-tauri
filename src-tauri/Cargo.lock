@@ -4294,12 +4294,12 @@ dependencies = [
  "config",
  "diesel",
  "diesel_migrations",
- "notify-rust",
  "req",
  "rusqlite",
  "serde",
  "serde_json",
  "tauri",
+ "tauri-plugin-notification",
 ]
 
 [[package]]

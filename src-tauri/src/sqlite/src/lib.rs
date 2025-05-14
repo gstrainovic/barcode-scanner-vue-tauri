@@ -72,7 +72,7 @@ pub fn create_history<'a>(status: &'a str, barcode: &'a str, nuser_id: &'a i32, 
 
     // println!("Debug: {:?}", new_history);
 
-    let status = diesel::insert_into(history::table)
+    let _ = diesel::insert_into(history::table)
         .values(&new_history)
         .execute(conn);
 

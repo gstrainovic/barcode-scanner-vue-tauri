@@ -2,12 +2,13 @@ use crate::{
     create_history, get_ausnahmen as get_ausnahmen_sqlite, get_leitcodes_sql,
     get_settings as get_settings_sqlite, is_barcode_duplicate_sqlite, update_leitcodes,
 };
-use notify_rust::Notification;
 use req::{
     check_duplicate_barcode::is_barcode_duplicate, get_ausnahmen::get_ausnahmen,
     get_leitcodes::get_leitcodes, get_leitcodes::IdAtrBuchstaben, get_leitcodes::Leitcode,
     get_leitcodes::LeitcodeBuchstabe, get_settings::get_settings,
 };
+
+use tauri_plugin_notification::NotificationExt;
 
 static mut ERROR_STATUS: super::errors::Status = super::errors::Status::Ok;
 
@@ -25,6 +26,7 @@ pub fn history_add(
     nuser_id: i32,
     offline: bool,
     lager_user_ids: &Vec<i32>,
+    app: &tauri::AppHandle,
 ) {
     unsafe { ERROR_STATUS = status.status };
 
@@ -50,10 +52,13 @@ pub fn history_add(
         .replace("@C03", "")
         .replace("@C00", "");
 
-    Notification::new()
-        .summary(&format!("{} {} ist {}", prefix_warn_icon, barcode_c, new_status_message))
-        .show()
-        .unwrap();
+    app.notification()
+            .builder()
+            .title(config::DIALOG_TITLE)
+            .body(&format!("{} {} ist {}", prefix_warn_icon, barcode_c, new_status_message))
+            .show()
+            .unwrap();
+
 }
 
 pub fn process_barcode(
@@ -62,6 +67,7 @@ pub fn process_barcode(
     jwt: String,
     lager_user_ids: &Vec<i32>,
     rolle: &str,
+    app: &tauri::AppHandle,
 ) {
     let offline = jwt.is_empty();
 
@@ -94,6 +100,7 @@ pub fn process_barcode(
                     user_id,
                     offline,
                     lager_user_ids,
+                    app,
                 );
                 return;
             }
@@ -107,6 +114,7 @@ pub fn process_barcode(
             user_id,
             offline,
             lager_user_ids,
+            app,
         );
         return;
     }
@@ -151,6 +159,7 @@ pub fn process_barcode(
                         user_id,
                         offline,
                         lager_user_ids,
+                        app,
                     );
                     return;
                 }
@@ -216,7 +225,7 @@ pub fn process_barcode(
             super::errors::no_numbers()
         };
 
-        history_add(err, &barcode_new, user_id, offline, lager_user_ids);
+        history_add(err, &barcode_new, user_id, offline, lager_user_ids, app);
     } else {
         history_add(
             super::errors::bereits_gesendet(),
@@ -224,6 +233,7 @@ pub fn process_barcode(
             user_id,
             offline,
             lager_user_ids,
+            app,
         );
     }
 }
