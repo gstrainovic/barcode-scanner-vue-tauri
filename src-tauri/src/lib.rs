@@ -20,16 +20,12 @@ fn check_single_instance() {
     if hwnd_of_barcode_scanner != std::ptr::null_mut() {
         let message = "Die Anwendung ist bereits geöffnet.";
         println!("{}", message);
-
         let _ = DialogBuilder::message()
             .set_title(config::DIALOG_TITLE)
             .set_text(message)
             .alert()
             .show();
-
         std::process::exit(0);
-    } else {
-        println!("No other instance found.");
     }
 }
 
