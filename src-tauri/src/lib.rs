@@ -63,7 +63,7 @@ fn update(app: AppHandle) {
         if let Ok(status) = update.update() {
             if status.updated() {
                 let message = format!(
-                    "Aktualisiert zu {}. Bitte barcode_scanner.exe nochmals starten",
+                    "Aktualisiert zu {}. Anwendung wird neu gestartet.",
                     status.version()
                 );
 
@@ -102,14 +102,23 @@ fn start_looper(app: AppHandle) {
                     "Bitte Barcode Scanner anschließen und einschalten";
                 eprintln!("{}", message);
 
-                app_clone
+                let ask = app_clone
                     .dialog()
                     .message(message)
                     .kind(tauri_plugin_dialog::MessageDialogKind::Error)
+                    .buttons(tauri_plugin_dialog::MessageDialogButtons::OkCancel)
                     .title(config::DIALOG_TITLE)
                     .blocking_show();
 
-                std::process::exit(1);
+                match ask {
+                    true => {
+                        app.restart();
+                    }
+                    false => {
+                        std::process::exit(0);
+                    }
+                }
+
             });
         manager.filter_devices(vec![keyboard.name.clone()]);
         let mut barcode_buffer = String::new();
