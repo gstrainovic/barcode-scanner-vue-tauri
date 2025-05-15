@@ -73,7 +73,8 @@ fn update(app: AppHandle) {
                     .title(config::DIALOG_TITLE)
                     .blocking_show();
 
-                std::process::exit(0);
+                app.restart();
+
             } else {
                 let message = "Keine neuen Updates verfügbar.";
                 println!("{}", message);
