@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
+// import { useMyFetch, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/myFetch';
 
 const router = useRouter();
 const email = ref('');
@@ -17,6 +18,18 @@ const { isDarkTheme } = useLayout();
 const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
+        // const { protokolliereArbeitszeit } = await useMyFetch();
+        const userId = authStore.userId;
+        console.log('User ID:', userId);
+        // const typ = ZeiterfassungTypEnum.Login;
+        // console.log('Login Type:', typ);
+        if (userId) {
+            // await protokolliereArbeitszeit(ZeiterfassungTypEnum.Login, +userId, LoginOrLogoutEnum.Login);
+        } else {
+            console.error('User ID is not available');
+        }
+
+
         if (userRole.value === 'Lager') {
             router.push('/team');
         } else {

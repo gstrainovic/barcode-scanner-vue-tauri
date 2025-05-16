@@ -5,6 +5,19 @@ const { userToken } = authStore;
 import { onlineCheck } from '@/composables/helpers';
 import { strapi } from '@strapi/client';
 
+export enum ZeiterfassungTypEnum {
+    Login = "login",
+    Logout = "logout",
+    Nutzerwechsel = "nutzerwechsel",
+    AppSchliessung = "app_schliessung"
+}
+
+export enum LoginOrLogoutEnum {
+    Login = "login",
+    Logout = "logout"
+}
+
+
 export const useMyFetch = async () => {
     const token = userToken;
     const configData = await config();
@@ -15,7 +28,7 @@ export const useMyFetch = async () => {
         auth: token,
     });
 
-    const fetchWithAuth: FetchWithAuth = async (endpoint, body = null) => {
+    const fetchWithAuth = async (endpoint: string, body = null) => {
         try {
             const response = await fetch(configData.api.strapi + endpoint, {
                 headers: {
@@ -35,12 +48,12 @@ export const useMyFetch = async () => {
     const postHinweis = async (id: string, hinweis: string, erstelltVon: Number | null = null, hinweisUmgesetztVon: Number[]) => {
         if (isOnline) {
             const barcodes = client.collection('barcodes');
-    
+
             const updateData: Record<string, any> = { hinweis: hinweis };
             if (erstelltVon !== null && erstelltVon !== undefined) {
                 updateData.hinweis_erstellt_von = erstelltVon;
             }
-            
+
             updateData.hinweis_umgesetzt_von = hinweisUmgesetztVon;
 
             const updatedBarcode = await barcodes.update(id, updateData);
@@ -78,7 +91,7 @@ export const useMyFetch = async () => {
             // result = await window.pywebview.api.get_lager_users();
             throw new Error('Offline mode not implemented yet!');
             // TODO: Implement offline mode for getUsersLager
-        }   
+        }
         const userNameIds = result.map((user: { username: any; id: any; }) => {
             return {
                 username: user.username,
@@ -88,10 +101,49 @@ export const useMyFetch = async () => {
         return await userNameIds;
     }
 
+    const protokolliereArbeitszeit = async (typ: ZeiterfassungTypEnum, userId: number, login_or_logout: LoginOrLogoutEnum, lagerUserIds : number[] = []) => {
+        const configData = await config();
+        const url = configData.api.strapi + 'zeit-erfassungen';
+        console.log('Protokolliere Arbeitszeit:', typ, userId, login_or_logout, lagerUserIds, url);
+
+        // const body = {
+        //     data: {
+        //         mitarbeiter: userId,
+        //         typ,
+        //         zeitpunkt: new Date().toISOString(),
+        //         // lager_mitarbeiter: lagerUserIds,
+        //         login_or_logout,
+        //     }
+        // };
+
+        // console.log('Protokolliere Arbeitszeit Body:', body);
+
+        const jwt = token;
+        const result = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwt}`,
+            },
+            body: JSON.stringify({
+                data: {
+                    mitarbeiter: userId,
+                    typ,
+                    zeitpunkt: new Date().toISOString(),
+                    // lager_mitarbeiter: lagerUserIds,
+                    login_or_logout,
+                }
+            }),
+        });
+        console.log('Protokolliere Arbeitszeit:', result);
+    } 
+
+
     return {
         getUsersLager,
         getHinweisFromBarcode,
         postHinweis,
         getHinweisVorlagen,
+        protokolliereArbeitszeit,
     };
 }
