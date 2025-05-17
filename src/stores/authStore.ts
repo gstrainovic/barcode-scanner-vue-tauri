@@ -3,10 +3,10 @@ import config from '../composables/config';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: sessionStorage.getItem('token') || undefined, // Token aus sessionStorage laden
-    rolle: sessionStorage.getItem('rolle') || undefined, // Rolle aus sessionStorage laden
-    username: sessionStorage.getItem('username') || undefined, // Benutzername aus sessionStorage laden
-    id: sessionStorage.getItem('id') || undefined, // Benutzername aus sessionStorage laden
+    token: '' as string | null,
+    rolle: '' as string | null,
+    username: '' as string | null,
+    id: 0 as number | null,
   }),
   getters: {
     userRole: (state) => state.rolle,
@@ -32,27 +32,22 @@ export const useAuthStore = defineStore('auth', {
 
       if (data.jwt) {
         this.token = data.jwt;
-        this.rolle = data.user.rolle; // Rolle speichern
-        this.username = data.user.username; // Benutzername speichern
+        this.rolle = data.user.rolle;
+        this.username = data.user.username;
         this.id = data.user.id;
-        sessionStorage.setItem('token', data.jwt); // Token im sessionStorage speichern
-        sessionStorage.setItem('rolle', data.user.rolle); // Rolle im sessionStorage speichern
-        sessionStorage.setItem('username', data.user.username); // Benutzername im sessionStorage speichern
-        sessionStorage.setItem('id', data.user.id); // Benutzername im sessionStorage speichern
         return true;
       } else {
         return false;
       }
     },
     removeToken() {
-      this.token = undefined;
-      this.rolle = undefined;
-      this.username = undefined;
-      this.id = undefined;
-      sessionStorage.removeItem('token'); // Token aus sessionStorage entfernen
-      sessionStorage.removeItem('rolle'); // Rolle aus sessionStorage entfernen
-      sessionStorage.removeItem('username'); // Benutzername aus sessionStorage entfernen
-      sessionStorage.removeItem('id'); // Benutzername aus sessionStorage entfernen
+      this.token = null;
+      this.rolle = null;
+      this.username = null;
+      this.id = null;
     },
+  },
+  persist: {
+    storage: sessionStorage
   },
 });
