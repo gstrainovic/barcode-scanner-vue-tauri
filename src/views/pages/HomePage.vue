@@ -101,6 +101,9 @@ const displayStatus = (status: string) => {
 const ladeHinweis = async () => {
     const { getHinweisFromBarcode } = await useMyFetch();
     const result = await getHinweisFromBarcode(barcode.value);
+    const umgesetzt : boolean = result.attributes.hinweis_umgesetzt_von.data.length > 0;
+    hinweisUmgesetzt.value= umgesetzt;
+
     if (!result?.id) {
         hinweis.value = '';
         return;
@@ -144,6 +147,20 @@ const checkBarcodeMatchWithVorlageBarcode = async (barcodeInput: string) => {
 };
 
 const processBarcode = async (binp = '') => {
+    // Falls es einen Hinweis gibt, muss dieser zuerst Beachtet werden
+    if (hinweis.value && hinweis.value !== '' && hinweisUmgesetzt.value === false) {
+        const Config = await config();
+        const message = 'Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
+        toast.add(getErrorToastMessage(message));
+        sendNotification({
+            title: Config.dialog.title,
+            body: message,
+        });
+        barcodeInput.value = '';
+        return;
+    }
+
+
     selectedVorlage.value = '';
     const barcodeValue = binp || barcodeInput.value;
     const barcodeMatch = await checkBarcodeMatchWithVorlageBarcode(barcodeValue);
@@ -231,6 +248,7 @@ const speichereHinweis = async () => {
             title: Config.dialog.title,
             body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
         });
+        hinweisUmgesetzt.value = false; // Reset the toggle after saving
     } else {
         toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweis.'));
         sendNotification({
