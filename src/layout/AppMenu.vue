@@ -3,7 +3,19 @@ import { ref } from 'vue';
 
 import AppMenuItem from './AppMenuItem.vue';
 
-const model = ref([
+// Extend the menu item type to include optional 'separator'
+interface AppMenuItemType {
+    label?: string;
+    icon?: string;
+    to?: string;
+    url?: string;
+    target?: string;
+    class?: string;
+    items?: AppMenuItemType[];
+    separator?: boolean;
+}
+
+const model = ref<AppMenuItemType[]>([
     {
         label: 'Home',
         items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
@@ -120,7 +132,7 @@ const model = ref([
 <template>
     <ul class="layout-menu">
         <template v-for="(item, i) in model" :key="item">
-            <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
+            <app-menu-item v-if="!item.separator" :item="item" :parentItemKey="null" :index="i" :root="true"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
     </ul>

@@ -8,7 +8,15 @@ const layoutConfig = reactive({
     menuMode: 'static'
 });
 
-const layoutState = reactive({
+const layoutState = reactive<{
+    staticMenuDesktopInactive: boolean;
+    overlayMenuActive: boolean;
+    profileSidebarVisible: boolean;
+    configSidebarVisible: boolean;
+    staticMenuMobileActive: boolean;
+    menuHoverActive: boolean;
+    activeMenuItem: string | null;
+}>({
     staticMenuDesktopInactive: false,
     overlayMenuActive: false,
     profileSidebarVisible: false,
@@ -19,23 +27,25 @@ const layoutState = reactive({
 });
 
 export function useLayout() {
-    const setPrimary = (value) => {
+    const setPrimary = (value: string) => {
         layoutConfig.primary = value;
     };
 
-    const setSurface = (value) => {
+    const setSurface = (value: null) => {
         layoutConfig.surface = value;
     };
 
-    const setPreset = (value) => {
+    const setPreset = (value: string) => {
         layoutConfig.preset = value;
     };
 
-    const setActiveMenuItem = (item) => {
-        layoutState.activeMenuItem = item.value || item;
+    type MenuItem = { value: string } | string;
+
+    const setActiveMenuItem = (item: MenuItem) => {
+        layoutState.activeMenuItem = typeof item === 'object' && 'value' in item ? item.value : item;
     };
 
-    const setMenuMode = (mode) => {
+    const setMenuMode = (mode: string) => {
         layoutConfig.menuMode = mode;
     };
 
@@ -46,7 +56,7 @@ export function useLayout() {
             return;
         }
 
-        document.startViewTransition(() => executeDarkModeToggle(event));
+        document.startViewTransition(() => executeDarkModeToggle());
     };
 
     const executeDarkModeToggle = () => {

@@ -4,6 +4,7 @@ const authStore = useAuthStore();
 const { userToken } = authStore;
 import { onlineCheck } from '@/composables/helpers';
 import { strapi } from '@strapi/client';
+import { User } from '@/interfaces';
 
 export enum ZeiterfassungTypEnum {
     Login = "login",
@@ -21,7 +22,7 @@ export enum LoginOrLogoutEnum {
 export const useMyFetch = async () => {
     const token = userToken;
     const configData = await config();
-    const isOnline: Boolean = await onlineCheck();
+    const isOnline: boolean = await onlineCheck();
 
     const client = strapi({
         baseURL: configData.api.strapi,
@@ -45,11 +46,11 @@ export const useMyFetch = async () => {
         }
     };
 
-    const postHinweis = async (id: string, hinweis: string, erstelltVon: Number | null = null, hinweisUmgesetztVon: Number[]) => {
+    const postHinweis = async (id: string, hinweis: string, erstelltVon: number | null = null, hinweisUmgesetztVon: number[]) => {
         if (isOnline) {
             const barcodes = client.collection('barcodes');
 
-            const updateData: Record<string, any> = { hinweis: hinweis };
+            const updateData: { hinweis: string; hinweis_erstellt_von?: number; hinweis_umgesetzt_von?: number[] } = { hinweis: hinweis };
             if (erstelltVon !== null && erstelltVon !== undefined) {
                 updateData.hinweis_erstellt_von = erstelltVon;
             }
@@ -74,7 +75,8 @@ export const useMyFetch = async () => {
         let result = [];
         if (isOnline) {
             const response = await fetchWithAuth('hinweis-vorlagen?sort=strg:asc');
-            const attributes = response.data.map((item: { attributes: any; }) => item.attributes);
+            type HinweisVorlage = { attributes: { [key: string]: unknown } };
+            const attributes = response.data.map((item: HinweisVorlage) => item.attributes);
             result = Array.isArray(attributes) ? attributes : [];
         } else {
             throw new Error('Offline mode not implemented yet!');
@@ -92,7 +94,8 @@ export const useMyFetch = async () => {
             throw new Error('Offline mode not implemented yet!');
             // TODO: Implement offline mode for getUsersLager
         }
-        const userNameIds = result.map((user: { username: any; id: any; }) => {
+
+        const userNameIds = result.map((user: User) => {
             return {
                 username: user.username,
                 id: user.id,

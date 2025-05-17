@@ -4,7 +4,7 @@ import AppConfigurator from './AppConfigurator.vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { getActivePinia } from "pinia"
+// import { getActivePinia } from "pinia"
 import { ref, onMounted } from 'vue';
 import { onlineCheck } from '@/composables/helpers';
 import { config } from '@/composables/config';
@@ -35,7 +35,7 @@ onMounted(() => {
 
 const logout = () => {
     authStore.removeToken();
-    getActivePinia()._s.forEach(store => store.$reset());
+    // getActivePinia()._s.forEach(store => store.$reset());
     router.push('/login');
 };
 

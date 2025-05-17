@@ -7,7 +7,11 @@ import { useRouter } from 'vue-router';
 
 const teamStore = useTeamStore();
 const router = useRouter();
-const usernames = ref<{ username: any; id: any }[]>([]);
+interface Username {
+    username: string;
+    id: number | string;
+}
+const usernames = ref<Username[]>([]);
 const { team, checked } = storeToRefs(teamStore);
 
 onMounted(async () => {

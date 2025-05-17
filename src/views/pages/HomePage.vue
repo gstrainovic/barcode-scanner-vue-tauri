@@ -16,12 +16,13 @@ import { message } from '@tauri-apps/plugin-dialog';
 import config from '@/composables/config';
 import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { sendNotification } from '@tauri-apps/plugin-notification';
+import { User } from '@/interfaces';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 const { team, checked } = storeToRefs(teamStore);
 const { userRole, userId, userToken } = storeToRefs(authStore);
-const usernames = ref<{ username: any; id: any }[]>([]);
+const usernames = ref<User[]>([]);
 const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
 const hinweis = ref('');
@@ -29,7 +30,14 @@ const barcode = ref('');
 const toast = useToast();
 const barcodeId = ref('');
 const hinweisUmgesetzt = ref(false);
-const hinweisVorlagen = ref<any[]>([]);
+interface HinweisVorlage {
+    id: number;
+    titel: string;
+    text: string;
+    strg: string;
+    barcode?: string;
+}
+const hinweisVorlagen = ref<HinweisVorlage[]>([]);
 const selectedVorlage = ref('');
 
 listen('sendebarcode', (event) => {
@@ -152,14 +160,13 @@ const processBarcode = async (binp = '') => {
     }
     barcodeInput.value = '';
 
-    const userID: Number = Number(userId.value);
+    const userID: number = Number(userId.value);
     if (!userID) {
         console.error('Fehler: userId ist nicht definiert.');
         return;
     }
+    const lager_user_ids = (team.value as User[]).map((user) => user.id);
 
-
-    const lager_user_ids = team.value.map((user) => user.id);
 
     await invoke('process_barcode', {
         barcode: barcode.value,
@@ -202,13 +209,13 @@ const speichereHinweis = async () => {
         return;
     }
 
-    const userID: Number = Number(userId.value);
+    const userID: number = Number(userId.value);
     if (!userID) {
         console.error('Fehler: userId ist nicht definiert.');
         return;
     }
 
-    const teamIds = team.value.map((user) => user.id);
+    const teamIds = team.value.map((user: User) => user.id);
     const teamUndUserIds = teamIds.concat(userID);
     const createdBy = userRole.value === 'Produktion' ? userID : null;
     const hinweisUmgesetztVon = hinweisUmgesetzt.value ? teamUndUserIds : [];
@@ -233,16 +240,16 @@ const speichereHinweis = async () => {
     }
 };
 
-const setHinweis = async (event: any) => {
+const setHinweis = async (event: HinweisVorlage | { text?: string; value?: string }) => {
     console.log('setHinweis', event);
-    const hinweisInput = event.text || event.value;
+    const hinweisInput = (event as HinweisVorlage).text || (event as { value?: string }).value;
     console.log('hinweisInput', hinweisInput);
     if (hinweisInput && hinweisInput.length > 2) {
         hinweis.value = await marked.parse(hinweisInput) || '';
     } else {
         hinweis.value = '';
     }
-    selectedVorlage.value = hinweisInput;
+    selectedVorlage.value = hinweisInput ?? '';
     await speichereHinweis();
 };
 </script>

@@ -5,23 +5,18 @@ import Aura from '@primevue/themes/aura';
 import Lara from '@primevue/themes/lara';
 import { ref } from 'vue';
 
-const { layoutConfig, setPrimary, setSurface, setPreset, isDarkTheme, setMenuMode } = useLayout();
+const { layoutConfig, setPrimary, setSurface, setPreset, isDarkTheme } = useLayout();
 
-const presets = {
+const presets: Record<string, typeof Aura | typeof Lara> = {
     Aura,
     Lara
 };
 const preset = ref(layoutConfig.preset);
 const presetOptions = ref(Object.keys(presets));
 
-const menuMode = ref(layoutConfig.menuMode);
-const menuModeOptions = ref([
-    { label: 'Static', value: 'static' },
-    { label: 'Overlay', value: 'overlay' }
-]);
 
 const primaryColors = ref([
-    { name: 'noir', palette: {} },
+    { name: 'noir', palette: { 50: '#000000', 100: '#111111', 200: '#222222', 300: '#333333', 400: '#444444', 500: '#555555', 600: '#666666', 700: '#777777', 800: '#888888', 900: '#999999', 950: '#AAAAAA' } },
     { name: 'emerald', palette: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b', 950: '#022c22' } },
     { name: 'green', palette: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16' } },
     { name: 'lime', palette: { 50: '#f7fee7', 100: '#ecfccb', 200: '#d9f99d', 300: '#bef264', 400: '#a3e635', 500: '#84cc16', 600: '#65a30d', 700: '#4d7c0f', 800: '#3f6212', 900: '#365314', 950: '#1a2e05' } },
@@ -77,6 +72,10 @@ const surfaces = ref([
 
 function getPresetExt() {
     const color = primaryColors.value.find((c) => c.name === layoutConfig.primary);
+
+    if (!color) {
+        return {};
+    }
 
     if (color.name === 'noir') {
         return {
@@ -165,17 +164,17 @@ function getPresetExt() {
     }
 }
 
-function updateColors(type, color) {
+function updateColors(type: string, color: { name: string; palette: Record<number, string>; }) {
     if (type === 'primary') {
         setPrimary(color.name);
     } else if (type === 'surface') {
-        setSurface(color.name);
+        setSurface(color.name as never);
     }
 
     applyTheme(type, color);
 }
 
-function applyTheme(type, color) {
+function applyTheme(type: string, color: { palette: Record<number, string>; }) {
     if (type === 'primary') {
         updatePreset(getPresetExt());
     } else if (type === 'surface') {
@@ -191,9 +190,6 @@ function onPresetChange() {
     $t().preset(presetValue).preset(getPresetExt()).surfacePalette(surfacePalette).use({ useDefaultOptions: true });
 }
 
-function onMenuModeChange() {
-    setMenuMode(menuMode.value);
-}
 </script>
 
 <template>
@@ -236,10 +232,7 @@ function onMenuModeChange() {
                 <span class="text-sm text-muted-color font-semibold">Presets</span>
                 <SelectButton v-model="preset" @change="onPresetChange" :options="presetOptions" :allowEmpty="false" />
             </div>
-            <div class="flex flex-col gap-2">
-                <span class="text-sm text-muted-color font-semibold">Menu Mode</span>
-                <SelectButton v-model="menuMode" @change="onMenuModeChange" :options="menuModeOptions" :allowEmpty="false" optionLabel="label" optionValue="value" />
-            </div>
+
         </div>
     </div>
 </template>
