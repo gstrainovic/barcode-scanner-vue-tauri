@@ -1,10 +1,10 @@
+import { useAppStore } from '@/stores/appStore';
 import config from './config';
 import { useAuthStore } from '@/stores/authStore';
 const authStore = useAuthStore();
 const { userToken } = authStore;
-import { onlineCheck } from '@/composables/helpers';
+const appStore = useAppStore();
 import { strapi } from '@strapi/client';
-import { User } from '@/interfaces';
 
 export enum ZeiterfassungTypEnum {
     Login = "login",
@@ -25,7 +25,7 @@ export const useMyFetch = async () => {
         throw new Error('User token is not available. Please log in first.');
     }
     const configData = await config();
-    const isOnline: boolean = await onlineCheck();
+    await appStore.onlineCheck();
 
     const client = strapi({
         baseURL: configData.api.strapi,
@@ -50,7 +50,7 @@ export const useMyFetch = async () => {
     };
 
     const postHinweis = async (id: string, hinweis: string, erstelltVon: number | null = null, hinweisUmgesetztVon: number[]) => {
-        if (isOnline) {
+        if (appStore.isOnline) {
             const barcodes = client.collection('barcodes');
 
             const updateData: { hinweis: string; hinweis_erstellt_von?: number; hinweis_umgesetzt_von?: number[] } = { hinweis: hinweis };
@@ -66,7 +66,7 @@ export const useMyFetch = async () => {
     };
 
     const getHinweisFromBarcode = async (barcode: string) => {
-        if (isOnline) {
+        if (appStore.isOnline) {
             const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1&sort=id:asc');
             return response.data[0];
         } else {
@@ -76,7 +76,7 @@ export const useMyFetch = async () => {
 
     const getHinweisVorlagen = async () => {
         let result = [];
-        if (isOnline) {
+        if (appStore.isOnline) {
             const response = await fetchWithAuth('hinweis-vorlagen?sort=strg:asc');
             type HinweisVorlage = { attributes: { [key: string]: unknown } };
             const attributes = response.data.map((item: HinweisVorlage) => item.attributes);
@@ -87,25 +87,6 @@ export const useMyFetch = async () => {
         return result;
     };
 
-    const getUsersLager = async () => {
-        let result = [];
-        if (isOnline) {
-            const response = await fetchWithAuth('users?filters[rolle][$eq]=Lager');
-            result = Array.isArray(response) ? response : [];
-        } else {
-            // result = await window.pywebview.api.get_lager_users();
-            throw new Error('Offline mode not implemented yet!');
-            // TODO: Implement offline mode for getUsersLager
-        }
-
-        const userNameIds = result.map((user: User) => {
-            return {
-                username: user.username,
-                id: user.id,
-            }
-        });
-        return await userNameIds;
-    }
 
     const protokolliereArbeitszeit = async (typ: ZeiterfassungTypEnum, teamAndUserIds: number[], login_or_logout: LoginOrLogoutEnum) => {
         const configData = await config();
@@ -128,30 +109,8 @@ export const useMyFetch = async () => {
         });
     }
     
-    // const updateArbeitszeit = async (id: number, typ: ZeiterfassungTypEnum, userId: number, login_or_logout: LoginOrLogoutEnum, lagerUserIds : number[] = []) => {
-    //     const configData = await config();
-    //     const url = configData.api.strapi + 'zeit-erfassungen/' + id;
-    //     const jwt = token;
-    //     await fetch(url, {
-    //         method: 'PUT',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'Authorization': `Bearer ${jwt}`,
-    //         },
-    //         body: JSON.stringify({
-    //             data: {
-    //                 mitarbeiter: userId,
-    //                 typ,
-    //                 zeitpunkt: new Date().toISOString(),
-    //                 // lager_mitarbeiter: lagerUserIds,
-    //                 login_or_logout,
-    //             }
-    //         }),
-    //     });
-    // }
-
     return {
-        getUsersLager,
+        fetchWithAuth,
         getHinweisFromBarcode,
         postHinweis,
         getHinweisVorlagen,

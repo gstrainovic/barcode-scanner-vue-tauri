@@ -1,23 +1,11 @@
 <script setup lang="ts">
-import { useMyFetch } from '@/composables/myFetch';
-import { ref, onMounted } from 'vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
 const teamStore = useTeamStore();
 const router = useRouter();
-interface Username {
-    username: string;
-    id: number | string;
-}
-const usernames = ref<Username[]>([]);
-const { team, checked } = storeToRefs(teamStore);
-
-onMounted(async () => {
-    const { getUsersLager } = await useMyFetch();
-    usernames.value = await getUsersLager();
-});
+const { team, checked, lagerUsers } = storeToRefs(teamStore);
 
 const nextPage = () => {
     router.push('/');
@@ -54,7 +42,7 @@ html, body {
                         <br>
                         <br>
 
-                        <MultiSelect v-model="team" :options="usernames" placeholder="Mitarbeiter auswählen" @change="teamStore.changeTeam"
+                        <MultiSelect v-model="team" :options="lagerUsers" placeholder="Mitarbeiter auswählen" @change="teamStore.changeTeam"
                             :filter="true" v-show="!checked" optionLabel="username">
                         </MultiSelect>
                         <br>

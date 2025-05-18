@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { useMyFetch } from '@/composables/myFetch';
@@ -16,13 +17,13 @@ import { message } from '@tauri-apps/plugin-dialog';
 import config from '@/composables/config';
 import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { sendNotification } from '@tauri-apps/plugin-notification';
-import { User } from '@/interfaces';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
-const { team, checked, teamIds } = storeToRefs(teamStore);
-const { userRole, userId, userToken, teamAndUserIds } = storeToRefs(authStore);
-const usernames = ref<User[]>([]);
+const appStore = useAppStore();
+const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
+const { userRole, userId, userToken } = storeToRefs(authStore);
+const { teamAndUserIds } = storeToRefs(appStore); 
 const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
 const hinweis = ref('');
@@ -45,8 +46,6 @@ listen('sendebarcode', (event) => {
 });
 
 onMounted(async () => {
-    const { getUsersLager } = await useMyFetch();
-    usernames.value = await getUsersLager();
     hist.value = await invoke<[]>('load_history');
     if (userRole.value === 'Produktion') {
         await ladeHinweisVorlagen();
@@ -290,7 +289,7 @@ const setHinweis = async (event: HinweisVorlage | { text?: string; value?: strin
                                 @update:modelValue="teamStore.onToggleChangeVerpackeAlleine"></ToggleSwitch>
                             <label for="toggleSwitch" class="text-lg">Ich verpacke alleine</label>
                         </div>
-                        <MultiSelect v-model="team" :options="usernames" optionLabel="username" @change="teamStore.changeTeam"
+                        <MultiSelect v-model="team" :options="lagerUsers" optionLabel="username" @change="teamStore.changeTeam"
                             placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
                         </MultiSelect>
                     </div>

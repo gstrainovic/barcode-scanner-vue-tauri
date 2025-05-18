@@ -8,7 +8,8 @@
         "preview": "vite preview",
         "tauri": "tauri",
         "lint:fix": "eslint --ext .js,.ts,.vue src --fix",
-        "ts:check": "vue-tsc --noEmit"
+        "ts:check": "vue-tsc --noEmit",
+        "check": "npm run lint:fix && npm run ts:check"
     },
     "dependencies": {
         "@primevue/themes": "^4.0.0",

@@ -2,31 +2,23 @@
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useAppStore } from '@/stores/appStore';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 // import { getActivePinia } from "pinia"
 import { ref, onMounted } from 'vue';
-import { onlineCheck } from '@/composables/helpers';
 import { config } from '@/composables/config';
 
 const router = useRouter();
 const { toggleDarkMode, isDarkTheme } = useLayout();
 const authStore = useAuthStore();
-const isOnlineRef = ref(false)
+const appStore = useAppStore();
 const version = ref('0.0.0')
+const { isOnline } = storeToRefs(appStore)
 
-const checkOnlineStatus = async () => {
-      try {
-        isOnlineRef.value = await onlineCheck();
-      } catch (error) {
-        console.error('Error checking online status:', error)
-        isOnlineRef.value = false
-      }
-    }
 
 onMounted(() => {
     const initialize = async () => {
-        await checkOnlineStatus();
         const Config = await config();
         version.value = Config.version;
     };
@@ -51,7 +43,7 @@ const { userName, userRole } = storeToRefs(authStore);
         <i class="pi pi-qrcode" style="font-size: 1.5rem"></i>
         <p class="text-xl ml-3">Barcode Scanner</p>
         <p class="text-lg ml-3">{{  version }}</p>
-        <p class="text-lg ml-3"> {{ isOnlineRef ? 'Online' : 'Offline' }}</p>
+        <p class="text-lg ml-3"> {{ isOnline ? 'Online' : 'Offline' }}</p>
         <p class="text-xl ml-12">{{ userName }}</p>
         <p class="text-xl ml-12">{{ userRole }}</p>
         <div class="layout-topbar-actions">

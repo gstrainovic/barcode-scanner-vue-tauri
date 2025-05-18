@@ -7,14 +7,12 @@ export const useAuthStore = defineStore('auth', {
     rolle: '' as string | null,
     username: '' as string | null,
     id: 0 as number | null,
-    teamAndUserIds: [] as number[],
   }),
   getters: {
     userRole: (state) => state.rolle,
     userName: (state) => state.username,
     userToken: (state) => state.token,
     userId: (state) => state.id,
-    userTeamAndUserIds: (state) => state.teamAndUserIds,
   },
   actions: {
     async authenticateUser({ identifier, password }: { identifier: string; password: string }) {
@@ -37,7 +35,6 @@ export const useAuthStore = defineStore('auth', {
         this.rolle = data.user.rolle;
         this.username = data.user.username;
         this.id = data.user.id;
-        this.teamAndUserIds = [data.user.id];
         return true;
       } else {
         return false;
