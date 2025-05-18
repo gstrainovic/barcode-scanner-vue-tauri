@@ -1,5 +1,5 @@
 import { User } from '@/interfaces';
-import { useMyFetch } from '@/composables/myFetch';
+import { useMyFetch } from '@/composables/useApi';
 import { useAuthStore } from './authStore';
 import { useAppStore } from './appStore';
 import { defineStore } from 'pinia';

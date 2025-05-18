@@ -2,11 +2,7 @@ import config from './config';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { strapi } from '@strapi/client';
-
-const authStore = useAuthStore();
-const appStore = useAppStore();
-
-const { userToken } = authStore;
+import { storeToRefs } from 'pinia';
 
 export enum ZeiterfassungTypEnum {
     Login = "login",
@@ -20,10 +16,12 @@ export enum LoginOrLogoutEnum {
     Logout = "logout"
 }
 
-
 export const useMyFetch = async () => {
-    const token = userToken;
-    if (!token) {
+    const authStore = useAuthStore();
+    const appStore = useAppStore();
+    const { userToken } = storeToRefs(authStore);
+
+    if (!userToken.value) {
         throw new Error('User token is not available. Please log in first.');
     }
     const configData = await config();
@@ -31,14 +29,14 @@ export const useMyFetch = async () => {
 
     const client = strapi({
         baseURL: configData.api.strapi,
-        auth: token
+        auth: userToken.value
     });
 
     const fetchWithAuth = async (endpoint: string, body = null) => {
         try {
             const response = await fetch(configData.api.strapi + endpoint, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${userToken.value}`,
                     'Content-Type': 'application/json'
                 },
                 method: body ? 'POST' : 'GET',
@@ -93,7 +91,7 @@ export const useMyFetch = async () => {
     const protokolliereArbeitszeit = async (typ: ZeiterfassungTypEnum, teamAndUserIds: number[], login_or_logout: LoginOrLogoutEnum) => {
         const configData = await config();
         const url = configData.api.strapi + 'zeit-erfassungen';
-        const jwt = token;
+        const jwt = userToken.value;
         await fetch(url, {
             method: 'POST',
             headers: {

@@ -2,7 +2,7 @@
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useRouter } from 'vue-router';
-import { useMyFetch, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/myFetch';
+import { useMyFetch, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/useApi';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';

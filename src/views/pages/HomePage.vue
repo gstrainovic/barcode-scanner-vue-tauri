@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import HinweisVorlage from '@/interfaces/HinweisVorlage';
+import { HinweisVorlage } from '@/interfaces';
 import Editor from 'primevue/editor';
 import config from '@/composables/config';
 import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
-import { useMyFetch } from '@/composables/myFetch';
+import { useMyFetch } from '@/composables/useApi';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
@@ -16,7 +16,7 @@ import { message } from '@tauri-apps/plugin-dialog';
 import { marked } from 'marked';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
-import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/composables/helpers';
+import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/utils/toastUtils';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 const toast = useToast();
