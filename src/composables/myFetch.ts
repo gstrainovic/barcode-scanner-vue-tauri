@@ -21,12 +21,15 @@ export enum LoginOrLogoutEnum {
 
 export const useMyFetch = async () => {
     const token = userToken;
+    if (!token) {
+        throw new Error('User token is not available. Please log in first.');
+    }
     const configData = await config();
     const isOnline: boolean = await onlineCheck();
 
     const client = strapi({
         baseURL: configData.api.strapi,
-        auth: token,
+        auth: token
     });
 
     const fetchWithAuth = async (endpoint: string, body = null) => {
@@ -104,25 +107,11 @@ export const useMyFetch = async () => {
         return await userNameIds;
     }
 
-    const protokolliereArbeitszeit = async (typ: ZeiterfassungTypEnum, userId: number, login_or_logout: LoginOrLogoutEnum, lagerUserIds : number[] = []) => {
+    const protokolliereArbeitszeit = async (typ: ZeiterfassungTypEnum, teamAndUserIds: number[], login_or_logout: LoginOrLogoutEnum) => {
         const configData = await config();
         const url = configData.api.strapi + 'zeit-erfassungen';
-        console.log('Protokolliere Arbeitszeit:', typ, userId, login_or_logout, lagerUserIds, url);
-
-        // const body = {
-        //     data: {
-        //         mitarbeiter: userId,
-        //         typ,
-        //         zeitpunkt: new Date().toISOString(),
-        //         // lager_mitarbeiter: lagerUserIds,
-        //         login_or_logout,
-        //     }
-        // };
-
-        // console.log('Protokolliere Arbeitszeit Body:', body);
-
         const jwt = token;
-        const result = await fetch(url, {
+        await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -130,17 +119,36 @@ export const useMyFetch = async () => {
             },
             body: JSON.stringify({
                 data: {
-                    mitarbeiter: userId,
                     typ,
+                    mitarbeiter: teamAndUserIds,
                     zeitpunkt: new Date().toISOString(),
-                    // lager_mitarbeiter: lagerUserIds,
                     login_or_logout,
                 }
             }),
         });
-        console.log('Protokolliere Arbeitszeit:', result);
-    } 
-
+    }
+    
+    // const updateArbeitszeit = async (id: number, typ: ZeiterfassungTypEnum, userId: number, login_or_logout: LoginOrLogoutEnum, lagerUserIds : number[] = []) => {
+    //     const configData = await config();
+    //     const url = configData.api.strapi + 'zeit-erfassungen/' + id;
+    //     const jwt = token;
+    //     await fetch(url, {
+    //         method: 'PUT',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             'Authorization': `Bearer ${jwt}`,
+    //         },
+    //         body: JSON.stringify({
+    //             data: {
+    //                 mitarbeiter: userId,
+    //                 typ,
+    //                 zeitpunkt: new Date().toISOString(),
+    //                 // lager_mitarbeiter: lagerUserIds,
+    //                 login_or_logout,
+    //             }
+    //         }),
+    //     });
+    // }
 
     return {
         getUsersLager,

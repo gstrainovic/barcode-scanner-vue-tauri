@@ -52,7 +52,7 @@ html, body {
                         <br>
                         <br>
 
-                        <MultiSelect v-model="team" :options="usernames" placeholder="Mitarbeiter auswählen"
+                        <MultiSelect v-model="team" :options="usernames" placeholder="Mitarbeiter auswählen" @change="teamStore.changeTeam"
                             :filter="true" v-show="!checked" optionLabel="username">
                         </MultiSelect>
                         <br>

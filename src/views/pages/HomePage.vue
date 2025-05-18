@@ -20,8 +20,8 @@ import { User } from '@/interfaces';
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
-const { team, checked } = storeToRefs(teamStore);
-const { userRole, userId, userToken } = storeToRefs(authStore);
+const { team, checked, teamIds } = storeToRefs(teamStore);
+const { userRole, userId, userToken, teamAndUserIds } = storeToRefs(authStore);
 const usernames = ref<User[]>([]);
 const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
 const barcodeInput = ref('');
@@ -182,14 +182,12 @@ const processBarcode = async (binp = '') => {
         console.error('Fehler: userId ist nicht definiert.');
         return;
     }
-    const lager_user_ids = (team.value as User[]).map((user) => user.id);
-
 
     await invoke('process_barcode', {
         barcode: barcode.value,
         uid: userID,
         jwt: userToken.value,
-        luids: lager_user_ids,
+        luids: teamIds.value,
         rolle: userRole.value,
     });
 
@@ -232,8 +230,8 @@ const speichereHinweis = async () => {
         return;
     }
 
-    const teamIds = team.value.map((user: User) => user.id);
-    const teamUndUserIds = teamIds.concat(userID);
+    // const teamUndUserIds = teamIds.value.concat(userID);
+    const teamUndUserIds = teamAndUserIds.value;
     const createdBy = userRole.value === 'Produktion' ? userID : null;
     const hinweisUmgesetztVon = hinweisUmgesetzt.value ? teamUndUserIds : [];
     const { postHinweis } = await useMyFetch();
@@ -270,6 +268,8 @@ const setHinweis = async (event: HinweisVorlage | { text?: string; value?: strin
     selectedVorlage.value = hinweisInput ?? '';
     await speichereHinweis();
 };
+
+
 </script>
 
 <template>
@@ -296,7 +296,7 @@ const setHinweis = async (event: HinweisVorlage | { text?: string; value?: strin
                             <label for="toggleSwitch" class="text-lg">Ich verpacke alleine</label>
                         </div>
                     </div>
-                    <MultiSelect v-model="team" :options="usernames" optionLabel="username"
+                    <MultiSelect v-model="team" :options="usernames" optionLabel="username" @change="teamStore.changeTeam"
                         placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
                     </MultiSelect>
                 </div>
