@@ -34,8 +34,7 @@ onMounted(() => {
 });
 
 const logout = () => {
-    authStore.removeToken();
-    // getActivePinia()._s.forEach(store => store.$reset());
+    sessionStorage.clear();
     router.push('/login');
 };
 

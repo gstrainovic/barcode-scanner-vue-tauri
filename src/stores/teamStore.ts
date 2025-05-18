@@ -6,7 +6,7 @@ export const useTeamStore = defineStore('team', {
   state: () => ({
     team: [],
     teamIds: [] as number[],
-    checked: false,
+    checked: true,
   }),
   actions: {
     changeTeam(event: { value: User[] }) {
@@ -17,6 +17,15 @@ export const useTeamStore = defineStore('team', {
       const teamAndUserIds = userId ? [...this.teamIds, userId] : this.teamIds;
       authStore.teamAndUserIds = teamAndUserIds;
       console.log('authStore.teamAndUserIds', authStore.teamAndUserIds);
+    },
+    onToggleChangeVerpackeAlleine (value: boolean) {
+      this.checked = value;
+      if (this.checked) {
+        this.team = [];
+        this.teamIds = [];
+        const authStore = useAuthStore();
+        authStore.teamAndUserIds = authStore.userId ? [authStore.userId] : [];
+      }
     },
   },
   persist: {

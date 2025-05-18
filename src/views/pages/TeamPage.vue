@@ -46,7 +46,9 @@ html, body {
                         </div>
                         <br>
                         <div class="flex items-center justify-center">
-                            <ToggleSwitch v-model="checked" id="toggleSwitch"></ToggleSwitch>
+                            <ToggleSwitch v-model="checked" id="toggleSwitch"
+                                @update:modelValue="teamStore.onToggleChangeVerpackeAlleine">
+                            </ToggleSwitch>
                             <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
                         </div>
                         <br>

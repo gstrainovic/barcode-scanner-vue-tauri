@@ -43,13 +43,6 @@ export const useAuthStore = defineStore('auth', {
         return false;
       }
     },
-    removeToken() {
-      this.token = null;
-      this.rolle = null;
-      this.username = null;
-      this.id = null;
-      this.teamAndUserIds = [];
-    },
   },
   persist: {
     storage: sessionStorage

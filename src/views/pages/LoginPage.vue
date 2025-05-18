@@ -19,10 +19,7 @@ const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
         const { protokolliereArbeitszeit } = await useMyFetch();
-        const userId = authStore.userId;
-        if (userId) {
-            await protokolliereArbeitszeit(ZeiterfassungTypEnum.Login, +userId, LoginOrLogoutEnum.Login);
-        }
+        await protokolliereArbeitszeit(ZeiterfassungTypEnum.Login, authStore.teamAndUserIds, LoginOrLogoutEnum.Login);
         if (userRole.value === 'Lager') {
             router.push('/team');
         } else {

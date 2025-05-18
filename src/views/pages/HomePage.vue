@@ -128,12 +128,6 @@ const bringWindowToFront = async () => {
     }
 };
 
-const onToggleChangeVerpackeAlleine = (newValue: boolean) => {
-    if (newValue) {
-        team.value = [];
-    }
-};
-
 
 const checkBarcodeMatchWithVorlageBarcode = async (barcodeInput: string) => {
     if (hinweisVorlagen.value.length > 0 && barcodeInput) {
@@ -182,6 +176,7 @@ const processBarcode = async (binp = '') => {
         console.error('Fehler: userId ist nicht definiert.');
         return;
     }
+
 
     await invoke('process_barcode', {
         barcode: barcode.value,
@@ -292,13 +287,13 @@ const setHinweis = async (event: HinweisVorlage | { text?: string; value?: strin
                         <div class="font-semibold text-xl"><i class="pi pi-users"></i> Team</div>
                         <div class="flex items-center gap-2">
                             <ToggleSwitch v-model="checked" id="toggleSwitch"
-                                @update:modelValue="onToggleChangeVerpackeAlleine"></ToggleSwitch>
+                                @update:modelValue="teamStore.onToggleChangeVerpackeAlleine"></ToggleSwitch>
                             <label for="toggleSwitch" class="text-lg">Ich verpacke alleine</label>
                         </div>
+                        <MultiSelect v-model="team" :options="usernames" optionLabel="username" @change="teamStore.changeTeam"
+                            placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
+                        </MultiSelect>
                     </div>
-                    <MultiSelect v-model="team" :options="usernames" optionLabel="username" @change="teamStore.changeTeam"
-                        placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
-                    </MultiSelect>
                 </div>
             </div>
 
