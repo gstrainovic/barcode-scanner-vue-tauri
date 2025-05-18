@@ -1,8 +1,8 @@
 import { User } from '@/interfaces';
-import { defineStore } from 'pinia';
+import { useMyFetch } from '@/composables/myFetch';
 import { useAuthStore } from './authStore';
 import { useAppStore } from './appStore';
-import { useMyFetch } from '@/composables/myFetch';
+import { defineStore } from 'pinia';
 
 export const useTeamStore = defineStore('team', {
   state: () => ({

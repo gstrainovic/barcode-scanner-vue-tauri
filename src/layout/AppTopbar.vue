@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
+import { useRouter } from 'vue-router';
+import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
-import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-// import { getActivePinia } from "pinia"
 import { ref, onMounted } from 'vue';
 import { config } from '@/composables/config';
 
+const version = ref('0.0.0')
 const router = useRouter();
-const { toggleDarkMode, isDarkTheme } = useLayout();
 const authStore = useAuthStore();
 const appStore = useAppStore();
-const version = ref('0.0.0')
+const { toggleDarkMode, isDarkTheme } = useLayout();
 const { isOnline } = storeToRefs(appStore)
-
 
 onMounted(() => {
     const initialize = async () => {

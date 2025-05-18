@@ -1,32 +1,31 @@
 <script setup lang="ts">
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
-import { useAuthStore } from '@/stores/authStore';
 import { useTeamStore } from '@/stores/teamStore';
-import { useAppStore } from '@/stores/appStore';
 import { useRouter } from 'vue-router';
+import { useMyFetch, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/myFetch';
+import { useLayout } from '@/layout/composables/layout';
+import { useAuthStore } from '@/stores/authStore';
+import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useLayout } from '@/layout/composables/layout';
-import { useMyFetch, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/myFetch';
 
+const teamStore = useTeamStore();
 const router = useRouter();
-const email = ref('');
 const password = ref('');
 const loginFailed = ref(false);
+const email = ref('');
 const authStore = useAuthStore();
-const teamStore = useTeamStore();
 const appStore = useAppStore(); 
 const { userRole } = storeToRefs(authStore);
 const { isDarkTheme } = useLayout();
+
 
 const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
         const { protokolliereArbeitszeit } = await useMyFetch();
-        await protokolliereArbeitszeit(ZeiterfassungTypEnum.Login, appStore.teamAndUserIds, LoginOrLogoutEnum.Login);
-
         await teamStore.getUsersLager();
-
+        await protokolliereArbeitszeit(ZeiterfassungTypEnum.Login, appStore.teamAndUserIds, LoginOrLogoutEnum.Login);
         if (userRole.value === 'Lager') {
             router.push('/team');
         } else {

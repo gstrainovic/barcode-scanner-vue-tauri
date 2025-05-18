@@ -1,45 +1,40 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import HinweisVorlage from '@/interfaces/HinweisVorlage';
+import Editor from 'primevue/editor';
+import config from '@/composables/config';
+import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
+import { useMyFetch } from '@/composables/myFetch';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
-import { onMounted } from 'vue';
-import { useMyFetch } from '@/composables/myFetch';
-import { invoke } from '@tauri-apps/api/core';
-import { marked } from 'marked';
-import Editor from 'primevue/editor';
-import { listen } from '@tauri-apps/api/event';
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { useToast } from "primevue/usetoast";
-import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/composables/helpers';
-import { message } from '@tauri-apps/plugin-dialog';
-import config from '@/composables/config';
-import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { sendNotification } from '@tauri-apps/plugin-notification';
+import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
+import { ref } from 'vue';
+import { onMounted } from 'vue';
+import { message } from '@tauri-apps/plugin-dialog';
+import { marked } from 'marked';
+import { listen } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/core';
+import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/composables/helpers';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
+const toast = useToast();
 const teamStore = useTeamStore();
+const selectedVorlage = ref('');
+const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
+const hinweisVorlagen = ref<HinweisVorlage[]>([]);
+const hinweisUmgesetzt = ref(false);
+const hinweis = ref('');
+const barcodeInput = ref('');
+const barcodeId = ref('');
+const barcode = ref('');
 const authStore = useAuthStore();
 const appStore = useAppStore();
-const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
 const { userRole, userId, userToken } = storeToRefs(authStore);
 const { teamAndUserIds } = storeToRefs(appStore); 
-const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
-const barcodeInput = ref('');
-const hinweis = ref('');
-const barcode = ref('');
-const toast = useToast();
-const barcodeId = ref('');
-const hinweisUmgesetzt = ref(false);
-interface HinweisVorlage {
-    id: number;
-    titel: string;
-    text: string;
-    strg: string;
-    barcode?: string;
-}
-const hinweisVorlagen = ref<HinweisVorlage[]>([]);
-const selectedVorlage = ref('');
+const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
+
 
 listen('sendebarcode', (event) => {
     processBarcode(event.payload as string);

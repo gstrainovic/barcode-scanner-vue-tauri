@@ -57,7 +57,7 @@ const model = ref<AppMenuItemType[]>([
             {
                 label: 'Not Found',
                 icon: 'pi pi-fw pi-exclamation-circle',
-                to: '/pages/notfound'
+                to: '/pages/notfoundpage'
             },
             {
                 label: 'Empty',

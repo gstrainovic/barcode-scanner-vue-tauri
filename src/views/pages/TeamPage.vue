@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTeamStore } from '@/stores/teamStore';
-import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 
 const teamStore = useTeamStore();
 const router = useRouter();

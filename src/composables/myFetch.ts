@@ -1,10 +1,12 @@
-import { useAppStore } from '@/stores/appStore';
 import config from './config';
 import { useAuthStore } from '@/stores/authStore';
-const authStore = useAuthStore();
-const { userToken } = authStore;
-const appStore = useAppStore();
+import { useAppStore } from '@/stores/appStore';
 import { strapi } from '@strapi/client';
+
+const authStore = useAuthStore();
+const appStore = useAppStore();
+
+const { userToken } = authStore;
 
 export enum ZeiterfassungTypEnum {
     Login = "login",
