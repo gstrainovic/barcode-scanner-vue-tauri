@@ -1,5 +1,5 @@
 import { User } from '@/interfaces';
-import { useMyFetch } from '@/composables/useApi';
+import { useApi } from '@/composables/useApi';
 import { useAuthStore } from './authStore';
 import { useAppStore } from './appStore';
 import { defineStore } from 'pinia';
@@ -32,7 +32,7 @@ export const useTeamStore = defineStore('team', {
       }
     },
     async getUsersLager() {
-      const { fetchWithAuth } = await useMyFetch();
+      const { fetchWithAuth } = await useApi();
       const appStore = useAppStore();
       await appStore.onlineCheck();
       let result = [];

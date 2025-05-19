@@ -16,7 +16,7 @@ export enum LoginOrLogoutEnum {
     Logout = "logout"
 }
 
-export const useMyFetch = async () => {
+export const useApi = async () => {
     const authStore = useAuthStore();
     const appStore = useAppStore();
     const { userToken } = storeToRefs(authStore);

@@ -2,7 +2,7 @@
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useRouter } from 'vue-router';
-import { useMyFetch, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/useApi';
+import { useApi, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/useApi';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
@@ -23,7 +23,7 @@ const { isDarkTheme } = useLayout();
 const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
-        const { protokolliereArbeitszeit } = await useMyFetch();
+        const { protokolliereArbeitszeit } = await useApi();
         await teamStore.getUsersLager();
         await protokolliereArbeitszeit(ZeiterfassungTypEnum.Login, appStore.teamAndUserIds, LoginOrLogoutEnum.Login);
         if (userRole.value === 'Lager') {

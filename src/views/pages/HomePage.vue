@@ -4,7 +4,7 @@ import Editor from 'primevue/editor';
 import config from '@/composables/config';
 import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
-import { useMyFetch } from '@/composables/useApi';
+import { useApi } from '@/composables/useApi';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
@@ -93,7 +93,7 @@ const displayStatus = (status: string) => {
 };
 
 const ladeHinweis = async () => {
-    const { getHinweisFromBarcode } = await useMyFetch();
+    const { getHinweisFromBarcode } = await useApi();
     const result = await getHinweisFromBarcode(barcode.value);
     const umgesetzt : boolean = result.attributes.hinweis_umgesetzt_von.data.length > 0;
     hinweisUmgesetzt.value= umgesetzt;
@@ -197,7 +197,7 @@ const processBarcode = async (binp = '') => {
 };
 
 const ladeHinweisVorlagen = async () => {
-    const { getHinweisVorlagen } = await useMyFetch();
+    const { getHinweisVorlagen } = await useApi();
     hinweisVorlagen.value = await getHinweisVorlagen();
 }
 
@@ -223,7 +223,7 @@ const speichereHinweis = async () => {
     const teamUndUserIds = teamAndUserIds.value;
     const createdBy = userRole.value === 'Produktion' ? userID : null;
     const hinweisUmgesetztVon = hinweisUmgesetzt.value ? teamUndUserIds : [];
-    const { postHinweis } = await useMyFetch();
+    const { postHinweis } = await useApi();
     const result = await postHinweis(barcodeId.value, hinweis.value, createdBy, hinweisUmgesetztVon);
 
     const Config = await config();
