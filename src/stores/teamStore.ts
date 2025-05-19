@@ -1,15 +1,15 @@
 import { User } from '@/interfaces';
-import { useApi } from '@/composables/useApi';
 import { useAuthStore } from './authStore';
 import { useAppStore } from './appStore';
+import { useApi } from '@/composables/useApi';
 import { defineStore } from 'pinia';
 
 export const useTeamStore = defineStore('team', {
   state: () => ({
-    team: [] as User[],
-    teamIds: [] as number[],
     checked: true,
     lagerUsers: [] as User[],
+    team: [] as User[],
+    teamIds: [] as number[],
   }),
   actions: {
     changeTeam(event: { value: User[] }) {

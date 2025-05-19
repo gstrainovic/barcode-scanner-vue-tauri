@@ -1,117 +1,39 @@
 <script setup lang="ts">
-import { HinweisVorlage } from '@/interfaces';
-import Editor from 'primevue/editor';
+import HistoryComponent from '@/components/HistoryComponent.vue';
+import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
 import config from '@/composables/config';
 import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
-import { useApi } from '@/composables/useApi';
+import { useHistoryStore } from '@/stores/historyStore';
+import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
+import { useHinweisStore } from '@/stores/hinweisStore';
+import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { sendNotification } from '@tauri-apps/plugin-notification';
-import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { ref } from 'vue';
-import { onMounted } from 'vue';
-import { message } from '@tauri-apps/plugin-dialog';
-import { marked } from 'marked';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/utils/toastUtils';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-
 const toast = useToast();
 const teamStore = useTeamStore();
-const selectedVorlage = ref('');
-const hist = ref<{ status: string; barcode: string; timestamp: string }[]>([]);
-const hinweisVorlagen = ref<HinweisVorlage[]>([]);
-const hinweisUmgesetzt = ref(false);
-const hinweis = ref('');
+const historyStore = useHistoryStore();
+const hinweisVorlageStore = useHinweisVorlageStore();
+const hinweisStore = useHinweisStore();
+const barcodeStore = useBarcodeStore();
 const barcodeInput = ref('');
-const barcodeId = ref('');
-const barcode = ref('');
 const authStore = useAuthStore();
-const appStore = useAppStore();
 const { userRole, userId, userToken } = storeToRefs(authStore);
-const { teamAndUserIds } = storeToRefs(appStore); 
 const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
-
+const { selectedVorlage } = storeToRefs(hinweisVorlageStore);
+const { history } = storeToRefs(historyStore);
+const { hinweis, hinweisUmgesetzt } = storeToRefs(hinweisStore);
+const { barcode } = storeToRefs(barcodeStore);
 
 listen('sendebarcode', (event) => {
     processBarcode(event.payload as string);
 });
-
-onMounted(async () => {
-    hist.value = await invoke<[]>('load_history');
-    if (userRole.value === 'Produktion') {
-        await ladeHinweisVorlagen();
-        await registerHinweisVorlagenShortcuts();
-    }
-});
-
-const registerHinweisVorlagenShortcuts = async () => {
-    // Erst abmelden, dann beide Varianten registrieren
-    await unregisterAll();
-    for (const vorlage of hinweisVorlagen.value) {
-        const hotkeyMain = 'CommandOrControl+' + vorlage.strg; // z.B. CommandOrControl+1
-        const hotkeyNumpad = 'CommandOrControl+Numpad' + vorlage.strg; // z.B. CommandOrControl+Numpad1
-
-
-        await register(hotkeyMain, async (event) => {
-            if (event.state === "Released") {
-                await setHinweis(vorlage);
-                await speichereHinweis();
-            }
-        });
-        await register(hotkeyNumpad, async (event) => {
-            if (event.state === "Released") {
-                await setHinweis(vorlage);
-                await speichereHinweis();
-            }
-        });
-    }
-};
-
-const statusClass = (status: string) => {
-    if (status.startsWith('@C03')) {
-        return 'text-orange-500';
-    } else if (status.startsWith('@C88')) {
-        return 'text-red-500';
-    } else {
-        return 'text-green-500';
-    }
-
-};
-
-const displayStatus = (status: string) => {
-    if (status.startsWith('@C03')) {
-        return status.replace('@C03', '');
-    } else if (status.startsWith('@C88')) {
-        return status.replace('@C88', '');
-    } else {
-        return status;
-    }
-};
-
-const ladeHinweis = async () => {
-    const { getHinweisFromBarcode } = await useApi();
-    const result = await getHinweisFromBarcode(barcode.value);
-    const umgesetzt : boolean = result.attributes.hinweis_umgesetzt_von.data.length > 0;
-    hinweisUmgesetzt.value= umgesetzt;
-
-    if (!result?.id) {
-        hinweis.value = '';
-        return;
-    }
-    barcodeId.value = result.id;
-    hinweis.value = await marked.parse(result.attributes.hinweis || '');
-    if (result.attributes.hinweis) {
-        const Config = await config();
-        message('Es gibt einen Hinweis zu Barcode ' + barcode.value, {
-            title: Config.dialog.title,
-            kind: 'warning',
-        });
-    }
-};
 
 const bringWindowToFront = async () => {
     const currentWindow = getCurrentWindow();
@@ -120,18 +42,6 @@ const bringWindowToFront = async () => {
         await currentWindow.maximize();
         await currentWindow.setFocus();
     }
-};
-
-
-const checkBarcodeMatchWithVorlageBarcode = async (barcodeInput: string) => {
-    if (hinweisVorlagen.value.length > 0 && barcodeInput) {
-        const barcodeVorlage = hinweisVorlagen.value.find((vorlage) => vorlage.barcode === barcodeInput);
-        if (barcodeVorlage) {
-            await setHinweis(barcodeVorlage);
-            return true;
-        }
-    }
-    return false;
 };
 
 const processBarcode = async (binp = '') => {
@@ -148,10 +58,9 @@ const processBarcode = async (binp = '') => {
         return;
     }
 
-
     selectedVorlage.value = '';
     const barcodeValue = binp || barcodeInput.value;
-    const barcodeMatch = await checkBarcodeMatchWithVorlageBarcode(barcodeValue);
+    const barcodeMatch = await hinweisVorlageStore.checkBarcodeMatchWithVorlageBarcode(barcodeValue);
     if (barcodeMatch) {
         console.log('Barcode match found with Vorlage Barcode.');
         barcodeInput.value = '';
@@ -171,7 +80,6 @@ const processBarcode = async (binp = '') => {
         return;
     }
 
-
     await invoke('process_barcode', {
         barcode: barcode.value,
         uid: userID,
@@ -180,9 +88,8 @@ const processBarcode = async (binp = '') => {
         rolle: userRole.value,
     });
 
-    hist.value = await invoke<[]>('load_history');
-
-    const lastHistory = hist.value[0] as { status: string; barcode: string; timestamp: string };
+    historyStore.loadHistory();
+    const lastHistory = history.value[0] as { status: string; barcode: string; timestamp: string };
     if (lastHistory.status.startsWith('@C88')) {
         await bringWindowToFront();
         toast.add(getErrorToastMessage(lastHistory.status.replace('@C88', '')));
@@ -193,72 +100,8 @@ const processBarcode = async (binp = '') => {
         toast.add(getSuccessToastMessage('Barcode erfolgreich verarbeitet.'));
     }
 
-    ladeHinweis();
+    hinweisStore.ladeHinweis();
 };
-
-const ladeHinweisVorlagen = async () => {
-    const { getHinweisVorlagen } = await useApi();
-    hinweisVorlagen.value = await getHinweisVorlagen();
-}
-
-const speichereHinweis = async () => {
-    if (!barcode.value || barcode.value === '') {
-        const Config = await config();
-        const message = 'Bitte Barcode zuerst scannen';
-        toast.add(getErrorToastMessage(message));
-        sendNotification({
-            title: Config.dialog.title,
-            body: message,
-        });
-        return;
-    }
-
-    const userID: number = Number(userId.value);
-    if (!userID) {
-        console.error('Fehler: userId ist nicht definiert.');
-        return;
-    }
-
-    // const teamUndUserIds = teamIds.value.concat(userID);
-    const teamUndUserIds = teamAndUserIds.value;
-    const createdBy = userRole.value === 'Produktion' ? userID : null;
-    const hinweisUmgesetztVon = hinweisUmgesetzt.value ? teamUndUserIds : [];
-    const { postHinweis } = await useApi();
-    const result = await postHinweis(barcodeId.value, hinweis.value, createdBy, hinweisUmgesetztVon);
-
-    const Config = await config();
-
-    // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
-    if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == hinweis.value) {
-        toast.add(getSuccessToastMessage('Hinweis gespeichert.'));
-        sendNotification({
-            title: Config.dialog.title,
-            body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
-        });
-        hinweisUmgesetzt.value = false; // Reset the toggle after saving
-    } else {
-        toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweis.'));
-        sendNotification({
-            title: Config.dialog.title,
-            body: 'Fehler beim Speichern der Hinweis.',
-        });
-    }
-};
-
-const setHinweis = async (event: HinweisVorlage | { text?: string; value?: string }) => {
-    console.log('setHinweis', event);
-    const hinweisInput = (event as HinweisVorlage).text || (event as { value?: string }).value;
-    console.log('hinweisInput', hinweisInput);
-    if (hinweisInput && hinweisInput.length > 2) {
-        hinweis.value = await marked.parse(hinweisInput) || '';
-    } else {
-        hinweis.value = '';
-    }
-    selectedVorlage.value = hinweisInput ?? '';
-    await speichereHinweis();
-};
-
-
 </script>
 
 <template>
@@ -290,79 +133,9 @@ const setHinweis = async (event: HinweisVorlage | { text?: string; value?: strin
                     </div>
                 </div>
             </div>
-
-            <div class="flex flex-col" v-if="userRole === 'Produktion'">
-                <div class="table-container">
-                    <DataTable :value="hinweisVorlagen" :sortField="'strg'" :sortOrder="+1" :paginator="false"
-                        :rows="10">
-                        <template #header>
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <span class="text-xl font-bold">Vorlagen</span>
-                            </div>
-                        </template>
-                        <Column field="titel" header="Titel" sortable style="width: 60%;font-size: 0.8rem;">
-                          <template #body="slotProps">
-                            <a 
-                              href="javascript:void(0)" 
-                              class="text-blue-500 hover:underline cursor-pointer" 
-                              @click="setHinweis(slotProps.data)">
-                              {{ slotProps.data.titel }}
-                            </a>
-                          </template>
-                        </Column>
-                        <Column field="strg" header="STRG +" sortable style="width: 40%;font-size: 0.8rem"></Column>
-                    </DataTable>
-                </div>
-            </div>
-
+            <HinweisVorlagenComponent />
         </div>
-
-        <div class="flex flex-col w-1/2 mt-1">
-            <div class="card flex flex-col mt-1">
-                <section>
-                    <div class="font-semibold text-xl mb-6 flex items-center justify-between">
-                        <div>
-                            <i class="pi pi-exclamation-triangle"></i> Hinweis zu: {{ barcode }}
-                        </div>
-                        <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
-                            <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis"
-                                inputId="hinweis_umgesetzt" name="size" value="Small" size="small" />
-                            <label for="hinweis_umgesetzt">Beachtet</label>
-                        </div>
-                        <div class="flex items-center gap-2" v-if="userRole === 'Produktion'">
-                            <Select v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
-                                optionLabel="titel" option-value="text" :filter="true" @change="setHinweis">
-                            </Select>
-                        </div>
-                    </div>
-                    <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '450px' }" />
-                    <br>
-                    <Button :disabled="!barcode" icon="pi pi-send" label="Speichern" class="w-full"
-                        @click="speichereHinweis()"></Button>
-                </section>
-            </div>
-        </div>
-
-        <div class="flex flex-col w-1/2 mt-1">
-            <div class="table-container">
-                <DataTable :value="hist" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="5">
-                    <template #header>
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <span class="text-xl font-bold">Verlauf</span>
-                        </div>
-                    </template>
-                    <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.7rem;">
-                        <template #body="slotProps">
-                            <span :class="statusClass(slotProps.data.status)">{{
-                                displayStatus(slotProps.data.status)
-                                }}</span>
-                        </template>
-                    </Column>
-                    <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.7rem"></Column>
-                    <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.7rem"></Column>
-                </DataTable>
-            </div>
-        </div>
+        <HistoryComponent />
     </Fluid>
     <br>
 </template>

@@ -3,8 +3,8 @@ import { defineStore } from 'pinia';
 
 export const useAppStore = defineStore('app', {
   state: () => ({
-    teamAndUserIds: [] as number[],
     isOnline: true as boolean,
+    teamAndUserIds: [] as number[],
   }),
   actions: {
     async onlineCheck() {

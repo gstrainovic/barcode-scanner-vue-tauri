@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import { useHistoryStore } from '@/stores/historyStore';
 import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 
 const historyStore = useHistoryStore();
-
 const { history } = storeToRefs(historyStore);
 
 onMounted(() => {
@@ -30,7 +29,6 @@ const displayStatus = (status: string) => {
         return status;
     }
 };
-
 </script>
 
 <template>

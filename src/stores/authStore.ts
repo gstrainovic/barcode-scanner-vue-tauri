@@ -6,10 +6,10 @@ let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: '' as string | null,
-    rolle: '' as string | null,
-    username: '' as string | null,
     id: 0 as number | null,
+    rolle: '' as string | null,
+    token: '' as string | null,
+    username: '' as string | null,
   }),
   getters: {
     userRole: (state) => state.rolle,
