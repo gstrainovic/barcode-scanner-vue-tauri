@@ -7,13 +7,13 @@ const teamStore = useTeamStore();
 const router = useRouter();
 const { team, checked, lagerUsers } = storeToRefs(teamStore);
 
-const nextPage = () => {
+const navigateToNextPage = () => {
     router.push('/');
 };
 
 </script>
 
-<style>
+<style scoped>
 html, body {
     margin: 0;
     padding: 0;
@@ -34,7 +34,7 @@ html, body {
                         </div>
                         <br>
                         <div class="flex items-center justify-center">
-                            <ToggleSwitch v-model="checked" id="toggleSwitch"
+                            <ToggleSwitch v-model:checked="checked" id="toggleSwitch"
                                 @update:modelValue="teamStore.onToggleChangeVerpackeAlleine">
                             </ToggleSwitch>
                             <label for="toggleSwitch" class="ml-2 mb-1 text-lg">Ich verpacke alleine</label>
@@ -51,7 +51,7 @@ html, body {
                     </div>
 
                     <div>
-                        <Button label="Weiter" class="w-full" @click="nextPage" />
+                        <Button label="Weiter" class="w-full" @click="navigateToNextPage" />
                     </div>
                 </div>
             </div>

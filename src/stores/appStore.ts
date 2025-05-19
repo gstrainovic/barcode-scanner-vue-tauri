@@ -18,7 +18,7 @@ export const useAppStore = defineStore('app', {
           return true;
         }
       } catch (error) {
-        console.error('An error occurred:', error);
+        console.error(`An error occurred while accessing ${url}:`, error);
         this.isOnline = false;
         return false;
       }
