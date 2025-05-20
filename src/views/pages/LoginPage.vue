@@ -4,11 +4,13 @@ import { useTeamStore } from '@/stores/teamStore';
 import { useRouter } from 'vue-router';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/authStore';
+import { useAppStore } from '@/stores/appStore';
 import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 
 const teamStore = useTeamStore();
+const appStore = useAppStore();
 const router = useRouter();
 const password = ref('');
 const loginFailed = ref(false);
@@ -27,6 +29,7 @@ const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
 
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
+        await appStore.setTeamAndUserIds();
         await arbeitszeitStore.login();
 
         if (userRole.value === 'Lager') {

@@ -21,6 +21,13 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Lager Users bleiben gespeichert beim F5 Refresh
 * [x] Toast und Notification oder nur Notification verwenden?
 * [x] Mit Ziffernblock auch CTRL + Vorlagen laden
+* [ ] pnpm check
+* [ ] code check von copilot
+* [ ] probieren auf awaits zu verzichten
+* [ ] absteigend soriteren die imports
+* [ ] imports alle nötig?
+* [ ] checkliste erstellen
+
 * [ ] Beim Starten sqlite kürzen auf 10'000 Barcodes Einträge, verhindert zu grosse Dateien
 * [ ] Sync
     - [ ] Beim Starten von Online zu sqlite synchronisieren

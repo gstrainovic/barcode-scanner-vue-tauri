@@ -1,5 +1,12 @@
 import config from '@/composables/config';
-import { defineStore } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
+import { useAuthStore } from './authStore';
+import { useTeamStore } from './teamStore';
+
+const authStore = useAuthStore();
+const { userId } = storeToRefs(authStore);
+const teamStore = useTeamStore();
+const { teamIds } = storeToRefs(teamStore);
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -25,6 +32,18 @@ export const useAppStore = defineStore('app', {
       this.isOnline = false;
       return false;
     },
+    async setTeamAndUserIds() {
+      const userIdNumber = userId.value;
+      if (!userIdNumber) {
+        console.error('User ID is not available. Please log in first.');
+        return;
+      }
+      if (teamIds.value.length > 0) {
+        this.teamAndUserIds = [...teamIds.value, userIdNumber];
+      } else {
+        this.teamAndUserIds = [userIdNumber];
+      }
+    }
   },
   persist: {
     storage: sessionStorage, // Speichert den Zustand im sessionStorage

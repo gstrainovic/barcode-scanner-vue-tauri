@@ -2,9 +2,12 @@ import { defineStore, storeToRefs } from 'pinia';
 import { hostname } from '@tauri-apps/plugin-os';
 import { useApi } from '@/composables/useApi';
 import { useAuthStore } from '@/stores/authStore';
+import { useAppStore } from '@/stores/appStore';
 
 const authStore = useAuthStore();
-const { userId } = storeToRefs(authStore);
+const { userRole } = storeToRefs(authStore);
+const appStore = useAppStore();
+const { teamAndUserIds } = storeToRefs(appStore);
 
 export enum ZeiterfassungTypEnum {
   Login = "login",
@@ -28,7 +31,7 @@ interface ZeiterfassungBody {
   mitarbeiter: number;
   login_or_logout: LoginOrLogoutEnum;
   geraete_name: string;
-  abteilung: AbteilungEnum;
+  abteilung: AbteilungEnum | string;
 }
 
 const protokolliereArbeitszeit = async (body: ZeiterfassungBody) => {
@@ -42,6 +45,21 @@ const protokolliereArbeitszeit = async (body: ZeiterfassungBody) => {
   console.log('protokolliereArbeitszeit:', result, data);
 }
 
+// const preCheck = () => {
+//   const userIdNumber = userId.value;
+//   if (!userIdNumber) {
+//     console.error('User ID is not available. Please log in first.');
+//   }
+//   const abteilung = userRole.value;
+//   if (!abteilung) {
+//     console.error('Abteilung is not available. Please log in first.');
+//   }
+//   return {
+//     userIdNumber,
+//     abteilung
+//   };
+// }
+
 
 export const useArbeitszeitStore = defineStore('arbeitszeit', {
   state: () => ({
@@ -52,21 +70,48 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
       this.deviceName =  await hostname();
       console.log('Host Name:', this.deviceName);
     },
-    async login() {
-      const userIdNumber = userId.value;
-      if (!userIdNumber) {
-        console.error('User ID is not available. Please log in first.');
+    async login(typ = ZeiterfassungTypEnum.Login) {
+      const abteilung = userRole.value;
+      if (!abteilung) {
+        console.error('Abteilung is not available. Please log in first.');
         return;
       }
-      const body: ZeiterfassungBody = {
-        typ: ZeiterfassungTypEnum.Login,
-        mitarbeiter: userIdNumber,
-        login_or_logout: LoginOrLogoutEnum.Login,
-        geraete_name: this.deviceName as string,
-        abteilung: AbteilungEnum.Produktion
-      };
-      await protokolliereArbeitszeit(body);
-    }
+      for (const userId of teamAndUserIds.value) {
+        const body: ZeiterfassungBody = {
+          typ,
+          mitarbeiter: userId,
+          login_or_logout: LoginOrLogoutEnum.Login,
+          geraete_name: this.deviceName as string,
+          abteilung
+        };
+        await protokolliereArbeitszeit(body);
+      }
+    },
+    async logout(typ = ZeiterfassungTypEnum.Logout) {
+      const abteilung = userRole.value;
+      if (!abteilung) {
+        console.error('Abteilung is not available. Please log in first.');
+        return;
+      }
+
+      for (const userId of teamAndUserIds.value) {
+        const body: ZeiterfassungBody = {
+          typ,
+          mitarbeiter: userId,
+          login_or_logout: LoginOrLogoutEnum.Logout,
+          geraete_name: this.deviceName as string,
+          abteilung
+        };
+        await protokolliereArbeitszeit(body);
+      }
+    },
+    async appSchliessung() {
+      await this.logout(ZeiterfassungTypEnum.AppSchliessung);
+    },
+    async nutzerWechsel() {
+      await this.logout(ZeiterfassungTypEnum.Nutzerwechsel);
+      await this.login(ZeiterfassungTypEnum.Nutzerwechsel);
+    },
   },
   persist: {
     storage: sessionStorage, // Speichert den Zustand im sessionStorage
