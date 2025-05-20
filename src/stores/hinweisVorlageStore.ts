@@ -1,11 +1,12 @@
 import { defineStore, storeToRefs } from 'pinia';
-import { HinweisVorlage } from '@/interfaces';
+import { Attributes, HinweisVorlage } from '@/interfaces';
 import { useApi } from '@/composables/useApi';
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { marked } from 'marked';
 
 const hinweisStore = useHinweisStore();
 const { hinweis } = storeToRefs(hinweisStore);
+const { fetchWithAuth } = await useApi();
 
 export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
   state: () => ({
@@ -24,8 +25,9 @@ export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
       return false;
     },
     async ladeHinweisVorlagen() {
-      const { getHinweisVorlagen } = await useApi();
-      this.hinweisVorlagen = await getHinweisVorlagen();
+      const response = await fetchWithAuth('hinweis-vorlagen?sort=strg:asc');
+      const attributes = response.data.map((item: Attributes) => item.attributes);
+      this.hinweisVorlagen = Array.isArray(attributes) ? attributes : [];
     },
     
     async setHinweis(event: HinweisVorlage | { text?: string; value?: string }) {

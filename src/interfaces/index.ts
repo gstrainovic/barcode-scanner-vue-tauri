@@ -21,3 +21,5 @@ export interface AuthResponse {
     };
     [key: string]: unknown;
 };
+
+export interface Attributes { attributes: { [key: string]: unknown } };

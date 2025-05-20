@@ -9,13 +9,52 @@ import { message } from '@tauri-apps/plugin-dialog';
 import { marked } from 'marked';
 import { getErrorToastMessage, getSuccessToastMessage } from '@/utils/toastUtils';
 import { defineStore } from 'pinia';
+import { strapi } from '@strapi/client';
 
 const barcodeStore = useBarcodeStore();
 const authStore = useAuthStore();
 const appStore = useAppStore();
-const { userRole, userId } = storeToRefs(authStore);
+const { userRole, userId, userToken } = storeToRefs(authStore);
 const { teamAndUserIds } = storeToRefs(appStore);
 const { barcode } = storeToRefs(barcodeStore);
+const Config = await config();
+const { fetchWithAuth } = await useApi();
+
+const token = userToken.value;
+if (!token) {
+    throw new Error('User token is not available. Please log in first.');
+}
+
+const client = strapi({
+    baseURL: Config.api.strapi,
+    auth: token
+});
+
+const getHinweisFromBarcode = async (barcode: string) => {
+    if (appStore.isOnline) {
+        const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1&sort=id:asc');
+        return response.data[0];
+    } else {
+        throw new Error('Offline mode not implemented yet!');
+    }
+};
+
+const postHinweis = async (id: string, hinweis: string, erstelltVon: number | null = null, hinweisUmgesetztVon: number[]) => {
+    if (appStore.isOnline) {
+        const barcodes = client.collection('barcodes');
+
+        const updateData: { hinweis: string; hinweis_erstellt_von?: number; hinweis_umgesetzt_von?: number[] } = { hinweis: hinweis };
+        if (erstelltVon !== null && erstelltVon !== undefined) {
+            updateData.hinweis_erstellt_von = erstelltVon;
+        }
+
+        updateData.hinweis_umgesetzt_von = hinweisUmgesetztVon;
+
+        const updatedBarcode = await barcodes.update(id, updateData);
+        return updatedBarcode;
+    }
+};
+
 
 export const useHinweisStore = defineStore('hinweis', {
   state: () => ({
@@ -24,8 +63,8 @@ export const useHinweisStore = defineStore('hinweis', {
     hinweisUmgesetzt: false,
   }),
   actions: {
+
     async ladeHinweis() {
-      const { getHinweisFromBarcode } = await useApi();
       const result = await getHinweisFromBarcode(barcode.value);
       const umgesetzt: boolean = result.attributes.hinweis_umgesetzt_von.data.length > 0;
       this.hinweisUmgesetzt = umgesetzt;
@@ -45,14 +84,13 @@ export const useHinweisStore = defineStore('hinweis', {
       }
     },
 
+
     async speichereHinweis() {
       let toastReturn;
-
 
       if (!barcode) {
         const Config = await config();
         const message = 'Bitte Barcode zuerst scannen';
-        // toast.add(getErrorToastMessage(message));
         toastReturn = getErrorToastMessage(message);
         sendNotification({
           title: Config.dialog.title,
@@ -71,15 +109,11 @@ export const useHinweisStore = defineStore('hinweis', {
       const teamUndUserIds = teamAndUserIds.value;
       const createdBy = userRole.value === 'Produktion' ? userID : null;
       const hinweisUmgesetztVon = this.hinweisUmgesetzt ? teamUndUserIds : [];
-      const { postHinweis } = await useApi();
       const result = await postHinweis(this.barcodeId, this.hinweis, createdBy, hinweisUmgesetztVon);
-
-      const Config = await config();
 
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
       if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == this.hinweis) {
         toastReturn = getSuccessToastMessage('Hinweis gespeichert.');
-        // toast.add(getSuccessToastMessage('Hinweis gespeichert.'));
         sendNotification({
           title: Config.dialog.title,
           body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',

@@ -23,11 +23,10 @@ onMounted(() => {
     initialize();
 });
 
-const logout = () => {
+const logout = async () => {
     sessionStorage.clear();
     router.push('/login');
 };
-
 
 const { userName, userRole } = storeToRefs(authStore);
 </script>

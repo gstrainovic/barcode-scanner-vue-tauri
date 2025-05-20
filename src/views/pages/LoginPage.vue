@@ -2,12 +2,11 @@
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useRouter } from 'vue-router';
-import { useApi, ZeiterfassungTypEnum, LoginOrLogoutEnum } from '@/composables/useApi';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/authStore';
-import { useAppStore } from '@/stores/appStore';
+import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const teamStore = useTeamStore();
 const router = useRouter();
@@ -15,26 +14,33 @@ const password = ref('');
 const loginFailed = ref(false);
 const email = ref('');
 const authStore = useAuthStore();
-const appStore = useAppStore(); 
 const { userRole } = storeToRefs(authStore);
 const { isDarkTheme } = useLayout();
+const arbeitszeitStore = useArbeitszeitStore();
 
+onMounted(async () => {
+    arbeitszeitStore.setDeviceName(); // einmalig den Gerätenamen setzen
+    teamStore.getUsersLager(); // einmalig die User für Lager holen
+});
 
 const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
+
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
-        const { protokolliereArbeitszeit } = await useApi();
-        await teamStore.getUsersLager();
-        await protokolliereArbeitszeit(ZeiterfassungTypEnum.Login, appStore.teamAndUserIds, LoginOrLogoutEnum.Login);
+        await arbeitszeitStore.login();
+
         if (userRole.value === 'Lager') {
             router.push('/team');
         } else {
             router.push('/');
         }
+
     } else {
+
         loginFailed.value = true;
     }
 };
+
 </script>
 
 <template>
