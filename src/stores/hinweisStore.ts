@@ -1,5 +1,4 @@
 import config from '@/composables/config';
-import { useToast } from "primevue/usetoast";
 import { useBarcodeStore } from './barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
@@ -11,7 +10,6 @@ import { marked } from 'marked';
 import { getErrorToastMessage, getSuccessToastMessage } from '@/utils/toastUtils';
 import { defineStore } from 'pinia';
 
-const toast = useToast();
 const barcodeStore = useBarcodeStore();
 const authStore = useAuthStore();
 const appStore = useAppStore();
@@ -48,15 +46,19 @@ export const useHinweisStore = defineStore('hinweis', {
     },
 
     async speichereHinweis() {
+      let toastReturn;
+
+
       if (!barcode) {
         const Config = await config();
         const message = 'Bitte Barcode zuerst scannen';
-        toast.add(getErrorToastMessage(message));
+        // toast.add(getErrorToastMessage(message));
+        toastReturn = getErrorToastMessage(message);
         sendNotification({
           title: Config.dialog.title,
           body: message,
         });
-        return;
+        return toastReturn;
       }
 
       const userID: number = Number(userId.value);
@@ -76,19 +78,21 @@ export const useHinweisStore = defineStore('hinweis', {
 
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
       if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == this.hinweis) {
-        toast.add(getSuccessToastMessage('Hinweis gespeichert.'));
+        toastReturn = getSuccessToastMessage('Hinweis gespeichert.');
+        // toast.add(getSuccessToastMessage('Hinweis gespeichert.'));
         sendNotification({
           title: Config.dialog.title,
           body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
         });
-        this.hinweisUmgesetzt = false; // Reset the toggle after saving
       } else {
-        toast.add(getErrorToastMessage('Fehler beim Speichern der Hinweis.'));
+        toastReturn = getErrorToastMessage('Fehler beim Speichern des Hinweises.');
         sendNotification({
           title: Config.dialog.title,
-          body: 'Fehler beim Speichern der Hinweis.',
+          body: 'Fehler beim Speichern des Hinweises.',
         });
+        this.hinweisUmgesetzt = false; 
       }
+      return toastReturn;
     },
   },
   persist: {

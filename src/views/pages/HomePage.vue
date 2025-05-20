@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import HistoryComponent from '@/components/HistoryComponent.vue';
+import HinweisComponent from '@/components/HinweisComponent.vue';
 import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
 import config from '@/composables/config';
 import { useToast } from "primevue/usetoast";
@@ -135,6 +136,7 @@ const processBarcode = async (binp = '') => {
             </div>
             <HinweisVorlagenComponent />
         </div>
+        <HinweisComponent />
         <HistoryComponent />
     </Fluid>
     <br>

@@ -1,18 +1,55 @@
 <script setup lang="ts">
+import { useHinweisStore } from '@/stores/hinweisStore';
 import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useToast } from 'primevue';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
+import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 
 const hinweisVorlageStore = useHinweisVorlageStore();
+const hinweisStore = useHinweisStore();
 const authStore = useAuthStore();
 const { userRole } = storeToRefs(authStore);
 const { hinweisVorlagen } = storeToRefs(hinweisVorlageStore);
+const toast = useToast();
+
+const registerHinweisVorlagenShortcuts = async () => {
+    // Erst abmelden, dann beide Varianten registrieren
+    await unregisterAll();
+    for (const vorlage of hinweisVorlagen.value) {
+        const hotkeyMain = 'CommandOrControl+' + vorlage.strg; // z.B. CommandOrControl+1
+        const hotkeyNumpad = 'CommandOrControl+Numpad' + vorlage.strg; // z.B. CommandOrControl+Numpad1
+
+
+        await register(hotkeyMain, async (event) => {
+            if (event.state === "Released") {
+                await hinweisVorlageStore.setHinweis(vorlage);
+                const toastMessage = await hinweisStore.speichereHinweis();
+                if (toastMessage) {
+                    toast.add(toastMessage);
+                }
+            }
+        });
+
+        await register(hotkeyNumpad, async (event) => {
+            if (event.state === "Released") {
+                await hinweisVorlageStore.setHinweis(vorlage);
+                const toastMessage = await hinweisStore.speichereHinweis();
+                if (toastMessage) {
+                    toast.add(toastMessage);
+                }
+            }
+        });
+    }
+}
+
+
 
 onMounted(async () => {
     if (userRole.value === 'Produktion') {
         await hinweisVorlageStore.ladeHinweisVorlagen();
-        await hinweisVorlageStore.registerHinweisVorlagenShortcuts();
+        await registerHinweisVorlagenShortcuts();
     }
 });
 </script>

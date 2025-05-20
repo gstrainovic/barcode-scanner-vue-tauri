@@ -4,6 +4,7 @@ import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useToast } from 'primevue/usetoast';
 import { storeToRefs } from 'pinia';
 const hinweisVorlageStore = useHinweisVorlageStore();
 const hinweisStore = useHinweisStore();
@@ -13,7 +14,17 @@ const { userRole } = storeToRefs(authStore);
 const { selectedVorlage , hinweisVorlagen} = storeToRefs(hinweisVorlageStore);
 const { hinweis, hinweisUmgesetzt,  } = storeToRefs(hinweisStore);
 const { barcode } = storeToRefs(barcodeStore);
+const toast = useToast();
+
+const speichereHinweis = async () => {
+    const toastMessage = await hinweisStore.speichereHinweis();
+    if (toastMessage) {
+        toast.add(toastMessage);
+    }
+};
+
 </script>
+
 
 <template>
     <div class="flex flex-col w-1/2 mt-1">
@@ -24,7 +35,7 @@ const { barcode } = storeToRefs(barcodeStore);
                         <i class="pi pi-exclamation-triangle"></i> Hinweis zu: {{ barcode }}
                     </div>
                     <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
-                        <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="hinweisStore.speichereHinweis"
+                        <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis"
                             inputId="hinweis_umgesetzt" name="size" value="Small" size="small" />
                         <label for="hinweis_umgesetzt">Beachtet</label>
                     </div>
@@ -37,7 +48,7 @@ const { barcode } = storeToRefs(barcodeStore);
                 <Editor :readonly="!barcode" v-model="hinweis" :style="{ height: '450px' }" />
                 <br>
                 <Button :disabled="!barcode" icon="pi pi-send" label="Speichern" class="w-full"
-                    @click="hinweisStore.speichereHinweis()"></Button>
+                    @click="speichereHinweis()"></Button>
             </section>
         </div>
     </div>

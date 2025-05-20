@@ -16,6 +16,7 @@ declare module 'vue' {
     FloatingConfigurator: typeof import('./src/components/FloatingConfigurator.vue')['default']
     Fluid: typeof import('primevue/fluid')['default']
     HinweisComponent: typeof import('./src/components/HinweisComponent.vue')['default']
+    HinweisVorlagenComponent: typeof import('./src/components/HinweisVorlagenComponent.vue')['default']
     HistoryComponent: typeof import('./src/components/HistoryComponent.vue')['default']
     IconField: typeof import('primevue/iconfield')['default']
     InputIcon: typeof import('primevue/inputicon')['default']
