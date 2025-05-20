@@ -36,7 +36,7 @@ export const useHinweisStore = defineStore('hinweis', {
       }
       this.barcodeId = result.id;
       this.hinweis = await marked.parse(result.attributes.hinweis || '');
-      if (result.attributes.hinweis) {
+      if (result.attributes.hinweis && userRole.value === 'Lager') {
         const Config = await config();
         message('Es gibt einen Hinweis zu Barcode ' + barcode.value, {
           title: Config.dialog.title,

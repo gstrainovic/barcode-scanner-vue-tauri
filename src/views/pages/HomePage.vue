@@ -47,7 +47,7 @@ const bringWindowToFront = async () => {
 
 const processBarcode = async (binp = '') => {
     // Falls es einen Hinweis gibt, muss dieser zuerst Beachtet werden
-    if (hinweis.value && hinweis.value !== '' && hinweisUmgesetzt.value === false) {
+    if (hinweis.value && !hinweisUmgesetzt.value && userRole.value === 'Lager') {
         const Config = await config();
         const message = 'Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
         toast.add(getErrorToastMessage(message));
