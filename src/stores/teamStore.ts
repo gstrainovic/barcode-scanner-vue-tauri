@@ -1,6 +1,6 @@
 import { User } from '@/interfaces';
 import { useAppStore } from './appStore';
-import { useApi } from '@/composables/useApi';
+import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { defineStore } from 'pinia';
 
 const appStore = useAppStore();
@@ -26,7 +26,6 @@ export const useTeamStore = defineStore('team', {
       }
     },
     async getUsersLager() {
-      const { fetchWithAuth } = await useApi();
       await appStore.onlineCheck();
       let result = [];
       if (appStore.isOnline) {

@@ -1,8 +1,8 @@
-import config from '@/composables/config';
+import config from '@/utils/config';
 import { useBarcodeStore } from './barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
-import { useApi } from '@/composables/useApi';
+import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { storeToRefs } from 'pinia';
 import { sendNotification } from '@tauri-apps/plugin-notification';
 import { message } from '@tauri-apps/plugin-dialog';
@@ -18,7 +18,6 @@ const { userRole, userId, userToken } = storeToRefs(authStore);
 const { teamAndUserIds } = storeToRefs(appStore);
 const { barcode } = storeToRefs(barcodeStore);
 const Config = await config();
-const { fetchWithAuth } = await useApi();
 
 const token = userToken.value;
 if (!token) {

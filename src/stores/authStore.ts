@@ -1,5 +1,5 @@
 import { AuthResponse } from '@/interfaces';
-import config from '../composables/config';
+import config from '../utils/config';
 import { defineStore } from 'pinia';
 
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;

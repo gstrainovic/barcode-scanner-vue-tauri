@@ -6,7 +6,6 @@ import { useToast } from 'primevue';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
-
 const hinweisVorlageStore = useHinweisVorlageStore();
 const hinweisStore = useHinweisStore();
 const authStore = useAuthStore();
@@ -15,12 +14,10 @@ const { hinweisVorlagen } = storeToRefs(hinweisVorlageStore);
 const toast = useToast();
 
 const registerHinweisVorlagenShortcuts = async () => {
-    // Erst abmelden, dann beide Varianten registrieren
     await unregisterAll();
     for (const vorlage of hinweisVorlagen.value) {
         const hotkeyMain = 'CommandOrControl+' + vorlage.strg; // z.B. CommandOrControl+1
         const hotkeyNumpad = 'CommandOrControl+Numpad' + vorlage.strg; // z.B. CommandOrControl+Numpad1
-
 
         await register(hotkeyMain, async (event) => {
             if (event.state === "Released") {
@@ -43,8 +40,6 @@ const registerHinweisVorlagenShortcuts = async () => {
         });
     }
 }
-
-
 
 onMounted(async () => {
     if (userRole.value === 'Produktion') {

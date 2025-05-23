@@ -22,9 +22,7 @@ const speichereHinweis = async () => {
         toast.add(toastMessage);
     }
 };
-
 </script>
-
 
 <template>
     <div class="flex flex-col w-1/2 mt-1">

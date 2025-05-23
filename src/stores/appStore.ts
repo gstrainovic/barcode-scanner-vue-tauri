@@ -1,4 +1,4 @@
-import config from '@/composables/config';
+import config from '@/utils/config';
 import { defineStore, storeToRefs } from 'pinia';
 import { useAuthStore } from './authStore';
 import { useTeamStore } from './teamStore';

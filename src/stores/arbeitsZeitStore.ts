@@ -1,6 +1,6 @@
 import { defineStore, storeToRefs } from 'pinia';
 import { hostname } from '@tauri-apps/plugin-os';
-import { useApi } from '@/composables/useApi';
+import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 
@@ -35,7 +35,6 @@ interface ZeiterfassungBody {
 }
 
 const protokolliereArbeitszeit = async (body: ZeiterfassungBody) => {
-  const { fetchWithAuth } = await useApi();
   const data = {
     ...body,
     zeitpunkt: new Date().toISOString()

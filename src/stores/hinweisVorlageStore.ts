@@ -1,12 +1,11 @@
 import { defineStore, storeToRefs } from 'pinia';
 import { Attributes, HinweisVorlage } from '@/interfaces';
-import { useApi } from '@/composables/useApi';
+import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { marked } from 'marked';
 
 const hinweisStore = useHinweisStore();
 const { hinweis } = storeToRefs(hinweisStore);
-const { fetchWithAuth } = await useApi();
 
 export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
   state: () => ({

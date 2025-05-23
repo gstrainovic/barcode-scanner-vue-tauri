@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { ref, onMounted } from 'vue';
-import { config } from '@/composables/config';
+import { config } from '@/utils/config';
 
 const version = ref('0.0.0')
 const router = useRouter();

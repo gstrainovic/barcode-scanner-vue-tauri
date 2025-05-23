@@ -21,15 +21,13 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Lager Users bleiben gespeichert beim F5 Refresh
 * [x] Toast und Notification oder nur Notification verwenden?
 * [x] Mit Ziffernblock auch CTRL + Vorlagen laden
-* [ ] team and  user ids nicht selber setzen sonder per appstore.xxx()
+* [x] team and user ids nicht selber setzen sonder per appstore.xxx()
 * [ ] zeiterfassung testen
     * [ ] login
     * [ ] logout
     * [ ] appschliessung
     * [ ] nutzerwechsel
 
-* [ ] pnpm check
-* [ ] code check von copilot
 * [ ] probieren auf awaits zu verzichten
 * [ ] absteigend soriteren die imports
 * [ ] imports alle nötig?
@@ -45,4 +43,6 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
     - [ ] Offline fähig
     - [ ] Wenn Online Barcodes synchronisieren
 * [ ] Alle Versionen hochladen in package.json und alle cargo.toml
+* [x] pnpm check
+* [ ] code check von copilot
 
