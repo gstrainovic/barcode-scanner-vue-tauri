@@ -1,8 +1,9 @@
 import { User } from '@/interfaces';
-import { useAuthStore } from './authStore';
 import { useAppStore } from './appStore';
 import { useApi } from '@/composables/useApi';
 import { defineStore } from 'pinia';
+
+const appStore = useAppStore();
 
 export const useTeamStore = defineStore('team', {
   state: () => ({
@@ -14,26 +15,18 @@ export const useTeamStore = defineStore('team', {
   actions: {
     changeTeam(event: { value: User[] }) {
       this.teamIds = event.value.map((user: User) => user.id);
-      const authStore = useAuthStore();
-      const appStore = useAppStore();
-      const userId = authStore.userId;
-      const teamAndUserIds = userId ? [...this.teamIds, userId] : this.teamIds;
-      appStore.teamAndUserIds = teamAndUserIds;
-      console.log('authStore.teamAndUserIds', appStore.teamAndUserIds);
+      appStore.setTeamAndUserIds();
     },
     onToggleChangeVerpackeAlleine(value: boolean) {
       this.checked = value;
       if (this.checked) {
         this.team = [];
         this.teamIds = [];
-        const authStore = useAuthStore();
-        const appStore = useAppStore();
-        appStore.teamAndUserIds = authStore.userId ? [authStore.userId] : [];
+        appStore.setTeamAndUserIds();
       }
     },
     async getUsersLager() {
       const { fetchWithAuth } = await useApi();
-      const appStore = useAppStore();
       await appStore.onlineCheck();
       let result = [];
       if (appStore.isOnline) {
