@@ -18,8 +18,9 @@ const { isDarkTheme } = useLayout();
 const arbeitszeitStore = useArbeitszeitStore();
 
 onMounted(async () => {
-    arbeitszeitStore.setDeviceName(); // einmalig den Gerätenamen setzen
-    teamStore.getUsersLager(); // einmalig die User für Lager holen
+    await arbeitszeitStore.setDeviceName(); // einmalig den Gerätenamen setzen
+    await teamStore.getUsersLager(); // einmalig die User für Lager holen
+    await appStore.onlineCheck();
 });
 
 const login = async () => {

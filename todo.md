@@ -22,14 +22,17 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Toast und Notification oder nur Notification verwenden?
 * [x] Mit Ziffernblock auch CTRL + Vorlagen laden
 * [x] team and user ids nicht selber setzen sonder per appstore.xxx()
+* [x] absteigend soriteren die imports
 * [ ] zeiterfassung testen
+* [x] Alle Versionen hochladen in package.json und alle cargo.toml
+* [x] pnpm check
+* [x] code check von copilot
     * [ ] login
     * [ ] logout
     * [ ] appschliessung
     * [ ] nutzerwechsel
 
 * [ ] probieren auf awaits zu verzichten
-* [ ] absteigend soriteren die imports
 * [ ] imports alle nötig?
 * [ ] checkliste erstellen
 
@@ -42,7 +45,4 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
         - [ ] Ausnahmen
     - [ ] Offline fähig
     - [ ] Wenn Online Barcodes synchronisieren
-* [ ] Alle Versionen hochladen in package.json und alle cargo.toml
-* [x] pnpm check
-* [ ] code check von copilot
 

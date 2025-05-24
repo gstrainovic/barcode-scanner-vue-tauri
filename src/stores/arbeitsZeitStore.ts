@@ -41,22 +41,6 @@ const protokolliereArbeitszeit = async (body: ZeiterfassungBody) => {
   console.log('protokolliereArbeitszeit:', result, data);
 }
 
-// const preCheck = () => {
-//   const userIdNumber = userId.value;
-//   if (!userIdNumber) {
-//     console.error('User ID is not available. Please log in first.');
-//   }
-//   const abteilung = userRole.value;
-//   if (!abteilung) {
-//     console.error('Abteilung is not available. Please log in first.');
-//   }
-//   return {
-//     userIdNumber,
-//     abteilung
-//   };
-// }
-
-
 export const useArbeitszeitStore = defineStore('arbeitszeit', {
   state: () => ({
     deviceName: null as string | null,
@@ -74,16 +58,28 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
         console.error('Abteilung is not available. Please log in first.');
         return;
       }
-      for (const userId of teamAndUserIds.value) {
-        const body: ZeiterfassungBody = {
-          typ,
-          mitarbeiter: userId,
-          login_or_logout: LoginOrLogoutEnum.Login,
-          geraete_name: this.deviceName as string,
-          abteilung
-        };
-        await protokolliereArbeitszeit(body);
-      }
+      // for (const userId of teamAndUserIds.value) {
+      //   const body: ZeiterfassungBody = {
+      //     typ,
+      //     mitarbeiter: userId,
+      //     login_or_logout: LoginOrLogoutEnum.Login,
+      //     geraete_name: this.deviceName as string,
+      //     abteilung
+      //   };
+      //   await protokolliereArbeitszeit(body);
+      // }
+      await Promise.all(
+        teamAndUserIds.value.map(async (userId) => {
+          const body: ZeiterfassungBody = {
+            typ,
+            mitarbeiter: userId,
+            login_or_logout: LoginOrLogoutEnum.Login,
+            geraete_name: this.deviceName as string,
+            abteilung
+          };
+          await protokolliereArbeitszeit(body);
+        })
+      );
     },
     async logout(typ = ZeiterfassungTypEnum.Logout) {
       const appStore = useAppStore();
@@ -95,16 +91,28 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
         return;
       }
 
-      for (const userId of teamAndUserIds.value) {
-        const body: ZeiterfassungBody = {
-          typ,
-          mitarbeiter: userId,
-          login_or_logout: LoginOrLogoutEnum.Logout,
-          geraete_name: this.deviceName as string,
-          abteilung
-        };
-        await protokolliereArbeitszeit(body);
-      }
+      // for (const userId of teamAndUserIds.value) {
+      //   const body: ZeiterfassungBody = {
+      //     typ,
+      //     mitarbeiter: userId,
+      //     login_or_logout: LoginOrLogoutEnum.Logout,
+      //     geraete_name: this.deviceName as string,
+      //     abteilung
+      //   };
+      //   await protokolliereArbeitszeit(body);
+      // }
+      await Promise.all(
+        teamAndUserIds.value.map(async (userId) => {
+          const body: ZeiterfassungBody = {
+            typ,
+            mitarbeiter: userId,
+            login_or_logout: LoginOrLogoutEnum.Logout,
+            geraete_name: this.deviceName as string,
+            abteilung
+          };
+          await protokolliereArbeitszeit(body);
+        })
+      );
     },
     async appSchliessung() {
       await this.logout(ZeiterfassungTypEnum.AppSchliessung);

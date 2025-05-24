@@ -29,7 +29,6 @@ export const useTeamStore = defineStore('team', {
     },
     async getUsersLager() {
       const appStore = useAppStore();
-      await appStore.onlineCheck();
       let result = [];
       if (appStore.isOnline) {
         const response = await fetchWithAuth('users?filters[rolle][$eq]=Lager');
