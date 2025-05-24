@@ -23,17 +23,17 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Mit Ziffernblock auch CTRL + Vorlagen laden
 * [x] team and user ids nicht selber setzen sonder per appstore.xxx()
 * [x] absteigend soriteren die imports
-* [ ] zeiterfassung testen
 * [x] Alle Versionen hochladen in package.json und alle cargo.toml
 * [x] pnpm check
 * [x] code check von copilot
+* [x] probieren auf awaits zu verzichten
+* [x] imports alle nötig?
+* [ ] zeiterfassung testen
     * [ ] login
     * [ ] logout
     * [ ] appschliessung
     * [ ] nutzerwechsel
 
-* [ ] probieren auf awaits zu verzichten
-* [ ] imports alle nötig?
 * [ ] checkliste erstellen
 
 * [ ] Beim Starten sqlite kürzen auf 10'000 Barcodes Einträge, verhindert zu grosse Dateien

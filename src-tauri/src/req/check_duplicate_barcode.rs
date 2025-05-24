@@ -34,21 +34,6 @@ pub async fn is_barcode_duplicate(jwt: &str, barcode: &str, user_id: &i32) -> Re
     // println!("is_barcode_duplicate: res: {:?}", res);
 
     if res.data.len() > 0 {
-        // let created_at = &res.data[0].attributes.createdAt;
-        // println!("is_barcode_duplicate: createdAt: {}", created_at);
-        
-        // // if the last barcode was created less than 24 g ago, it's a duplicate
-        // let now = chrono::Utc::now();
-        // let last_barcode_created_at = chrono::DateTime::parse_from_rfc3339(created_at).unwrap();
-        // let duration = now.signed_duration_since(last_barcode_created_at);
-        // let days = duration.num_days();
-        // println!("is_barcode_duplicate: days: {}", days);
-        // if days < 1 {
-        //     return Ok(true);
-        // } else {
-        //     return Ok(false);
-        // }
-
         return Ok(true);
 
     } else {

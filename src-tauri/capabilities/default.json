@@ -7,7 +7,6 @@
   ],
   "permissions": [
     "core:default",
-    "opener:default",
     "core:window:allow-maximize",
     "core:window:allow-set-enabled",
     "core:window:allow-set-focus",

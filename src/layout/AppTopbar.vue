@@ -22,13 +22,8 @@ const logout = async () => {
 };
 
 onMounted(() => {
-    const initialize = async () => {
-        version.value = config.version;
-    };
-    initialize();
+    version.value = config.version;
 });
-
-
 </script>
 
 <template>
