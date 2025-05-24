@@ -7,7 +7,6 @@ import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { ref, onMounted } from 'vue';
 import { Config } from '@/utils/config';
-const config = await Config();
 const version = ref('0.0.0')
 const router = useRouter();
 const authStore = useAuthStore();
@@ -21,7 +20,8 @@ const logout = async () => {
     router.push('/login');
 };
 
-onMounted(() => {
+onMounted(async () => {
+    const config = await Config();
     version.value = config.version;
 });
 </script>

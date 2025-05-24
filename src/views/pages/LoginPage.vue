@@ -8,7 +8,6 @@ import { useAppStore } from '@/stores/appStore';
 import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
-const teamStore = useTeamStore();
 const appStore = useAppStore();
 const router = useRouter();
 const password = ref('');
@@ -19,14 +18,15 @@ const arbeitszeitStore = useArbeitszeitStore();
 
 onMounted(async () => {
     await arbeitszeitStore.setDeviceName(); // einmalig den Gerätenamen setzen
-    await teamStore.getUsersLager(); // einmalig die User für Lager holen
-    await appStore.onlineCheck();
+    await appStore.onlineCheck(); // einmalig den Online-Status setzen
 });
 
 const login = async () => {
-    const authStore = useAuthStore();
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
+    const authStore = useAuthStore();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
+        const teamStore = useTeamStore();
+        await teamStore.getUsersLager(); // einmalig die User für Lager holen
         const { userRole } = storeToRefs(authStore);
         await appStore.setTeamAndUserIds();
         await arbeitszeitStore.login();
@@ -39,7 +39,6 @@ const login = async () => {
         loginFailed.value = true;
     }
 };
-
 </script>
 
 <template>

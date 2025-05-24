@@ -48,7 +48,6 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
   actions: {
     async setDeviceName() {
       this.deviceName = await hostname();
-      console.log('Host Name:', this.deviceName);
     },
     async login(typ = ZeiterfassungTypEnum.Login) {
       const appStore = useAppStore();
