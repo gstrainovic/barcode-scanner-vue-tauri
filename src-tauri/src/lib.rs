@@ -1,12 +1,15 @@
 use multiinput::{KeyId, RawEvent, RawInputManager, State};
 use native_dialog::DialogBuilder;
 use sqlite::get_history;
+use sqlite::reduce_history;
 use std::sync::Arc;
 use std::thread;
 use tauri::AppHandle;
 use tauri::Emitter;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
+use std::env;
+mod config;
 
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
     let my_windows_hwnd = unsafe {
@@ -16,12 +19,13 @@ pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
 }
 
 fn check_single_instance() {
+    let config = config::Config::from_env();
     let hwnd_of_barcode_scanner = get_hwnd_barcode_scanner();
     if hwnd_of_barcode_scanner != std::ptr::null_mut() {
         let message = "Die Anwendung ist bereits geöffnet.";
         println!("{}", message);
         let _ = DialogBuilder::message()
-            .set_title(config::DIALOG_TITLE)
+            .set_title(config.dialog.title)
             .set_text(message)
             .alert()
             .show();
@@ -30,22 +34,8 @@ fn check_single_instance() {
 }
 
 #[tauri::command]
-fn get_version() -> String {
-    config::VERSION.to_string()
-}
-
-#[tauri::command]
-fn get_strapi_url() -> String {
-    config::STRAPI_URL.to_string()
-}
-
-#[tauri::command]
-fn get_dialog_title() -> String {
-    config::DIALOG_TITLE.to_string()
-}
-
-#[tauri::command]
 fn update(app: AppHandle) {
+    let config = config::Config::from_env();
     println!("Checking for updates...");
     if let Ok(update) = self_update::backends::github::Update::configure()
         .repo_owner("gstrainovic")
@@ -66,7 +56,7 @@ fn update(app: AppHandle) {
                 app.dialog()
                     .message(message.as_str())
                     .kind(tauri_plugin_dialog::MessageDialogKind::Info)
-                    .title(config::DIALOG_TITLE)
+                    .title(config.dialog.title)
                     .blocking_show();
 
                 app.restart();
@@ -84,6 +74,7 @@ fn update(app: AppHandle) {
 
 #[tauri::command]
 fn start_looper(app: AppHandle) {
+    let config = config::Config::from_env();
     let app_clone = app.clone();
     thread::spawn(move || {
         let mut manager = RawInputManager::new().unwrap();
@@ -103,7 +94,7 @@ fn start_looper(app: AppHandle) {
                     .message(message)
                     .kind(tauri_plugin_dialog::MessageDialogKind::Error)
                     .buttons(tauri_plugin_dialog::MessageDialogButtons::OkCancel)
-                    .title(config::DIALOG_TITLE)
+                    .title(config.dialog.title)
                     .blocking_show();
 
                 match ask {
@@ -145,6 +136,7 @@ fn start_looper(app: AppHandle) {
     });
 }
 
+#[allow(non_snake_case)]
 fn key_id_to_char(key_id: &KeyId) -> Option<char> {
     use multiinput::KeyId::*;
     match key_id {
@@ -200,7 +192,10 @@ fn load_history() -> Result<serde_json::Value, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    dotenv::dotenv().ok();
+    let config = config::Config::from_env();
     check_single_instance();
+    reduce_history();
     tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
@@ -222,7 +217,7 @@ pub fn run() {
                 let ans = window
                     .dialog()
                     .message("Möchten Sie die Anwendung wirklich schließen?")
-                    .title(config::DIALOG_TITLE)
+                    .title(config.dialog.title)
                     .buttons(tauri_plugin_dialog::MessageDialogButtons::YesNo)
                     .blocking_show();
                 match ans {

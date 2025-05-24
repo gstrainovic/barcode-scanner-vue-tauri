@@ -9,6 +9,7 @@ use req::{
 };
 
 use tauri_plugin_notification::NotificationExt;
+use crate::config::Config;
 
 static mut ERROR_STATUS: super::errors::Status = super::errors::Status::Ok;
 
@@ -29,6 +30,8 @@ pub fn history_add(
     app: &tauri::AppHandle,
 ) {
     unsafe { ERROR_STATUS = status.status };
+
+    let config = Config::load_config();
 
     create_history(
         &status.message,
@@ -54,7 +57,7 @@ pub fn history_add(
 
     app.notification()
             .builder()
-            .title(config::DIALOG_TITLE)
+            .title(config.dialog.title)
             .body(&format!("{} {} ist {}", prefix_warn_icon, barcode_c, new_status_message))
             .show()
             .unwrap();

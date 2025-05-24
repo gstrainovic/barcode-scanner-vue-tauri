@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use config::STRAPI_URL;
+use crate::config::Config;
 
 #[derive(Deserialize, Debug)]
 pub struct Response {
@@ -20,7 +20,8 @@ pub struct Attributes {
 
 #[tokio::main]
 pub async fn is_barcode_duplicate(jwt: &str, barcode: &str, user_id: &i32) -> Result<bool, reqwest::Error> {
-    let url = format!("{}/api/barcodes?filters[barcode][$eq]={}&filters[users_permissions_user][id][$eq]={}&sort=createdAt:DESC", STRAPI_URL, barcode, user_id);
+    let config = Config::new();
+    let url = format!("{}/api/barcodes?filters[barcode][$eq]={}&filters[users_permissions_user][id][$eq]={}&sort=createdAt:DESC", config.api.strapi, barcode, user_id);
     let client = reqwest::Client::new();
 
     let res = client

@@ -23,6 +23,8 @@ use req::get_leitcodes::IdAtr;
 use schema::ausnahmen::{self};
 use schema::leitcodes::{self};
 
+const HISTORY_LIMIT: i64 = 10000;
+
 fn run_migrations<DB: diesel::backend::Backend>(connection: &mut impl MigrationHarness<DB>) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     // This will run the necessary migrations.
     //
@@ -105,7 +107,33 @@ pub fn is_barcode_duplicate_sqlite(barcode_string: &str) -> bool {
     }
 }
 
-    
+// function to reduce the history table to the last 200 entries
+pub fn reduce_history() {
+    use schema::history::dsl::*;
+
+    let conn = &mut establish_connection();
+
+    let history_count = history.count().get_result::<i64>(conn).unwrap();
+
+    if history_count > HISTORY_LIMIT {
+        // Find the threshold id to delete all older entries
+        let threshold_id_opt = history
+            .select(id)
+            .order(id.desc())
+            .offset(HISTORY_LIMIT - 1)
+            .first::<i32>(conn)
+            .optional()
+            .expect("Error finding threshold id for history deletion");
+
+        if let Some(threshold_id) = threshold_id_opt {
+            let deleted_rows = diesel::delete(history.filter(id.lt(threshold_id)))
+                .execute(conn)
+                .expect("Error deleting old history");
+
+            println!("Deleted {} rows from history", deleted_rows);
+        }
+    }
+}
 
 
 pub fn get_history() -> Result<serde_json::Value, String> {
@@ -113,7 +141,7 @@ pub fn get_history() -> Result<serde_json::Value, String> {
 
     let history_records = history::table
         .order(history::timestamp.desc())
-        .limit(200)
+        .limit(HISTORY_LIMIT)
         .load::<History>(conn)
         .unwrap_or_else(|error| {
             eprintln!("Error loading history: {}", error);

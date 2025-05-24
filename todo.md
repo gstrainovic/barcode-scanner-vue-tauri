@@ -28,6 +28,11 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] code check von copilot
 * [x] probieren auf awaits zu verzichten
 * [x] imports alle nötig?
+* [x] gemeinsame .env benutzen
+
+testen:
+* [ ] Beim Starten sqlite verlauf kürzen auf 200 Barcodes Einträge, verhindert zu grosse Dateien
+
 * [ ] zeiterfassung testen
     * [ ] login
     * [ ] logout
@@ -36,7 +41,6 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 
 * [ ] checkliste erstellen
 
-* [ ] Beim Starten sqlite kürzen auf 10'000 Barcodes Einträge, verhindert zu grosse Dateien
 * [ ] Sync
     - [ ] Beim Starten von Online zu sqlite synchronisieren
         - [ ] Leticodes

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Funktion, um die nächste Version zu generieren
 generate_next_version() {
     # Abrufen der neuesten Version von GitHub-Releases
@@ -15,11 +14,3 @@ generate_next_version() {
     PATCH=$((PATCH + 1))
     echo "$MAJOR.$MINOR.$PATCH"
 }
-
-# Neue Version generieren
-NEW_VERSION=$(generate_next_version)
-echo "Neue Version: $NEW_VERSION"
-
-git tag v$NEW_VERSION
-git push origin v$NEW_VERSION
-gh release create v$NEW_VERSION ./src-tauri/target/release/$NEW_VERSION-barcode_scanner-x86_64-pc-windows-msvc.zip --notes v$NEW_VERSION

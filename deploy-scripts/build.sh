@@ -1,20 +1,5 @@
 #!/bin/bash
-
-# Funktion, um die nächste Version zu generieren
-generate_next_version() {
-    # Abrufen der neuesten Version von GitHub-Releases
-    LATEST_VERSION=$(gh release list --limit 1 | awk 'NR==1 {print $3}' | sed 's/^v//')
-    
-    if [ -z "$LATEST_VERSION" ]; then
-        echo "Konnte die neueste Version nicht abrufen. Stellen Sie sicher, dass 'gh' korrekt konfiguriert ist."
-        exit 1
-    fi
-
-    # Version inkrementieren (nur Patch-Level)
-    IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
-    PATCH=$((PATCH + 1))
-    echo "$MAJOR.$MINOR.$PATCH"
-}
+source ./utils.sh
 
 # Neue Version generieren
 NEW_VERSION=$(generate_next_version)
@@ -44,11 +29,12 @@ else
     exit 1
 fi
 
-if [ -f "src-tauri/src/config/src/lib.rs" ]; then
-    sed -i.bak -E "s/(^pub const VERSION : &str = )\".*\";/\1\"$NEW_VERSION\";/" src-tauri/src/config/src/lib.rs
-    echo "Version in src-tauri/src/config/src/lib.rs auf $NEW_VERSION geändert."
+#.env VITE_VERSION
+if [ -f ".env" ]; then
+    sed -i.bak -E "s/VITE_VERSION=.*/VITE_VERSION=$NEW_VERSION/" .env
+    echo "Version in .env auf $NEW_VERSION geändert."
 else
-    echo "src-tauri/src/config/src/lib.rs nicht gefunden!"
+    echo ".env nicht gefunden!"
     exit 1
 fi
 
