@@ -6,10 +6,10 @@ import { useToast } from 'primevue';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
-const hinweisVorlageStore = useHinweisVorlageStore();
 const hinweisStore = useHinweisStore();
 const authStore = useAuthStore();
 const { userRole } = storeToRefs(authStore);
+const hinweisVorlageStore = useHinweisVorlageStore();
 const { hinweisVorlagen } = storeToRefs(hinweisVorlageStore);
 const toast = useToast();
 

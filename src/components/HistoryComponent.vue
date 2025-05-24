@@ -2,7 +2,6 @@
 import { useHistoryStore } from '@/stores/historyStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
-
 const historyStore = useHistoryStore();
 const { history } = storeToRefs(historyStore);
 

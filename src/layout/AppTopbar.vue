@@ -6,29 +6,29 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { ref, onMounted } from 'vue';
-import { config } from '@/utils/config';
-
+import { Config } from '@/utils/config';
+const config = await Config();
 const version = ref('0.0.0')
 const router = useRouter();
 const authStore = useAuthStore();
 const appStore = useAppStore();
 const { toggleDarkMode, isDarkTheme } = useLayout();
 const { isOnline } = storeToRefs(appStore)
-
-onMounted(() => {
-    const initialize = async () => {
-        const Config = await config();
-        version.value = Config.version;
-    };
-    initialize();
-});
+const { userName, userRole } = storeToRefs(authStore);
 
 const logout = async () => {
     sessionStorage.clear();
     router.push('/login');
 };
 
-const { userName, userRole } = storeToRefs(authStore);
+onMounted(() => {
+    const initialize = async () => {
+        version.value = config.version;
+    };
+    initialize();
+});
+
+
 </script>
 
 <template>

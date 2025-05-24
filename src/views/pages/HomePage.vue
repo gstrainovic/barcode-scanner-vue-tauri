@@ -2,7 +2,7 @@
 import HistoryComponent from '@/components/HistoryComponent.vue';
 import HinweisComponent from '@/components/HinweisComponent.vue';
 import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
-import config from '@/utils/config';
+import Config from '@/utils/config';
 import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
 import { useHistoryStore } from '@/stores/historyStore';
@@ -19,18 +19,10 @@ import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } 
 import { getCurrentWindow } from '@tauri-apps/api/window';
 const toast = useToast();
 const teamStore = useTeamStore();
-const historyStore = useHistoryStore();
-const hinweisVorlageStore = useHinweisVorlageStore();
-const hinweisStore = useHinweisStore();
-const barcodeStore = useBarcodeStore();
 const barcodeInput = ref('');
 const authStore = useAuthStore();
 const { userRole, userId, userToken } = storeToRefs(authStore);
 const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
-const { selectedVorlage } = storeToRefs(hinweisVorlageStore);
-const { history } = storeToRefs(historyStore);
-const { hinweis, hinweisUmgesetzt } = storeToRefs(hinweisStore);
-const { barcode } = storeToRefs(barcodeStore);
 
 listen('sendebarcode', (event) => {
     processBarcode(event.payload as string);
@@ -46,13 +38,22 @@ const bringWindowToFront = async () => {
 };
 
 const processBarcode = async (binp = '') => {
+    const barcodeStore = useBarcodeStore();
+    const { barcode } = storeToRefs(barcodeStore);
+    const hinweisStore = useHinweisStore();
+    const { hinweis, hinweisUmgesetzt } = storeToRefs(hinweisStore);
+    const historyStore = useHistoryStore();
+    const { history } = storeToRefs(historyStore);
+    const hinweisVorlageStore = useHinweisVorlageStore();
+    const { selectedVorlage } = storeToRefs(hinweisVorlageStore);
+
     // Falls es einen Hinweis gibt, muss dieser zuerst Beachtet werden
     if (hinweis.value && !hinweisUmgesetzt.value && userRole.value === 'Lager') {
-        const Config = await config();
+        const config = await Config();
         const message = 'Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
         toast.add(getErrorToastMessage(message));
         sendNotification({
-            title: Config.dialog.title,
+            title: config.dialog.title,
             body: message,
         });
         barcodeInput.value = '';
@@ -128,8 +129,9 @@ const processBarcode = async (binp = '') => {
                                 @update:modelValue="teamStore.onToggleChangeVerpackeAlleine"></ToggleSwitch>
                             <label for="toggleSwitch" class="text-lg">Ich verpacke alleine</label>
                         </div>
-                        <MultiSelect v-model="team" :options="lagerUsers" optionLabel="username" @change="teamStore.changeTeam"
-                            placeholder="Mitarbeiter auswählen" :filter="true" v-show="!checked">
+                        <MultiSelect v-model="team" :options="lagerUsers" optionLabel="username"
+                            @change="teamStore.changeTeam" placeholder="Mitarbeiter auswählen" :filter="true"
+                            v-show="!checked">
                         </MultiSelect>
                     </div>
                 </div>

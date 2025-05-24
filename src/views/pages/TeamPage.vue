@@ -2,7 +2,6 @@
 import { useTeamStore } from '@/stores/teamStore';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-
 const teamStore = useTeamStore();
 const router = useRouter();
 const { team, checked, lagerUsers } = storeToRefs(teamStore);
@@ -10,7 +9,6 @@ const { team, checked, lagerUsers } = storeToRefs(teamStore);
 const navigateToNextPage = () => {
     router.push('/');
 };
-
 </script>
 
 <style scoped>

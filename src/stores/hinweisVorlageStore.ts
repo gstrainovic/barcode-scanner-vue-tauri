@@ -4,8 +4,7 @@ import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { marked } from 'marked';
 
-const hinweisStore = useHinweisStore();
-const { hinweis } = storeToRefs(hinweisStore);
+
 
 export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
   state: () => ({
@@ -13,7 +12,7 @@ export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
     selectedVorlage: '',
   }),
   actions: {
-    async checkBarcodeMatchWithVorlageBarcode (barcodeInput: string) {
+    async checkBarcodeMatchWithVorlageBarcode(barcodeInput: string) {
       if (this.hinweisVorlagen.length > 0 && barcodeInput) {
         const barcodeVorlage = this.hinweisVorlagen.find((vorlage) => vorlage.barcode === barcodeInput);
         if (barcodeVorlage) {
@@ -28,8 +27,10 @@ export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
       const attributes = response.data.map((item: Attributes) => item.attributes);
       this.hinweisVorlagen = Array.isArray(attributes) ? attributes : [];
     },
-    
+
     async setHinweis(event: HinweisVorlage | { text?: string; value?: string }) {
+      const hinweisStore = useHinweisStore();
+      const { hinweis } = storeToRefs(hinweisStore);
       console.log('setHinweis', event);
       const hinweisInput = (event as HinweisVorlage).text || (event as { value?: string }).value;
       console.log('hinweisInput', hinweisInput);

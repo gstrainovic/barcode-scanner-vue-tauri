@@ -3,7 +3,6 @@ import { useAppStore } from './appStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { defineStore } from 'pinia';
 
-const appStore = useAppStore();
 
 export const useTeamStore = defineStore('team', {
   state: () => ({
@@ -14,10 +13,13 @@ export const useTeamStore = defineStore('team', {
   }),
   actions: {
     changeTeam(event: { value: User[] }) {
+      const appStore = useAppStore();
       this.teamIds = event.value.map((user: User) => user.id);
       appStore.setTeamAndUserIds();
     },
     onToggleChangeVerpackeAlleine(value: boolean) {
+      const appStore = useAppStore();
+
       this.checked = value;
       if (this.checked) {
         this.team = [];
@@ -26,6 +28,7 @@ export const useTeamStore = defineStore('team', {
       }
     },
     async getUsersLager() {
+      const appStore = useAppStore();
       await appStore.onlineCheck();
       let result = [];
       if (appStore.isOnline) {

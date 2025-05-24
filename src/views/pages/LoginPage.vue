@@ -8,15 +8,12 @@ import { useAppStore } from '@/stores/appStore';
 import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
-
 const teamStore = useTeamStore();
 const appStore = useAppStore();
 const router = useRouter();
 const password = ref('');
 const loginFailed = ref(false);
 const email = ref('');
-const authStore = useAuthStore();
-const { userRole } = storeToRefs(authStore);
 const { isDarkTheme } = useLayout();
 const arbeitszeitStore = useArbeitszeitStore();
 
@@ -26,20 +23,18 @@ onMounted(async () => {
 });
 
 const login = async () => {
+    const authStore = useAuthStore();
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
-
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
+        const { userRole } = storeToRefs(authStore);
         await appStore.setTeamAndUserIds();
         await arbeitszeitStore.login();
-
         if (userRole.value === 'Lager') {
             router.push('/team');
         } else {
             router.push('/');
         }
-
     } else {
-
         loginFailed.value = true;
     }
 };
@@ -57,15 +52,20 @@ const login = async () => {
                     <div class="col-12 mt-2 xl:mt-0 text-center">
                         <img :src="isDarkTheme ? '/images/logo.svg' : '/images/logo-white.svg'"
                             class="b-8 w-16 shrink-0 mx-auto mb-12" style="width:300px; height:100px;">
-                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Barcode Scanner</div>
+                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Barcode Scanner
+                        </div>
                         <br>
                         <br>
                     </div>
                     <div>
-                        <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Benutzername</label>
-                        <InputText id="email1" type="text" placeholder="Benutzername" class="w-full md:w-[30rem] mb-8" v-model="email" />
-                        <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Passwort</label>
-                        <Password id="password1" v-model="password" placeholder="Passwort" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
+                        <label for="email1"
+                            class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Benutzername</label>
+                        <InputText id="email1" type="text" placeholder="Benutzername" class="w-full md:w-[30rem] mb-8"
+                            v-model="email" />
+                        <label for="password1"
+                            class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Passwort</label>
+                        <Password id="password1" v-model="password" placeholder="Passwort" :toggleMask="true"
+                            class="mb-4" fluid :feedback="false"></Password>
                         <Button @click.prevent="login" label="Anmelden" class="w-full p-3 text-xl" />
                         <Message v-if="loginFailed" severity="error">Anmeldung fehlgeschlagen</Message>
                     </div>

@@ -3,11 +3,8 @@ import { hostname } from '@tauri-apps/plugin-os';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
-
 const authStore = useAuthStore();
 const { userRole } = storeToRefs(authStore);
-const appStore = useAppStore();
-const { teamAndUserIds } = storeToRefs(appStore);
 
 export enum ZeiterfassungTypEnum {
   Login = "login",
@@ -66,10 +63,12 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
   }),
   actions: {
     async setDeviceName() {
-      this.deviceName =  await hostname();
+      this.deviceName = await hostname();
       console.log('Host Name:', this.deviceName);
     },
     async login(typ = ZeiterfassungTypEnum.Login) {
+      const appStore = useAppStore();
+      const { teamAndUserIds } = storeToRefs(appStore);
       const abteilung = userRole.value;
       if (!abteilung) {
         console.error('Abteilung is not available. Please log in first.');
@@ -87,6 +86,9 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
       }
     },
     async logout(typ = ZeiterfassungTypEnum.Logout) {
+      const appStore = useAppStore();
+      const { teamAndUserIds } = storeToRefs(appStore);
+
       const abteilung = userRole.value;
       if (!abteilung) {
         console.error('Abteilung is not available. Please log in first.');

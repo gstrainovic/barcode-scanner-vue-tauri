@@ -17,6 +17,7 @@ const { barcode } = storeToRefs(barcodeStore);
 const toast = useToast();
 
 const speichereHinweis = async () => {
+    const hinweisStore = useHinweisStore();
     const toastMessage = await hinweisStore.speichereHinweis();
     if (toastMessage) {
         toast.add(toastMessage);

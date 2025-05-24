@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 
-export const config = async () => {
+export const Config = async () => {
   const strapiUrl = await invoke('get_strapi_url');
   const dialogTitle : string = await invoke('get_dialog_title');
   const version : string = await invoke('get_version');
@@ -15,4 +15,4 @@ export const config = async () => {
   };
 };
 
-export default config;
+export default Config;

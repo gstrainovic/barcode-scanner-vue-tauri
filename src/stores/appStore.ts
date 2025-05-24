@@ -1,12 +1,7 @@
-import config from '@/utils/config';
+import Config from '@/utils/config';
 import { defineStore, storeToRefs } from 'pinia';
 import { useAuthStore } from './authStore';
 import { useTeamStore } from './teamStore';
-
-const authStore = useAuthStore();
-const { userId } = storeToRefs(authStore);
-const teamStore = useTeamStore();
-const { teamIds } = storeToRefs(teamStore);
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -15,8 +10,8 @@ export const useAppStore = defineStore('app', {
   }),
   actions: {
     async onlineCheck() {
-      const configData = await config();
-      const url = configData.api.strapi.replace('/api', '');
+      const config = await Config();
+      const url = config.api.strapi.replace('/api', '');
       try {
         const response = await fetch(url, { method: 'GET' });
         const text = await response.text();
@@ -33,6 +28,10 @@ export const useAppStore = defineStore('app', {
       return false;
     },
     async setTeamAndUserIds() {
+      const authStore = useAuthStore();
+      const { userId } = storeToRefs(authStore);
+      const teamStore = useTeamStore();
+      const { teamIds } = storeToRefs(teamStore);
       const userIdNumber = userId.value;
       if (!userIdNumber) {
         console.error('User ID is not available. Please log in first.');

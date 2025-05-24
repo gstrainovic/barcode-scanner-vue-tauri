@@ -11,20 +11,14 @@ import { invoke } from '@tauri-apps/api/core';
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
 import { useLayout } from '@/layout/composables/layout';
-
-invoke('start_looper')
-invoke('update')
-
 const { layoutConfig } = useLayout();
-
 if (layoutConfig.darkTheme) {
     document.documentElement.classList.add('app-dark');
 }
-
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate);
-const app = createApp(App);
 
+const app = createApp(App);
 app.use(router);
 app.use(PrimeVue, {
     theme: {
@@ -37,5 +31,8 @@ app.use(PrimeVue, {
 app.use(ToastService);
 app.use(ConfirmationService);
 app.use(pinia)
+
+invoke('update')
+invoke('start_looper')
 
 app.mount('#app');
