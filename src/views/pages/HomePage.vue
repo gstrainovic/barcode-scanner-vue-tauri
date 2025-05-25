@@ -2,7 +2,7 @@
 import HistoryComponent from '@/components/HistoryComponent.vue';
 import HinweisComponent from '@/components/HinweisComponent.vue';
 import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
-import Config from '@/utils/config';
+import { config } from '@/utils/config';
 import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
 import { useHistoryStore } from '@/stores/historyStore';
@@ -49,7 +49,6 @@ const processBarcode = async (binp = '') => {
 
     // Falls es einen Hinweis gibt, muss dieser zuerst Beachtet werden
     if (hinweis.value && !hinweisUmgesetzt.value && userRole.value === 'Lager') {
-        const config = await Config();
         const message = 'Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
         toast.add(getErrorToastMessage(message));
         sendNotification({

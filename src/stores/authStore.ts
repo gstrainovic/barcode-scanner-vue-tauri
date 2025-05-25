@@ -1,5 +1,5 @@
 import { AuthResponse } from '@/interfaces';
-import Config from '../utils/config';
+import {config} from '../utils/config';
 import { defineStore } from 'pinia';
 
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -25,8 +25,7 @@ export const useAuthStore = defineStore('auth', {
 
       return new Promise<boolean>((resolve) => {
         debounceTimeout = setTimeout(async () => {
-          const configData = await Config();
-          const url = configData.api.strapi + 'auth/local';
+          const url = config.api.strapi + 'auth/local';
 
           try {
             const response = await fetch(url, {

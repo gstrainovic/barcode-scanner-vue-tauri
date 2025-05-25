@@ -14,13 +14,14 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> Self {
+        dotenv::dotenv().ok();
         Self {
             api: ApiConfig {
-                strapi: std::env::var("STRAPI_URL").expect("STRAPI_URL not set") + "/api/",
+                strapi: std::env::var("VITE_STRAPI_URL").expect("VITE_STRAPI_URL not set") + "/api/",
             },
-            version: std::env::var("VERSION").expect("VERSION not set"),
+            version: std::env::var("VITE_VERSION").expect("VITE_VERSION not set"),
             dialog: DialogConfig {
-                title: std::env::var("DIALOG_TITLE").expect("DIALOG_TITLE not set"),
+                title: std::env::var("VITE_DIALOG_TITLE").expect("VITE_DIALOG_TITLE not set"),
             },
         }
     }

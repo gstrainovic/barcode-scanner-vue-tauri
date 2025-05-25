@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::config::Config;
+use config::{self, Config};
 
 #[derive(Deserialize, Debug)]
 pub struct Data {
@@ -41,7 +41,7 @@ pub struct LeitcodeBuchstabe {
 // get all exceptions from the database
 #[tokio::main]
 pub async fn get_leitcodes(jwt: &str) -> Result<Data, reqwest::Error> {
-    let config = Config::new();
+    let config = Config::from_env();
     let url = format!("{}/api/leitcodes?populate=*", config.api.strapi);
     let client = reqwest::Client::new();
 

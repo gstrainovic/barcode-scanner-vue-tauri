@@ -293,7 +293,6 @@ name = "barcode-scanner-v2"
 version = "2.0.5"
 dependencies = [
  "config",
- "dotenv",
  "multiinput",
  "native-dialog",
  "self_update",
@@ -582,6 +581,9 @@ dependencies = [
 [[package]]
 name = "config"
 version = "0.1.0"
+dependencies = [
+ "dotenv",
+]
 
 [[package]]
 name = "console"

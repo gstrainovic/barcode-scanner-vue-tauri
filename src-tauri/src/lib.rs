@@ -8,8 +8,6 @@ use tauri::AppHandle;
 use tauri::Emitter;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
-use std::env;
-mod config;
 
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
     let my_windows_hwnd = unsafe {
@@ -43,7 +41,7 @@ fn update(app: AppHandle) {
         .bin_name("barcode-scanner-v2.exe")
         .show_download_progress(true)
         .no_confirm(true)
-        .current_version(get_version().as_str())
+        .current_version(&config.version.to_string())
         .build()
     {
         if let Ok(status) = update.update() {
@@ -192,26 +190,22 @@ fn load_history() -> Result<serde_json::Value, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    dotenv::dotenv().ok();
-    let config = config::Config::from_env();
     check_single_instance();
     reduce_history();
     tauri::Builder::default()
-        .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_os::init())
-        .invoke_handler(tauri::generate_handler![
-            start_looper,
-            load_history,
-            process_barcode,
-            update,
-            get_strapi_url,
-            get_version,
-            get_dialog_title,
+    .plugin(tauri_plugin_notification::init())
+    .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_os::init())
+    .invoke_handler(tauri::generate_handler![
+        start_looper,
+        load_history,
+        process_barcode,
+        update,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let config = config::Config::from_env();
                 api.prevent_close();
                 let window = window.clone();
                 let ans = window

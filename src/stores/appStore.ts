@@ -1,4 +1,4 @@
-import Config from '@/utils/config';
+import {config} from '@/utils/config';
 import { defineStore, storeToRefs } from 'pinia';
 import { useAuthStore } from './authStore';
 import { useTeamStore } from './teamStore';
@@ -10,7 +10,6 @@ export const useAppStore = defineStore('app', {
   }),
   actions: {
     async onlineCheck() {
-      const config = await Config();
       const url = config.api.strapi.replace('/api', '');
       try {
         const response = await fetch(url, { method: 'GET' });

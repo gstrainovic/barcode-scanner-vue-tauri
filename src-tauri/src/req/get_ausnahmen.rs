@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::config::Config;
+use config::{self, Config};
 
 #[derive(Deserialize, Debug)]
 pub struct AusnahmenData {
@@ -22,7 +22,7 @@ pub struct Ausnahmen {
 // get all exceptions from the database
 #[tokio::main]
 pub async fn get_ausnahmen(jwt: &str) -> Result<Vec<Ausnahmen>, reqwest::Error> {
-    let config = Config::new();
+    let config = Config::from_env();
     let url = format!("{}/api/ausnahmen", config.api.strapi);
     let client = reqwest::Client::new();
 

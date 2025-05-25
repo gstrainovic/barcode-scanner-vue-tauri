@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { ref, onMounted } from 'vue';
-import { Config } from '@/utils/config';
+import { config } from '@/utils/config';
 const version = ref('0.0.0')
 const router = useRouter();
 const authStore = useAuthStore();
@@ -21,7 +21,6 @@ const logout = async () => {
 };
 
 onMounted(async () => {
-    const config = await Config();
     version.value = config.version;
 });
 </script>

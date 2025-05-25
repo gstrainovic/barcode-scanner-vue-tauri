@@ -9,7 +9,7 @@ use req::{
 };
 
 use tauri_plugin_notification::NotificationExt;
-use crate::config::Config;
+use config::{self, Config};
 
 static mut ERROR_STATUS: super::errors::Status = super::errors::Status::Ok;
 
@@ -31,7 +31,7 @@ pub fn history_add(
 ) {
     unsafe { ERROR_STATUS = status.status };
 
-    let config = Config::load_config();
+    let config = Config::from_env();
 
     create_history(
         &status.message,

@@ -1,4 +1,4 @@
-import Config from '@/utils/config';
+import { config } from '@/utils/config';
 import { useBarcodeStore } from './barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
@@ -15,7 +15,6 @@ const authStore = useAuthStore();
 const appStore = useAppStore();
 const { userRole, userId, userToken } = storeToRefs(authStore);
 
-const config = await Config();
 
 const token = userToken.value;
 if (!token) {

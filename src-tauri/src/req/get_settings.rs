@@ -1,4 +1,4 @@
-use crate::config::Config;
+use config::{self, Config};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -23,7 +23,7 @@ pub struct Einstellungen {
 // get all exceptions from the database
 #[tokio::main]
 pub async fn get_settings(jwt: &str) -> Result<EinstellungenData, reqwest::Error> {
-    let config = Config::new();
+    let config = Config::from_env();
     let url = format!("{}/api/einstellung", config.api.strapi);
     let client = reqwest::Client::new();
 

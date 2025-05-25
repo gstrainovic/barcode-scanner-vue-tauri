@@ -1,9 +1,9 @@
-use crate::config::Config;
+use config::{self, Config};
 use crate::loginfn::User;
 
 #[tokio::main]
 pub async fn get_users(jwt: String) -> Result<Vec<User>, reqwest::Error> {
-    let config = Config::new();
+    let config = Config::from_env();
     let url = format!("{}{}", config.api.strapi, "/api/users");
 
     let client = reqwest::Client::new();
