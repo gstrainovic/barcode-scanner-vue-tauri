@@ -1,5 +1,6 @@
 import { User } from '@/interfaces';
 import { useAppStore } from './appStore';
+import { useArbeitszeitStore } from './arbeitsZeitStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { defineStore } from 'pinia';
 
@@ -12,10 +13,12 @@ export const useTeamStore = defineStore('team', {
     teamIds: [] as number[],
   }),
   actions: {
-    changeTeam(event: { value: User[] }) {
+    async changeTeam(event: { value: User[] }) {
       const appStore = useAppStore();
       this.teamIds = event.value.map((user: User) => user.id);
-      appStore.setTeamAndUserIds();
+      await appStore.setTeamAndUserIds();
+      const arbeitszeitStore = useArbeitszeitStore();
+      await arbeitszeitStore.nutzerWechsel();
     },
     onToggleChangeVerpackeAlleine(value: boolean) {
       const appStore = useAppStore();

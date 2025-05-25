@@ -29,15 +29,13 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] probieren auf awaits zu verzichten
 * [x] imports alle nötig?
 * [x] gemeinsame .env benutzen
+* [x] Beim Starten sqlite verlauf kürzen auf 200 Barcodes Einträge, verhindert zu grosse Dateien
 
-testen:
-* [ ] Beim Starten sqlite verlauf kürzen auf 200 Barcodes Einträge, verhindert zu grosse Dateien
-
-* [ ] zeiterfassung testen
-    * [ ] login
-    * [ ] logout
-    * [ ] appschliessung
-    * [ ] nutzerwechsel
+* [x] zeiterfassung testen
+    * [x] login
+    * [x] logout
+    * [x] appschliessung
+    * [x] nutzerwechsel
 
 * [ ] checkliste erstellen
 

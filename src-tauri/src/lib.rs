@@ -6,6 +6,7 @@ use std::sync::Arc;
 use std::thread;
 use tauri::AppHandle;
 use tauri::Emitter;
+use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
 
@@ -58,7 +59,6 @@ fn update(app: AppHandle) {
                     .blocking_show();
 
                 app.restart();
-
             } else {
                 let message = "Keine neuen Updates verfügbar.";
                 println!("{}", message);
@@ -179,7 +179,14 @@ fn key_id_to_char(key_id: &KeyId) -> Option<char> {
 }
 
 #[tauri::command]
-fn process_barcode(barcode: &str, uid: i32, jwt: String, luids: Vec<i32>, rolle: &str, app: tauri::AppHandle) {
+fn process_barcode(
+    barcode: &str,
+    uid: i32,
+    jwt: String,
+    luids: Vec<i32>,
+    rolle: &str,
+    app: tauri::AppHandle,
+) {
     sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle, &app);
 }
 
@@ -193,15 +200,15 @@ pub fn run() {
     check_single_instance();
     reduce_history();
     tauri::Builder::default()
-    .plugin(tauri_plugin_notification::init())
-    .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-    .plugin(tauri_plugin_dialog::init())
-    .plugin(tauri_plugin_os::init())
-    .invoke_handler(tauri::generate_handler![
-        start_looper,
-        load_history,
-        process_barcode,
-        update,
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_os::init())
+        .invoke_handler(tauri::generate_handler![
+            start_looper,
+            load_history,
+            process_barcode,
+            update,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
@@ -216,6 +223,7 @@ pub fn run() {
                     .blocking_show();
                 match ans {
                     true => {
+                        window.app_handle().emit("closeapp", ()).unwrap();
                         std::process::exit(0);
                     }
                     false => {}

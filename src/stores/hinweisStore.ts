@@ -11,22 +11,11 @@ import { getErrorToastMessage, getSuccessToastMessage } from '@/utils/toastUtils
 import { defineStore } from 'pinia';
 import { strapi } from '@strapi/client';
 
-const authStore = useAuthStore();
-const appStore = useAppStore();
-const { userRole, userId, userToken } = storeToRefs(authStore);
 
 
-const token = userToken.value;
-if (!token) {
-  throw new Error('User token is not available. Please log in first.');
-}
-
-const client = strapi({
-  baseURL: config.api.strapi,
-  auth: token
-});
 
 const getHinweisFromBarcode = async (barcode: string) => {
+  const appStore = useAppStore();
   if (appStore.isOnline) {
     const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1&sort=id:asc');
     return response.data[0];
@@ -36,7 +25,18 @@ const getHinweisFromBarcode = async (barcode: string) => {
 };
 
 const postHinweis = async (id: string, hinweis: string, erstelltVon: number | null = null, hinweisUmgesetztVon: number[]) => {
+  const appStore = useAppStore();
   if (appStore.isOnline) {
+    const authStore = useAuthStore();
+    const { userToken } = storeToRefs(authStore);
+    if (!userToken.value) {
+      throw new Error('User token is not available');
+    }
+    const client = strapi({
+      baseURL: config.api.strapi,
+      auth: userToken.value,
+    });
+
     const barcodes = client.collection('barcodes');
 
     const updateData: { hinweis: string; hinweis_erstellt_von?: number; hinweis_umgesetzt_von?: number[] } = { hinweis: hinweis };
@@ -61,6 +61,8 @@ export const useHinweisStore = defineStore('hinweis', {
   actions: {
 
     async ladeHinweis() {
+      const authStore = useAuthStore();
+      const { userRole } = storeToRefs(authStore);
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
       const result = await getHinweisFromBarcode(barcode.value);
@@ -87,6 +89,8 @@ export const useHinweisStore = defineStore('hinweis', {
       const { barcode } = storeToRefs(barcodeStore);
       const appStore = useAppStore();
       const { teamAndUserIds } = storeToRefs(appStore);
+      const authStore = useAuthStore();
+      const { userId, userRole } = storeToRefs(authStore);
 
       let toastReturn;
 

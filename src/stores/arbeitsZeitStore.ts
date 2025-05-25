@@ -3,8 +3,7 @@ import { hostname } from '@tauri-apps/plugin-os';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
-const authStore = useAuthStore();
-const { userRole } = storeToRefs(authStore);
+
 
 export enum ZeiterfassungTypEnum {
   Login = "login",
@@ -52,21 +51,13 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
     async login(typ = ZeiterfassungTypEnum.Login) {
       const appStore = useAppStore();
       const { teamAndUserIds } = storeToRefs(appStore);
+      const authStore = useAuthStore();
+      const { userRole } = storeToRefs(authStore);
       const abteilung = userRole.value;
       if (!abteilung) {
         console.error('Abteilung is not available. Please log in first.');
         return;
       }
-      // for (const userId of teamAndUserIds.value) {
-      //   const body: ZeiterfassungBody = {
-      //     typ,
-      //     mitarbeiter: userId,
-      //     login_or_logout: LoginOrLogoutEnum.Login,
-      //     geraete_name: this.deviceName as string,
-      //     abteilung
-      //   };
-      //   await protokolliereArbeitszeit(body);
-      // }
       await Promise.all(
         teamAndUserIds.value.map(async (userId) => {
           const body: ZeiterfassungBody = {
@@ -83,23 +74,14 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
     async logout(typ = ZeiterfassungTypEnum.Logout) {
       const appStore = useAppStore();
       const { teamAndUserIds } = storeToRefs(appStore);
-
+      const authStore = useAuthStore();
+      const { userRole } = storeToRefs(authStore);
       const abteilung = userRole.value;
       if (!abteilung) {
         console.error('Abteilung is not available. Please log in first.');
         return;
       }
 
-      // for (const userId of teamAndUserIds.value) {
-      //   const body: ZeiterfassungBody = {
-      //     typ,
-      //     mitarbeiter: userId,
-      //     login_or_logout: LoginOrLogoutEnum.Logout,
-      //     geraete_name: this.deviceName as string,
-      //     abteilung
-      //   };
-      //   await protokolliereArbeitszeit(body);
-      // }
       await Promise.all(
         teamAndUserIds.value.map(async (userId) => {
           const body: ZeiterfassungBody = {

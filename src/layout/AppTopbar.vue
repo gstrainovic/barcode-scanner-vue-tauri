@@ -2,23 +2,55 @@
 import AppConfigurator from './AppConfigurator.vue';
 import { useRouter } from 'vue-router';
 import { useLayout } from '@/layout/composables/layout';
+import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
+import { useHinweisStore } from '@/stores/hinweisStore';
+import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
 import { useAppStore } from '@/stores/appStore';
 import { storeToRefs } from 'pinia';
 import { ref, onMounted } from 'vue';
 import { config } from '@/utils/config';
+import { listen } from '@tauri-apps/api/event';
 const version = ref('0.0.0')
 const router = useRouter();
+const hinweisVorlageStore = useHinweisVorlageStore();
+const hinweisStore = useHinweisStore();
+const barcodeStore = useBarcodeStore();
 const authStore = useAuthStore();
 const appStore = useAppStore();
+const { userName, userRole } = storeToRefs(authStore);
 const { toggleDarkMode, isDarkTheme } = useLayout();
 const { isOnline } = storeToRefs(appStore)
-const { userName, userRole } = storeToRefs(authStore);
+
+const reset = () => {
+    // delete all stores from pinia
+    hinweisVorlageStore.$reset();
+    hinweisStore.$reset();
+    barcodeStore.$reset();
+    authStore.$reset();
+    appStore.$reset();
+    
+    sessionStorage.clear();
+};
 
 const logout = async () => {
-    sessionStorage.clear();
+    const arbeitszeitStore = useArbeitszeitStore();
+    await arbeitszeitStore.logout();
+    reset();
     router.push('/login');
 };
+
+const closeapp = () => {
+    const arbeitszeitStore = useArbeitszeitStore();
+    arbeitszeitStore.appSchliessung();
+    reset();
+};
+
+
+listen('closeapp', () => {
+    closeapp();
+});
 
 onMounted(async () => {
     version.value = config.version;
