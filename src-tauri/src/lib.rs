@@ -84,7 +84,7 @@ fn start_looper(app: AppHandle) {
             .find(|device| device.name.contains("VID_0483") && device.name.contains("PID_5750"))
             .unwrap_or_else(|| {
                 let message =
-                    "Bitte Barcode Scanner anschließen und einschalten";
+                    "Bitte Barcode Scanner anschließen und einschalten. OK zum Neustarten, Abbrechen zum Beenden.";
                 eprintln!("{}", message);
 
                 let ask = app_clone
