@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS leitcodes;
+DROP TABLE IF EXISTS einstellung;
+DROP TABLE IF EXISTS ausnahmen;

@@ -10,6 +10,7 @@ import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useSyncStore } from '@/stores/syncStore';
 import { storeToRefs } from 'pinia';
 import { sendNotification } from '@tauri-apps/plugin-notification';
 import { ref } from 'vue';
@@ -17,15 +18,24 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/utils/toastUtils';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { onMounted } from 'vue';
 const toast = useToast();
 const teamStore = useTeamStore();
+const syncStore = useSyncStore();
 const barcodeInput = ref('');
 const authStore = useAuthStore();
 const { userRole, userId, userToken } = storeToRefs(authStore);
 const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
+const { settings, ausnahmen, leitcodes } = storeToRefs(syncStore);
 
 listen('sendebarcode', (event) => {
     processBarcode(event.payload as string);
+});
+
+onMounted(async () => {
+    console.log('HomePage mounted');
+    const syncStore = useSyncStore();
+    await syncStore.strapi2localStorage();
 });
 
 const bringWindowToFront = async () => {
@@ -87,6 +97,9 @@ const processBarcode = async (binp = '') => {
         jwt: userToken.value,
         luids: teamIds.value,
         rolle: userRole.value,
+        einstellungen: settings.value,
+        ausnahmen: ausnahmen.value,
+        leitcodes: leitcodes.value,
     });
 
     historyStore.loadHistory();

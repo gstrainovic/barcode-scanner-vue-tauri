@@ -1,15 +1,13 @@
 use crate::{
-    create_history, get_ausnahmen as get_ausnahmen_sqlite, get_leitcodes_sql,
-    get_settings as get_settings_sqlite, is_barcode_duplicate_sqlite, update_leitcodes,
+    create_history, is_barcode_duplicate_sqlite
 };
 use req::{
-    check_duplicate_barcode::is_barcode_duplicate, get_ausnahmen::get_ausnahmen,
-    get_leitcodes::get_leitcodes, get_leitcodes::IdAtrBuchstaben, get_leitcodes::Leitcode,
-    get_leitcodes::LeitcodeBuchstabe, get_settings::get_settings,
+    check_duplicate_barcode::is_barcode_duplicate,
 };
 
 use tauri_plugin_notification::NotificationExt;
 use config::{self, Config};
+use serde::{Deserialize, Serialize};
 
 static mut ERROR_STATUS: super::errors::Status = super::errors::Status::Ok;
 
@@ -64,6 +62,49 @@ pub fn history_add(
 
 }
 
+
+#[allow(non_snake_case)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Einstellungen {
+    pub Barcode_Mindestlaenge: i32,
+    pub Leitcodes_Aktiv: bool,
+    pub Ausnahmen_Aktiv: bool,
+}
+
+#[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub struct Ausnahmen {
+    pub Barcode: String,
+    pub Bedeutung: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub struct LeitcodeBuchstabe {
+    pub Buchstabe: String,
+    pub Position_Null_Beginnend: i32,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct IdAtrBuchstaben {
+    pub id: i16,
+    pub attributes: LeitcodeBuchstabe,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct DataBuchstaben {
+    pub data: Vec<IdAtrBuchstaben>,
+}
+
+#[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub struct Leitcode {
+    pub Beschreibung: String,
+    pub Mindeslaenge: i32,
+    pub Leitcode_Buchstabe: DataBuchstaben,
+    pub Produktion: bool,
+}
+
 pub fn process_barcode(
     barcode_new: &str,
     user_id: i32,
@@ -71,22 +112,18 @@ pub fn process_barcode(
     lager_user_ids: &Vec<i32>,
     rolle: &str,
     app: &tauri::AppHandle,
+    settings: Einstellungen,
+    ausnahmen: Vec<Ausnahmen>,
+    leitcodes: Vec<Leitcode>,
 ) {
     let offline = jwt.is_empty();
 
-    let settings = if offline {
-        get_settings_sqlite()
-    } else {
-        get_settings(&jwt).unwrap().data.attributes
-    };
+    println!(
+        "process_barcode: barcode_new: {}, user_id: {}, jwt: {}, lager_user_ids: {:?}, rolle: {}, offline: {}, settings: {:?}, ausnahmen: {:?}, leitcodes: {:?}",
+        barcode_new, user_id, jwt, lager_user_ids, rolle, offline, settings, ausnahmen, leitcodes
+    );
 
     if settings.Ausnahmen_Aktiv {
-        let ausnahmen = if offline {
-            get_ausnahmen_sqlite()
-        } else {
-            get_ausnahmen(&jwt).unwrap()
-        };
-
         // if barcode ends with a string from barcode_ausnahmen, then send it directly to server
         for barcode_ausnahme in ausnahmen {
             if barcode_new.ends_with(barcode_ausnahme.Barcode.to_lowercase().as_str()) {
@@ -124,24 +161,16 @@ pub fn process_barcode(
 
     if settings.Leitcodes_Aktiv {
         // block DHL Leitcode like
-        let leitcodes = if jwt.is_empty() {
-            get_leitcodes_sql()
-        } else {
-            update_leitcodes(get_leitcodes(&jwt).unwrap());
-            get_leitcodes(&jwt).unwrap().data
-        };
 
-        for idatr in leitcodes {
-            let attribute: Leitcode = idatr.attributes;
-
+        for leitcode in leitcodes {
             // Leitcodes welche nicht dem aktuellem Arbeitsplatz zugeordnet sind, werden ignoriert
-            if attribute.Produktion && rolle != "Produktion" {
+            if leitcode.Produktion && rolle != "Produktion" {
                 continue;
             }
 
-            if barcode_new.len() > attribute.Mindeslaenge as usize {
-                let beschreibung = attribute.Beschreibung;
-                let data_buchstaben: Vec<IdAtrBuchstaben> = attribute.Leitcode_Buchstabe.data;
+            if barcode_new.len() > leitcode.Mindeslaenge as usize {
+                let beschreibung = leitcode.Beschreibung;
+                let data_buchstaben: Vec<IdAtrBuchstaben> = leitcode.Leitcode_Buchstabe.data;
                 let anzahl_buchstaben = data_buchstaben.len();
                 let mut gefunden = 0;
                 for buchstabe_atr_id in data_buchstaben {

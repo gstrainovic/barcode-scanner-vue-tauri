@@ -25,9 +25,9 @@ const login = async () => {
     email.value = email.value.charAt(0).toUpperCase() + email.value.slice(1).toLowerCase();
     const authStore = useAuthStore();
     if (await authStore.authenticateUser({ identifier: email.value, password: password.value })) {
+        const { userRole } = storeToRefs(authStore);
         const teamStore = useTeamStore();
         await teamStore.getUsersLager(); // einmalig die User für Lager holen
-        const { userRole } = storeToRefs(authStore);
         await appStore.setTeamAndUserIds();
         await arbeitszeitStore.login();
         if (userRole.value === 'Lager') {

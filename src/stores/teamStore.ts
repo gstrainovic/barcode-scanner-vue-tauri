@@ -22,7 +22,6 @@ export const useTeamStore = defineStore('team', {
     },
     onToggleChangeVerpackeAlleine(value: boolean) {
       const appStore = useAppStore();
-
       this.checked = value;
       if (this.checked) {
         this.team = [];
@@ -41,7 +40,6 @@ export const useTeamStore = defineStore('team', {
         throw new Error('Offline mode not implemented yet!');
         // TODO: Implement offline mode for getUsersLager
       }
-
       this.lagerUsers = result.map((user: User) => {
         return {
           username: user.username,
@@ -51,6 +49,6 @@ export const useTeamStore = defineStore('team', {
     },
   },
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im sessionStorage
+    storage: sessionStorage, // Speichert den Zustand im localStorage
   },
 });

@@ -30,15 +30,11 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] imports alle nötig?
 * [x] gemeinsame .env benutzen
 * [x] Beim Starten sqlite verlauf kürzen auf 200 Barcodes Einträge, verhindert zu grosse Dateien
-
 * [x] zeiterfassung testen
     * [x] login
     * [x] logout
     * [x] appschliessung
     * [x] nutzerwechsel
-
-* [ ] checkliste erstellen
-
 * [ ] Sync
     - [ ] Beim Starten von Online zu sqlite synchronisieren
         - [ ] Leticodes
@@ -48,3 +44,4 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
     - [ ] Offline fähig
     - [ ] Wenn Online Barcodes synchronisieren
 
+* [ ] checkliste erstellen

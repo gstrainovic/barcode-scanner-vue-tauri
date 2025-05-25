@@ -1,6 +1,9 @@
 use multiinput::{KeyId, RawEvent, RawInputManager, State};
 use native_dialog::DialogBuilder;
 use sqlite::get_history;
+use sqlite::process_barcode::Ausnahmen;
+use sqlite::process_barcode::Einstellungen;
+use sqlite::process_barcode::Leitcode;
 use sqlite::reduce_history;
 use std::sync::Arc;
 use std::thread;
@@ -31,6 +34,7 @@ fn check_single_instance() {
         std::process::exit(0);
     }
 }
+
 
 #[tauri::command]
 fn update(app: AppHandle) {
@@ -186,8 +190,11 @@ fn process_barcode(
     luids: Vec<i32>,
     rolle: &str,
     app: tauri::AppHandle,
+    einstellungen: Einstellungen,
+    ausnahmen: Vec<Ausnahmen>,
+    leitcodes: Vec<Leitcode>,
 ) {
-    sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle, &app);
+    sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle, &app, einstellungen, ausnahmen, leitcodes);
 }
 
 #[tauri::command]

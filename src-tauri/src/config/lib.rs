@@ -17,7 +17,7 @@ impl Config {
         dotenv::dotenv().ok();
         Self {
             api: ApiConfig {
-                strapi: std::env::var("VITE_STRAPI_URL").expect("VITE_STRAPI_URL not set") + "/api/",
+                strapi: std::env::var("VITE_STRAPI_URL").expect("VITE_STRAPI_URL not set"),
             },
             version: std::env::var("VITE_VERSION").expect("VITE_VERSION not set"),
             dialog: DialogConfig {
