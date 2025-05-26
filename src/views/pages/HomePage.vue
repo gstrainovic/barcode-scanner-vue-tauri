@@ -10,32 +10,36 @@ import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useSyncStore } from '@/stores/syncStore';
+import { useAppStore } from '@/stores/appStore';
+import { useLocalStore } from '@/stores/localStore';
 import { storeToRefs } from 'pinia';
 import { sendNotification } from '@tauri-apps/plugin-notification';
-import { ref } from 'vue';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/utils/toastUtils';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import { Verlauf } from '@/interfaces';
 const toast = useToast();
 const teamStore = useTeamStore();
-const syncStore = useSyncStore();
+const localStore = useLocalStore();
+const appStore = useAppStore();
 const barcodeInput = ref('');
 const authStore = useAuthStore();
 const { userRole, userId, userToken } = storeToRefs(authStore);
 const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
-const { settings, ausnahmen, leitcodes } = storeToRefs(syncStore);
+const { settings, ausnahmen, leitcodes } = storeToRefs(localStore);
+const { isOnline } = storeToRefs(appStore);
+const historyStore = useHistoryStore();
+const { history } = storeToRefs(historyStore);
 
 listen('sendebarcode', (event) => {
     processBarcode(event.payload as string);
 });
 
 onMounted(async () => {
-    console.log('HomePage mounted');
-    const syncStore = useSyncStore();
-    await syncStore.strapi2localStorage();
+    await localStore.strapi2localStorage();
+
 });
 
 const bringWindowToFront = async () => {
@@ -52,8 +56,7 @@ const processBarcode = async (binp = '') => {
     const { barcode } = storeToRefs(barcodeStore);
     const hinweisStore = useHinweisStore();
     const { hinweis, hinweisUmgesetzt } = storeToRefs(hinweisStore);
-    const historyStore = useHistoryStore();
-    const { history } = storeToRefs(historyStore);
+
     const hinweisVorlageStore = useHinweisVorlageStore();
     const { selectedVorlage } = storeToRefs(hinweisVorlageStore);
 
@@ -73,7 +76,6 @@ const processBarcode = async (binp = '') => {
     const barcodeValue = binp || barcodeInput.value;
     const barcodeMatch = await hinweisVorlageStore.checkBarcodeMatchWithVorlageBarcode(barcodeValue);
     if (barcodeMatch) {
-        console.log('Barcode match found with Vorlage Barcode.');
         barcodeInput.value = '';
         return;
     }
@@ -91,7 +93,7 @@ const processBarcode = async (binp = '') => {
         return;
     }
 
-    await invoke('process_barcode', {
+    const result: unknown = await invoke('process_barcode', {
         barcode: barcode.value,
         uid: userID,
         jwt: userToken.value,
@@ -101,6 +103,18 @@ const processBarcode = async (binp = '') => {
         ausnahmen: ausnahmen.value,
         leitcodes: leitcodes.value,
     });
+
+    const verlauf: Verlauf = {
+        status: (result as { message: string }).message,
+        barcode: barcode.value,
+        timestamp: new Date().toISOString(),
+        synced: false,
+        user_id: userID,
+        offline: !isOnline.value,
+        lager_user_ids: teamIds.value,
+    }
+
+    localStore.verlauf.push(verlauf);
 
     historyStore.loadHistory();
     const lastHistory = history.value[0] as { status: string; barcode: string; timestamp: string };

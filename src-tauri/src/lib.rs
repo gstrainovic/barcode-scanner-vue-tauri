@@ -113,6 +113,7 @@ fn start_looper(app: AppHandle) {
         let mut barcode_buffer = String::new();
         loop {
             if let Some(event) = manager.get_event() {
+                // println!("Raw event: {:?}", event);
                 if let RawEvent::KeyboardEvent(_, key_id, state) = &event {
                     if let State::Pressed = state {
                         if let Some(c) = key_id_to_char(key_id) {
@@ -124,6 +125,9 @@ fn start_looper(app: AppHandle) {
                 }
                 match event {
                     RawEvent::KeyboardEvent(_, KeyId::Return, State::Released) => {
+                        if barcode_buffer.starts_with('2') {
+                            barcode_buffer.remove(0);
+                        }
                         // println!("Key released: Return");
                         // println!("Barcode: {}", barcode_buffer);
                         app.emit("sendebarcode", barcode_buffer.as_str()).unwrap();
@@ -193,8 +197,9 @@ fn process_barcode(
     einstellungen: Einstellungen,
     ausnahmen: Vec<Ausnahmen>,
     leitcodes: Vec<Leitcode>,
-) {
-    sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle, &app, einstellungen, ausnahmen, leitcodes);
+) -> sqlite::errors::Error {
+    let result = sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle, &app, einstellungen, ausnahmen, leitcodes);
+    return result;
 }
 
 #[tauri::command]

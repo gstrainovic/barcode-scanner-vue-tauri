@@ -1,9 +1,11 @@
+#[derive(serde::Serialize)]
 pub enum Status {
     Warn,
     Error,
     Ok,
 }
 
+#[derive(serde::Serialize)]
 pub enum Type {
     Ausnahme,
     ZuKurz,
@@ -13,6 +15,7 @@ pub enum Type {
     Ok,
 }
 
+#[derive(serde::Serialize)]
 pub struct Error {
     pub message: String,
     pub status: Status,

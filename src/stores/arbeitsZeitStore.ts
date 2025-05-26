@@ -36,8 +36,7 @@ const protokolliereArbeitszeit = async (body: ZeiterfassungBody) => {
     zeitpunkt: new Date().toISOString()
   };
 
-  const result = await fetchWithAuth('zeit-erfassungen', data);
-  console.log('protokolliereArbeitszeit:', result, data);
+  await fetchWithAuth('zeit-erfassungen', data);
 }
 
 export const useArbeitszeitStore = defineStore('arbeitszeit', {

@@ -35,13 +35,15 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
     * [x] logout
     * [x] appschliessung
     * [x] nutzerwechsel
+* [x] Beim Starten von Online zu localStorage synchronisieren
+    * [x] Leitcodes
+    * [x] Einstellungen
+    * [x] Benutzer
+    * [x] Ausnahmen
+    * [x] HinweisVorlagen
+    * [x] Barcodes mit Vorlagen
+* [ ] Checkliste erstellen
+* [ ] Arbeitszeiten in Admin darstellen
 * [ ] Sync
-    - [ ] Beim Starten von Online zu sqlite synchronisieren
-        - [ ] Leticodes
-        - [ ] Einstellungen
-        - [ ] Benutzer
-        - [ ] Ausnahmen
     - [ ] Offline fähig
     - [ ] Wenn Online Barcodes synchronisieren
-
-* [ ] checkliste erstellen

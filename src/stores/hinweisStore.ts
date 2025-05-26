@@ -11,9 +11,6 @@ import { getErrorToastMessage, getSuccessToastMessage } from '@/utils/toastUtils
 import { defineStore } from 'pinia';
 import { strapi } from '@strapi/client';
 
-
-
-
 const getHinweisFromBarcode = async (barcode: string) => {
   const appStore = useAppStore();
   if (appStore.isOnline) {
@@ -66,7 +63,7 @@ export const useHinweisStore = defineStore('hinweis', {
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
       const result = await getHinweisFromBarcode(barcode.value);
-      const umgesetzt: boolean = result.attributes.hinweis_umgesetzt_von.data.length > 0;
+      const umgesetzt: boolean = result?.attributes?.hinweis_umgesetzt_von?.data?.length > 0;
       this.hinweisUmgesetzt = umgesetzt;
 
       if (!result?.id) {
@@ -75,7 +72,7 @@ export const useHinweisStore = defineStore('hinweis', {
       }
       this.barcodeId = result.id;
       this.hinweis = await marked.parse(result.attributes.hinweis || '');
-      if (result.attributes.hinweis && userRole.value === 'Lager') {
+      if (result.attributes.hinweis && userRole.value === 'Lager' && !umgesetzt) {
         message('Es gibt einen Hinweis zu Barcode ' + barcode.value, {
           title: config.dialog.title,
           kind: 'warning',

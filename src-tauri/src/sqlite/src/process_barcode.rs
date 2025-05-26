@@ -115,19 +115,16 @@ pub fn process_barcode(
     settings: Einstellungen,
     ausnahmen: Vec<Ausnahmen>,
     leitcodes: Vec<Leitcode>,
-) {
+) -> super::errors::Error {
     let offline = jwt.is_empty();
 
-    println!(
-        "process_barcode: barcode_new: {}, user_id: {}, jwt: {}, lager_user_ids: {:?}, rolle: {}, offline: {}, settings: {:?}, ausnahmen: {:?}, leitcodes: {:?}",
-        barcode_new, user_id, jwt, lager_user_ids, rolle, offline, settings, ausnahmen, leitcodes
-    );
 
     if settings.Ausnahmen_Aktiv {
         // if barcode ends with a string from barcode_ausnahmen, then send it directly to server
         for barcode_ausnahme in ausnahmen {
             if barcode_new.ends_with(barcode_ausnahme.Barcode.to_lowercase().as_str()) {
                 let cleaned_barcode = clean_barcode(&barcode_new);
+                let bedeutung = barcode_ausnahme.Bedeutung.clone();
                 super::send_barcode::send_barcode(
                     cleaned_barcode.clone(),
                     user_id,
@@ -135,14 +132,15 @@ pub fn process_barcode(
                     &lager_user_ids,
                 );
                 history_add(
-                    super::errors::ausnahme(barcode_ausnahme.Bedeutung),
+                    super::errors::ausnahme(bedeutung.clone()),
                     &cleaned_barcode,
                     user_id,
                     offline,
                     lager_user_ids,
                     app,
                 );
-                return;
+                let status_response = super::errors::ausnahme(bedeutung);
+                return status_response;
             }
         }
     }
@@ -156,7 +154,8 @@ pub fn process_barcode(
             lager_user_ids,
             app,
         );
-        return;
+        let status_response = super::errors::zu_kurz();
+        return status_response;
     }
 
     if settings.Leitcodes_Aktiv {
@@ -183,17 +182,18 @@ pub fn process_barcode(
                         }
                     }
                 }
-
+                
                 if gefunden == anzahl_buchstaben {
                     history_add(
-                        super::errors::leitcode(beschreibung),
+                        super::errors::leitcode(beschreibung.clone()),
                         &barcode_new,
                         user_id,
                         offline,
                         lager_user_ids,
                         app,
                     );
-                    return;
+                    let status_response = super::errors::leitcode(beschreibung);
+                    return status_response;
                 }
 
                 // for buchstabe_atr_id in data_buchstaben {
@@ -258,6 +258,8 @@ pub fn process_barcode(
         };
 
         history_add(err, &barcode_new, user_id, offline, lager_user_ids, app);
+        let status_response = super::errors::ok();
+        return status_response;
     } else {
         history_add(
             super::errors::bereits_gesendet(),
@@ -267,5 +269,7 @@ pub fn process_barcode(
             lager_user_ids,
             app,
         );
+        let status_response = super::errors::bereits_gesendet();
+        return status_response;
     }
 }

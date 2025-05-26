@@ -44,7 +44,6 @@ export interface Ausnahmen {
 //     pub Leitcode_Buchstabe: DataBuchstaben,
 //     pub Produktion: bool,
 // }
-
 export interface Leitcode {
     Beschreibung: string;
     Mindeslaenge: number;
@@ -79,4 +78,26 @@ interface IdAtrBuchstaben {
 export interface LeitcodeBuchstabe {
     Buchstabe: string;
     Position_Null_Beginnend: number;
+}
+
+// #[derive(Insertable)]
+// #[diesel(table_name = history)]
+// #[derive(Debug)]
+// pub struct History<'a> {
+//     pub status: &'a str,
+//     pub barcode: &'a str,
+//     pub timestamp: &'a str,
+//     pub synced: &'a bool,
+//     pub user_id: &'a i32,
+//     pub offline: bool,
+//     pub lager_user_ids: &'a str,
+// }
+export interface Verlauf {
+    status: string;
+    barcode: string;
+    timestamp: string;
+    synced: boolean;
+    user_id: number;
+    offline: boolean;
+    lager_user_ids: number[];
 }
