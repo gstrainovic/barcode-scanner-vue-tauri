@@ -25,7 +25,7 @@ fn run_migrations<DB: diesel::backend::Backend>(connection: &mut impl MigrationH
 }
 
 pub fn establish_connection() -> SqliteConnection {
-    let path = std::path::Path::new("../db.sqlite");
+    let path = std::path::Path::new("./db.sqlite");
 
     if !path.exists() {
         fs::File::create(path).expect("Unable to create file");
