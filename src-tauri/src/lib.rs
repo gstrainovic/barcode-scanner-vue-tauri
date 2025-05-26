@@ -1,4 +1,5 @@
 use multiinput::{KeyId, RawEvent, RawInputManager, State};
+use native_dialog::message;
 use native_dialog::DialogBuilder;
 use sqlite::get_history;
 use sqlite::process_barcode::Ausnahmen;
@@ -12,6 +13,7 @@ use tauri::Emitter;
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
+use notify_rust::Notification;
 
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
     let my_windows_hwnd = unsafe {
@@ -35,6 +37,14 @@ fn check_single_instance() {
     }
 }
 
+#[tauri::command]
+fn show_notification(message: String) -> Result<(), Box<dyn std::error::Error>> {
+    Notification::new()
+        .summary(&message)
+        .show()
+        .unwrap();
+    Ok(())
+}
 
 #[tauri::command]
 fn update(app: AppHandle) {
@@ -198,7 +208,16 @@ fn process_barcode(
     ausnahmen: Vec<Ausnahmen>,
     leitcodes: Vec<Leitcode>,
 ) -> sqlite::errors::Error {
-    let result = sqlite::process_barcode::process_barcode(barcode, uid, jwt, &luids, rolle, &app, einstellungen, ausnahmen, leitcodes);
+    let result = sqlite::process_barcode::process_barcode(
+        barcode,
+        uid,
+        jwt,
+        &luids,
+        rolle,
+        einstellungen,
+        ausnahmen,
+        leitcodes,
+    );
     return result;
 }
 
@@ -212,7 +231,6 @@ pub fn run() {
     check_single_instance();
     reduce_history();
     tauri::Builder::default()
-        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_os::init())
@@ -221,6 +239,7 @@ pub fn run() {
             load_history,
             process_barcode,
             update,
+            show_notification,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

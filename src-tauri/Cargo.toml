@@ -18,7 +18,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-
+notify-rust = "4.11.7"
 self_update = { version = "0.42.0", features = ["archive-zip", "compression-flate2", "compression-zip-deflate"] }
 tauri = { version = "2.5.1", features = [] }
 serde = { version = "1", features = ["derive"] }
@@ -29,7 +29,6 @@ tauri-plugin-dialog = "2"
 sqlite = { path = "./src/sqlite" }
 req = { path = "./src/req" }
 native-dialog = { version = "0.9.0" }
-tauri-plugin-notification = "2"
 tauri-plugin-os = "2"
 config = { path = "./src/config" }
 

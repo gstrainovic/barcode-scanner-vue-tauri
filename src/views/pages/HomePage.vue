@@ -2,7 +2,6 @@
 import HistoryComponent from '@/components/HistoryComponent.vue';
 import HinweisComponent from '@/components/HinweisComponent.vue';
 import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
-import { config } from '@/utils/config';
 import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
 import { useHistoryStore } from '@/stores/historyStore';
@@ -13,7 +12,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { useLocalStore } from '@/stores/localStore';
 import { storeToRefs } from 'pinia';
-import { sendNotification } from '@tauri-apps/plugin-notification';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/utils/toastUtils';
@@ -64,10 +62,11 @@ const processBarcode = async (binp = '') => {
     if (hinweis.value && !hinweisUmgesetzt.value && userRole.value === 'Lager') {
         const message = 'Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
         toast.add(getErrorToastMessage(message));
-        sendNotification({
-            title: config.dialog.title,
-            body: message,
-        });
+        // sendNotification({
+        //     title: config.dialog.title,
+        //     body: message,
+        // });
+        invoke('show_notification', { message });
         barcodeInput.value = '';
         return;
     }

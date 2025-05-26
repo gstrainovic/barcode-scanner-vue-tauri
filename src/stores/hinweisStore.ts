@@ -4,12 +4,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { storeToRefs } from 'pinia';
-import { sendNotification } from '@tauri-apps/plugin-notification';
 import { message } from '@tauri-apps/plugin-dialog';
 import { marked } from 'marked';
 import { getErrorToastMessage, getSuccessToastMessage } from '@/utils/toastUtils';
 import { defineStore } from 'pinia';
 import { strapi } from '@strapi/client';
+import { invoke } from '@tauri-apps/api/core';
 
 const getHinweisFromBarcode = async (barcode: string) => {
   const appStore = useAppStore();
@@ -94,10 +94,11 @@ export const useHinweisStore = defineStore('hinweis', {
       if (!barcode) {
         const message = 'Bitte Barcode zuerst scannen';
         toastReturn = getErrorToastMessage(message);
-        sendNotification({
-          title: config.dialog.title,
-          body: message,
-        });
+        // sendNotification({
+        //   title: config.dialog.title,
+        //   body: message,
+        // });
+        invoke('show_notification', {message});
         return toastReturn;
       }
 
@@ -116,15 +117,17 @@ export const useHinweisStore = defineStore('hinweis', {
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
       if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == this.hinweis) {
         toastReturn = getSuccessToastMessage('Hinweis gespeichert.');
-        sendNotification({
-          title: config.dialog.title,
-          body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
+        // sendNotification({
+        //   title: config.dialog.title,
+        //   body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
+        // });
+        invoke('show_notification', {
+          message: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
         });
       } else {
         toastReturn = getErrorToastMessage('Fehler beim Speichern des Hinweises.');
-        sendNotification({
-          title: config.dialog.title,
-          body: 'Fehler beim Speichern des Hinweises.',
+        invoke('show_notification', {
+          message: 'Fehler beim Speichern des Hinweises.',
         });
         this.hinweisUmgesetzt = false;
       }
