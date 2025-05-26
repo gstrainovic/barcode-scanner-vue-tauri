@@ -1,5 +1,4 @@
 use multiinput::{KeyId, RawEvent, RawInputManager, State};
-use native_dialog::message;
 use native_dialog::DialogBuilder;
 use sqlite::get_history;
 use sqlite::process_barcode::Ausnahmen;
@@ -38,12 +37,11 @@ fn check_single_instance() {
 }
 
 #[tauri::command]
-fn show_notification(message: String) -> Result<(), Box<dyn std::error::Error>> {
+fn show_notification(message: String) -> () {
     Notification::new()
         .summary(&message)
         .show()
         .unwrap();
-    Ok(())
 }
 
 #[tauri::command]
@@ -203,7 +201,6 @@ fn process_barcode(
     jwt: String,
     luids: Vec<i32>,
     rolle: &str,
-    app: tauri::AppHandle,
     einstellungen: Einstellungen,
     ausnahmen: Vec<Ausnahmen>,
     leitcodes: Vec<Leitcode>,

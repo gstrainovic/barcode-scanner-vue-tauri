@@ -9,7 +9,6 @@
     "main"
   ],
   "permissions": [
-    "global-shortcut:default",
-    "notification:default"
+    "global-shortcut:default"
   ]
 }
