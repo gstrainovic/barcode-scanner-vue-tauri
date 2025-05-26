@@ -39,7 +39,7 @@ else
 fi
 
 # Backup-Dateien entfernen
-find . -name "*.bak" -type f -delete
+find ../ -name "*.bak" -type f -delete
 
 echo "Version erfolgreich auf $NEW_VERSION aktualisiert."
 
