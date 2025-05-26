@@ -8,10 +8,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    BarcodeInput: typeof import('./src/components/BarcodeInput.vue')['default']
     Button: typeof import('primevue/button')['default']
     Column: typeof import('primevue/column')['default']
-    copy: typeof import('./src/components/HistoryComponent copy.vue')['default']
     DataTable: typeof import('primevue/datatable')['default']
     FloatingConfigurator: typeof import('./src/components/FloatingConfigurator.vue')['default']
     Fluid: typeof import('primevue/fluid')['default']
