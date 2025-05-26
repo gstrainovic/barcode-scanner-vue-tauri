@@ -42,7 +42,7 @@ const speichereHinweis = async () => {
                         <label for="hinweis_umgesetzt">Beachtet</label>
                     </div>
                     <div class="flex items-center gap-2" v-if="userRole === 'Produktion'">
-                        <Select v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
+                        <Select v-if="barcode" v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
                             optionLabel="titel" option-value="text" :filter="true"
                             @change="hinweisVorlageStore.setHinweis">
                         </Select>

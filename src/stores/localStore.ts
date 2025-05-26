@@ -95,7 +95,6 @@ export const useLocalStore = defineStore('local', {
         this.ladeHinweisVorlagen(),
         this.fetchBarcodeMitHinweise(),
       ]).then(() => {
-        console.log('Alle Daten erfolgreich synchronisiert.');
       }).catch((error) => {
         console.error('Fehler beim Synchronisieren der Daten:', error);
       });

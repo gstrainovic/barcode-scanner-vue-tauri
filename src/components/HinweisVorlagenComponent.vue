@@ -2,15 +2,20 @@
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useLocalStore } from '@/stores/localStore';
+import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useToast } from 'primevue';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 const hinweisStore = useHinweisStore();
 const authStore = useAuthStore();
+const localStore = useLocalStore();
+const barcodeStore = useBarcodeStore();
 const { userRole } = storeToRefs(authStore);
 const hinweisVorlageStore = useHinweisVorlageStore();
-const { hinweisVorlagen } = storeToRefs(hinweisVorlageStore);
+const { hinweisVorlagen } = storeToRefs(localStore);
+const { barcode } = storeToRefs(barcodeStore);
 const toast = useToast();
 
 const registerHinweisVorlagenShortcuts = async () => {
@@ -43,14 +48,14 @@ const registerHinweisVorlagenShortcuts = async () => {
 
 onMounted(async () => {
     if (userRole.value === 'Produktion') {
-        await hinweisVorlageStore.ladeHinweisVorlagen();
+        await localStore.ladeHinweisVorlagen();
         await registerHinweisVorlagenShortcuts();
     }
 });
 </script>
 
 <template>
-    <div class="flex flex-col" v-if="userRole === 'Produktion'">
+    <div class="flex flex-col" v-if="userRole === 'Produktion' && barcode">
         <div class="table-container">
             <DataTable :value="hinweisVorlagen" :sortField="'strg'" :sortOrder="+1" :paginator="false" :rows="10">
                 <template #header>
