@@ -56,7 +56,7 @@ if [ $? -eq 0 ]; then
         if [ -f "../src-tauri/target/release/barcode-scanner-v2.exe" ]; then
             echo "Build erfolgreich erstellt."
             # Zippen des Builds mit powershell
-            powershell -Command "Compress-Archive -Path ../src-tauri/target/release/barcode-scanner-v2.exe -DestinationPath ../src-tauri/target/release/$NEW_VERSION-barcode_scanner-x86_64-pc-windows-msvc.zip"
+            powershell -Command "Compress-Archive -Path ../src-tauri/target/release/barcode-scanner-v2.exe -DestinationPath ../src-tauri/target/release/$NEW_VERSION-barcode_scanner-x86_64-pc-windows-msvc.zip -Force"
             echo "Build in $NEW_VERSION-barcode_scanner-x86_64-pc-windows-msvc.zip gepackt."
         else
             echo "Build nicht gefunden!"
