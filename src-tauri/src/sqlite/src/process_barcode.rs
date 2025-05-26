@@ -118,7 +118,6 @@ pub fn process_barcode(
 ) -> super::errors::Error {
     let offline = jwt.is_empty();
 
-
     if settings.Ausnahmen_Aktiv {
         // if barcode ends with a string from barcode_ausnahmen, then send it directly to server
         for barcode_ausnahme in ausnahmen {

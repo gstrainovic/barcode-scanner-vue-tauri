@@ -8,28 +8,35 @@ import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
 import { useAppStore } from '@/stores/appStore';
+import { useTeamStore } from '@/stores/teamStore';
 import { storeToRefs } from 'pinia';
 import { ref, onMounted } from 'vue';
 import { config } from '@/utils/config';
 import { listen } from '@tauri-apps/api/event';
 const version = ref('0.0.0')
 const router = useRouter();
+const teamStore = useTeamStore();
 const hinweisVorlageStore = useHinweisVorlageStore();
 const hinweisStore = useHinweisStore();
 const barcodeStore = useBarcodeStore();
 const authStore = useAuthStore();
 const appStore = useAppStore();
+const arbeitszeitStore = useArbeitszeitStore();
 const { userName, userRole } = storeToRefs(authStore);
 const { toggleDarkMode, isDarkTheme } = useLayout();
 const { isOnline } = storeToRefs(appStore)
 
 const reset = () => {
     // delete all stores from pinia
-    hinweisVorlageStore.$reset();
-    hinweisStore.$reset();
-    barcodeStore.$reset();
-    authStore.$reset();
     appStore.$reset();
+    arbeitszeitStore.$reset();
+    authStore.$reset();
+    barcodeStore.$reset();
+    hinweisStore.$reset();
+    hinweisVorlageStore.$reset();
+    // historyStore don't need to be reset, as it is used for logging and should persist
+    // localStore don't need to be reset, as it is used for long-term storage
+    teamStore.$reset();
     
     sessionStorage.clear();
 };
