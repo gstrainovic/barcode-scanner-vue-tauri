@@ -20,7 +20,7 @@ const isAusnahmenArray = (arr: unknown): arr is Ausnahmen[] => {
 
 const isLeitcodeArray = (arr: unknown): arr is Leitcode[] => {
   return Array.isArray(arr) && arr.every(
-    leitcode => typeof leitcode.Beschreibung === 'string' &&
+    leitcode => 
       typeof leitcode.Mindeslaenge === 'number' &&
       typeof leitcode.Leitcode_Buchstabe === 'object' &&
       typeof leitcode.Produktion === 'boolean'

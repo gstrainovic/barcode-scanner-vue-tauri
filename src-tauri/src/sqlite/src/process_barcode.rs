@@ -100,7 +100,6 @@ pub struct DataBuchstaben {
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
 pub struct Leitcode {
-    pub Beschreibung: String,
     pub Mindeslaenge: i32,
     pub Leitcode_Buchstabe: DataBuchstaben,
     pub Produktion: bool,
@@ -165,7 +164,6 @@ pub fn process_barcode(
             }
 
             if barcode_new.len() > leitcode.Mindeslaenge as usize {
-                let beschreibung = leitcode.Beschreibung;
                 let data_buchstaben: Vec<IdAtrBuchstaben> = leitcode.Leitcode_Buchstabe.data;
                 let anzahl_buchstaben = data_buchstaben.len();
                 let mut gefunden = 0;
@@ -182,13 +180,13 @@ pub fn process_barcode(
                 
                 if gefunden == anzahl_buchstaben {
                     history_add(
-                        super::errors::leitcode(beschreibung.clone()),
+                        super::errors::leitcode("".to_string()),
                         &barcode_new,
                         user_id,
                         offline,
                         lager_user_ids,
                     );
-                    let status_response = super::errors::leitcode(beschreibung);
+                    let status_response = super::errors::leitcode("".to_string());
                     return status_response;
                 }
 

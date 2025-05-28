@@ -45,7 +45,7 @@ export interface Ausnahmen {
 //     pub Produktion: bool,
 // }
 export interface Leitcode {
-    Beschreibung: string;
+    Beschreibung?: string;
     Mindeslaenge: number;
     Leitcode_Buchstabe: DataBuchstaben;
     Produktion: boolean;

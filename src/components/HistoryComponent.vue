@@ -39,15 +39,15 @@ const displayStatus = (status: string) => {
                         <span class="text-xl font-bold">Verlauf</span>
                     </div>
                 </template>
-                <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.6rem;">
+                <Column field="status" header="Status" sortable style="width: 20%;font-size: 1.5rem;">
                     <template #body="slotProps">
                         <span :class="statusClass(slotProps.data.status)">{{
                             displayStatus(slotProps.data.status)
                         }}</span>
                     </template>
                 </Column>
-                <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.6rem"></Column>
-                <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.6rem"></Column>
+                <Column field="barcode" header="Barcode" sortable style="width: 50%;font-size: 1.5rem"></Column>
+                <Column field="timestamp" header="Datum" sortable style="width: 30%;font-size: 1.5rem"></Column>
             </DataTable>
         </div>
     </div>
