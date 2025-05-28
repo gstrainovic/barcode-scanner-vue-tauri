@@ -55,7 +55,7 @@ onMounted(async () => {
                         <span class="text-xl font-bold">Vorlagen</span>
                     </div>
                 </template>
-                <Column field="titel" header="Titel" sortable style="width: 60%;font-size: 0.8rem;">
+                <Column field="titel" header="Titel" sortable style="width: 60%;font-size: 1.05rem;">
                     <template #body="slotProps">
                         <a href="javascript:void(0)" class="text-blue-500 hover:underline cursor-pointer"
                             @click="hinweisVorlageStore.setHinweis(slotProps.data)">
@@ -63,7 +63,7 @@ onMounted(async () => {
                         </a>
                     </template>
                 </Column>
-                <Column field="strg" header="STRG +" sortable style="width: 40%;font-size: 0.8rem"></Column>
+                <Column field="strg" header="STRG +" sortable style="width: 40%;font-size: 1.05rem;"></Column>
             </DataTable>
         </div>
     </div>

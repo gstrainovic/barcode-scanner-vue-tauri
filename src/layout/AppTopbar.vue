@@ -37,7 +37,7 @@ const reset = () => {
     // historyStore don't need to be reset, as it is used for logging and should persist
     // localStore don't need to be reset, as it is used for long-term storage
     teamStore.$reset();
-    
+
     sessionStorage.clear();
 };
 
@@ -64,18 +64,40 @@ onMounted(async () => {
 });
 </script>
 
+<style scoped>
+img.logo {
+    width: 100%;
+    height: auto;
+    max-width: 120px;
+    /* oder gewünschte Maximalbreite */
+    display: block;
+}
+</style>
+
 <template>
     <div class="layout-topbar">
-        <div class="layout-topbar-logo-container">
-            <img :src="isDarkTheme ? '/images/logo.svg' : '/images/logo-white.svg'" alt="Gravurzeile Logo" class="w-32">
+        <div class="">
+            <img :src="isDarkTheme ? '/images/logo.svg' : '/images/logo-white.svg'" alt="Gravurzeile Logo"
+                class="logo mr-8" />
         </div>
 
-        <i class="pi pi-qrcode" style="font-size: 1.5rem"></i>
-        <p class="text-xl ml-3">Barcode Scanner</p>
-        <p class="text-lg ml-3">{{  version }}</p>
-        <p class="text-lg ml-3"> {{ isOnline ? 'Online' : 'Offline' }}</p>
-        <p class="text-xl ml-12">{{ userName }}</p>
-        <p class="text-xl ml-12">{{ userRole }}</p>
+        <div class="flex items-center justify-between w-full px-4">
+            <!-- Links: Logo -->
+            <div class="flex items-center">
+            </div>
+            <!-- Mitte: Zentrierte Elemente -->
+            <div class="flex items-center gap-8">
+                <!-- <i class="pi pi-qrcode" style="font-size: 1.5rem"></i> -->
+                <p class="text-xl">Barcode Scanner {{ version }}</p>
+                <p class="text-xl"> {{ isOnline ? 'Online' : 'Offline' }}</p>
+                <p class="text-xl">{{ userName }}</p>
+                <p class="text-xl">{{ userRole }}</p>
+            </div>
+            <!-- Rechts: Weitere Elemente -->
+            <div class="flex items-center gap-4">
+            </div>
+        </div>
+
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">

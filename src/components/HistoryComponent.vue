@@ -31,9 +31,9 @@ const displayStatus = (status: string) => {
 </script>
 
 <template>
-    <div class="flex flex-col w-1/2 mt-1">
+    <div class="flex flex-col w-1/2">
         <div class="table-container">
-            <DataTable :value="history" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="5">
+            <DataTable :value="history" :sortField="'timestamp'" :sortOrder="-1" paginator :rows="6">
                 <template #header>
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xl font-bold">Verlauf</span>

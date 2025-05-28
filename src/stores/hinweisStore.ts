@@ -71,7 +71,7 @@ export const useHinweisStore = defineStore('hinweis', {
     },
 
 
-    async speichereHinweis(umgesetzt: boolean = false) {
+    async speichereHinweis() {
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
       const appStore = useAppStore();
@@ -98,9 +98,8 @@ export const useHinweisStore = defineStore('hinweis', {
 
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
       if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == this.hinweis) {
-        const gespeichertOderUmgesetzt = umgesetzt ? ' umgesetzt.' : ' gespeichert.';
         invoke('show_notification', {
-          message: ' ✅ Hinweis zu Barcode ' + barcode.value + gespeichertOderUmgesetzt,
+          message: ' ✅ Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
         });
       } else {
         invoke('show_notification', {

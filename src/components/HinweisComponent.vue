@@ -24,35 +24,37 @@ const speichereHinweis = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col w-1/2 mt-1">
-        <Message v-if="hinweis && userRole === 'Lager' && !hinweisUmgesetzt" severity="error">Bitte Hinweis beachten und bestätigen.</Message>
-        <div class="card flex flex-col mt-1">
+    <div class="flex flex-col w-1/2">
+        <Message v-if="hinweis && userRole === 'Lager' && !hinweisUmgesetzt" severity="error">Bitte Hinweis beachten und
+            umsetzen.</Message>
+        <div class="card flex flex-col">
             <section>
                 <div class="font-semibold text-xl mb-6 flex items-center justify-between">
                     <div>
-                        <i class="pi pi-exclamation-triangle"></i><span class="text-lg"> Hinweis zu: {{ barcode }}</span>
+                        <i class="pi pi-exclamation-triangle"></i><span class="text-lg"> Hinweis zu: {{ barcode
+                            }}</span>
                     </div>
                     <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
-                        <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis(umgesetzt = true)"
+                        <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis(true)"
                             inputId="hinweis_umgesetzt" name="size" value="Small" size="small" />
-                        <label for="hinweis_umgesetzt">Beachtet</label>
+                        <label for="hinweis_umgesetzt">Umgesetzt</label>
                     </div>
                     <div class="flex items-center gap-2" v-if="userRole === 'Produktion'">
-                        <Select v-if="barcode" v-model="selectedVorlage" :options="hinweisVorlagen" placeholder="Vorlage auswählen"
-                            optionLabel="titel" option-value="text" :filter="true"
+                        <Select v-if="barcode" v-model="selectedVorlage" :options="hinweisVorlagen"
+                            placeholder="Vorlage auswählen" optionLabel="titel" option-value="text" :filter="true"
                             @change="hinweisVorlageStore.setHinweis">
                         </Select>
                     </div>
                 </div>
-                <Editor v-if="userRole === 'Produktion'" :readonly="!barcode" v-model="hinweis"
-                    :style="{ height: '450px' }" />
-                <ScrollPanel v-if="userRole === 'Lager'" style="height: 495px">
-                    <div v-html="hinweis"></div>
-                </ScrollPanel>
+                <Editor :readonly="!barcode || userRole === 'Lager'" v-model="hinweis" :style="{ height: '450px' }" />
                 <br>
-                <Button v-if="userRole === 'Produktion'" :disabled="!barcode" icon="pi pi-send" label="Speichern"
-                    class="w-full" @click="speichereHinweis()"></Button>
+                <br>
+                <br>
+                <br>
             </section>
+            <Button v-if="userRole === 'Produktion'" :disabled="!barcode" icon="pi pi-send" label="Speichern"
+                class="w-full" @click="speichereHinweis()"></Button>
+            <br v-if="userRole === 'Lager'" />
         </div>
     </div>
 </template>
