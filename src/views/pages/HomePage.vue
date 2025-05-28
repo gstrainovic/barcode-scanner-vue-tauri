@@ -17,7 +17,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/utils/toastUtils';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { onMounted, ref } from 'vue';
-import { Verlauf } from '@/interfaces';
+import { Barcode2Strapi } from '@/interfaces';
 const toast = useToast();
 const teamStore = useTeamStore();
 const localStore = useLocalStore();
@@ -92,28 +92,29 @@ const processBarcode = async (binp = '') => {
         return;
     }
 
-    const result: unknown = await invoke('process_barcode', {
-        barcode: barcode.value,
-        uid: userID,
-        jwt: userToken.value,
-        luids: teamIds.value,
-        rolle: userRole.value,
-        einstellungen: settings.value,
-        ausnahmen: ausnahmen.value,
-        leitcodes: leitcodes.value,
-    });
-
-    const verlauf: Verlauf = {
-        status: (result as { message: string }).message,
-        barcode: barcode.value,
-        timestamp: new Date().toISOString(),
-        synced: false,
-        user_id: userID,
-        offline: !isOnline.value,
-        lager_user_ids: teamIds.value,
+    if (isOnline.value) {
+        // Wenn online, dann Barcode an Strapi senden
+        const result: unknown = await invoke('process_barcode', {
+            barcode: barcode.value,
+            uid: userID,
+            jwt: userToken.value,
+            luids: teamIds.value,
+            rolle: userRole.value,
+            einstellungen: settings.value,
+            ausnahmen: ausnahmen.value,
+            leitcodes: leitcodes.value,
+        });
+        // result wird später gebraucht, wenn Sqlite durch LocalStorage ersetzt wird
+        console.log('Result from process_barcode:', result);
+    } else {
+        // Wenn offline, dann Barcode in LocalStorage speichern
+        const barcode2strapi : Barcode2Strapi = {
+            barcode: barcode.value,
+            users_permissions_user: userID,
+            lager_mitarbeiter: teamIds.value,
+        }
+        localStore.barcode2strapi.push(barcode2strapi);
     }
-
-    localStore.verlauf.push(verlauf);
 
     historyStore.loadHistory();
     const lastHistory = history.value[0] as { status: string; barcode: string; timestamp: string };

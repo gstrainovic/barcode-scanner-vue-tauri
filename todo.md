@@ -42,8 +42,9 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
     * [x] Ausnahmen
     * [x] HinweisVorlagen
     * [x] Barcodes mit Vorlagen
-* [ ] Checkliste erstellen
-* [ ] Arbeitszeiten in Admin darstellen
+* [ ] Arbeitszeiten auch local speichern
 * [ ] Sync
     - [ ] Offline fähig
     - [ ] Wenn Online Barcodes synchronisieren
+* [ ] Arbeitszeiten in Admin darstellen
+* [ ] Checkliste erstellen

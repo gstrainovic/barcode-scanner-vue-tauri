@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
-import { Attributes, Ausnahmen, HinweisVorlage, Leitcode, Settings, User, Verlauf } from '@/interfaces';
+import { Attributes, Ausnahmen, Barcode2Strapi, BarcodeMitHinweise, HinweisVorlage, Leitcode, Settings, User, Zeiterfassung } from '@/interfaces';
 
 const isUserArray = (arr: unknown): arr is User[] => {
   return Array.isArray(arr) && arr.every(
@@ -33,9 +33,10 @@ export const useLocalStore = defineStore('local', {
     settings: {} as Settings,
     ausnahmen: [] as Ausnahmen[],
     leitcodes: [] as Leitcode[],
-    verlauf: [] as Verlauf[],
+    barcode2strapi: [] as Barcode2Strapi[],
+    zeiterfassung2strapi: [] as Zeiterfassung[],
     hinweisVorlagen: [] as HinweisVorlage[],
-    barcodeMitHinweise: [] as { barcode: string; hinweis: string }[],
+    barcodeMitHinweise: [] as BarcodeMitHinweise[],
   }),
   actions: {
     async fetchBarcodeMitHinweise() {

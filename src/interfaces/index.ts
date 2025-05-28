@@ -92,12 +92,25 @@ export interface LeitcodeBuchstabe {
 //     pub offline: bool,
 //     pub lager_user_ids: &'a str,
 // }
-export interface Verlauf {
-    status: string;
+export interface Barcode2Strapi {
     barcode: string;
-    timestamp: string;
-    synced: boolean;
-    user_id: number;
-    offline: boolean;
-    lager_user_ids: number[];
+    users_permissions_user: number;
+    lager_mitarbeiter: number[];
+    hinweis?: string;
+    hinweis_erstellt_von?: number;
+    hinweis_umgesetzt_von?: number[];
+}
+
+export interface Zeiterfassung {
+    mitarbeiter: number;
+    typ: string;
+    zeitpunkt: string;
+    login_or_logout: string;
+    geraete_name: string;
+    abteilung: string;
+}
+
+export interface BarcodeMitHinweise {
+    barcode: string;
+    hinweis: string;
 }
