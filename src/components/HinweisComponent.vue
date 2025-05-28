@@ -29,7 +29,7 @@ const speichereHinweis = async () => {
             <section>
                 <div class="font-semibold text-xl mb-6 flex items-center justify-between">
                     <div>
-                        <i class="pi pi-exclamation-triangle"></i> Hinweis zu: {{ barcode }}
+                        <i class="pi pi-exclamation-triangle"></i><span class="text-lg"> Hinweis zu: {{ barcode }}</span>
                     </div>
                     <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
                         <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis"

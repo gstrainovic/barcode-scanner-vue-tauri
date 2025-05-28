@@ -27,7 +27,6 @@ declare module 'vue' {
     ScrollPanel: typeof import('primevue/scrollpanel')['default']
     Select: typeof import('primevue/select')['default']
     SelectButton: typeof import('primevue/selectbutton')['default']
-    Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']
   }
   export interface ComponentCustomProperties {
