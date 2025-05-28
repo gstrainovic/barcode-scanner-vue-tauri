@@ -7,6 +7,7 @@ edition = "2021"
     
 [dependencies]
 dotenv = { version = "0.15" }
+reqwest = { version = "0.12.16" }
 
 [lib]
 name = "config"
