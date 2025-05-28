@@ -13,6 +13,8 @@ use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
 use notify_rust::Notification;
+use std::sync::atomic::{AtomicBool, Ordering};
+static LOOPER_RUNNING: AtomicBool = AtomicBool::new(false);
 
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
     let my_windows_hwnd = unsafe {
@@ -84,6 +86,12 @@ fn update(app: AppHandle) {
 
 #[tauri::command]
 fn start_looper(app: AppHandle) {
+    if LOOPER_RUNNING.load(Ordering::SeqCst) {
+        eprintln!("Looper is already running.");
+        return;
+    }
+    LOOPER_RUNNING.store(true, Ordering::SeqCst);
+    println!("Starting looper...");
     let config = config::Config::from_env();
     let app_clone = app.clone();
     thread::spawn(move || {
