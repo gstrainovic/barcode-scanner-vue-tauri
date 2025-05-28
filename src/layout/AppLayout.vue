@@ -64,5 +64,4 @@ function isOutsideClicked(event: MouseEvent) {
         </div>
         <div class="layout-mask animate-fadein"></div>
     </div>
-    <Toast />
 </template>

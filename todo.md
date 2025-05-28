@@ -19,7 +19,6 @@ Hier noch eine kurze Checkliste / Überblick über die umgesetzte und offenen Fu
 * [x] Hinweis Vorlagen
 * [x] Hotkey für Vorlagen
 * [x] Lager Users bleiben gespeichert beim F5 Refresh
-* [x] Toast und Notification oder nur Notification verwenden?
 * [x] Mit Ziffernblock auch CTRL + Vorlagen laden
 * [x] team and user ids nicht selber setzen sonder per appstore.xxx()
 * [x] absteigend soriteren die imports

@@ -5,7 +5,6 @@ import { useHinweisStore } from '@/stores/hinweisStore';
 import { useBarcodeStore } from '@/stores/barcodeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useLocalStore } from '@/stores/localStore';
-import { useToast } from 'primevue/usetoast';
 import { storeToRefs } from 'pinia';
 const hinweisVorlageStore = useHinweisVorlageStore();
 const localStore = useLocalStore();
@@ -17,14 +16,10 @@ const { selectedVorlage } = storeToRefs(hinweisVorlageStore);
 const { hinweis, hinweisUmgesetzt, } = storeToRefs(hinweisStore);
 const { hinweisVorlagen } = storeToRefs(localStore);
 const { barcode } = storeToRefs(barcodeStore);
-const toast = useToast();
 
 const speichereHinweis = async () => {
     const hinweisStore = useHinweisStore();
-    const toastMessage = await hinweisStore.speichereHinweis();
-    if (toastMessage) {
-        toast.add(toastMessage);
-    }
+    await hinweisStore.speichereHinweis();
 };
 </script>
 

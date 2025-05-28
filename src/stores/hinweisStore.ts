@@ -6,7 +6,6 @@ import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { storeToRefs } from 'pinia';
 import { message } from '@tauri-apps/plugin-dialog';
 import { marked } from 'marked';
-import { getErrorToastMessage, getSuccessToastMessage } from '@/utils/toastUtils';
 import { defineStore } from 'pinia';
 import { strapi } from '@strapi/client';
 import { invoke } from '@tauri-apps/api/core';
@@ -89,17 +88,9 @@ export const useHinweisStore = defineStore('hinweis', {
       const authStore = useAuthStore();
       const { userId, userRole } = storeToRefs(authStore);
 
-      let toastReturn;
-
       if (!barcode) {
         const message = 'Bitte Barcode zuerst scannen';
-        toastReturn = getErrorToastMessage(message);
-        // sendNotification({
-        //   title: config.dialog.title,
-        //   body: message,
-        // });
         invoke('show_notification', {message});
-        return toastReturn;
       }
 
       const userID: number = Number(userId.value);
@@ -116,22 +107,15 @@ export const useHinweisStore = defineStore('hinweis', {
 
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
       if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == this.hinweis) {
-        toastReturn = getSuccessToastMessage('Hinweis gespeichert.');
-        // sendNotification({
-        //   title: config.dialog.title,
-        //   body: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
-        // });
         invoke('show_notification', {
           message: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
         });
       } else {
-        toastReturn = getErrorToastMessage('Fehler beim Speichern des Hinweises.');
         invoke('show_notification', {
           message: 'Fehler beim Speichern des Hinweises.',
         });
         this.hinweisUmgesetzt = false;
       }
-      return toastReturn;
     },
   },
   persist: {

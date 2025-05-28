@@ -4,7 +4,6 @@ import router from './router';
 import Aura from '@primevue/themes/aura';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { invoke } from '@tauri-apps/api/core';
@@ -28,7 +27,6 @@ app.use(PrimeVue, {
         }
     }
 });
-app.use(ToastService);
 app.use(ConfirmationService);
 app.use(pinia)
 

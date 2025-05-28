@@ -4,7 +4,6 @@ import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useLocalStore } from '@/stores/localStore';
 import { useBarcodeStore } from '@/stores/barcodeStore';
-import { useToast } from 'primevue';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
@@ -16,7 +15,6 @@ const { userRole } = storeToRefs(authStore);
 const hinweisVorlageStore = useHinweisVorlageStore();
 const { hinweisVorlagen } = storeToRefs(localStore);
 const { barcode } = storeToRefs(barcodeStore);
-const toast = useToast();
 
 const registerHinweisVorlagenShortcuts = async () => {
     await unregisterAll();
@@ -27,20 +25,14 @@ const registerHinweisVorlagenShortcuts = async () => {
         await register(hotkeyMain, async (event) => {
             if (event.state === "Released") {
                 await hinweisVorlageStore.setHinweis(vorlage);
-                const toastMessage = await hinweisStore.speichereHinweis();
-                if (toastMessage) {
-                    toast.add(toastMessage);
-                }
+                await hinweisStore.speichereHinweis();
             }
         });
 
         await register(hotkeyNumpad, async (event) => {
             if (event.state === "Released") {
                 await hinweisVorlageStore.setHinweis(vorlage);
-                const toastMessage = await hinweisStore.speichereHinweis();
-                if (toastMessage) {
-                    toast.add(toastMessage);
-                }
+                await hinweisStore.speichereHinweis();
             }
         });
     }

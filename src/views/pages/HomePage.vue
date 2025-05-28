@@ -2,7 +2,6 @@
 import HistoryComponent from '@/components/HistoryComponent.vue';
 import HinweisComponent from '@/components/HinweisComponent.vue';
 import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
-import { useToast } from "primevue/usetoast";
 import { useTeamStore } from '@/stores/teamStore';
 import { useHistoryStore } from '@/stores/historyStore';
 import { useHinweisVorlageStore } from '@/stores/hinweisVorlageStore';
@@ -14,11 +13,9 @@ import { useLocalStore } from '@/stores/localStore';
 import { storeToRefs } from 'pinia';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
-import { getErrorToastMessage, getSuccessToastMessage, getWarningToastMessage } from '@/utils/toastUtils';
-import { getCurrentWindow } from '@tauri-apps/api/window';
+// import { getCurrentWindow } from '@tauri-apps/api/window';
 import { onMounted, ref } from 'vue';
 import { Barcode2Strapi } from '@/interfaces';
-const toast = useToast();
 const teamStore = useTeamStore();
 const localStore = useLocalStore();
 const appStore = useAppStore();
@@ -29,7 +26,7 @@ const { team, checked, teamIds, lagerUsers } = storeToRefs(teamStore);
 const { settings, ausnahmen, leitcodes } = storeToRefs(localStore);
 const { isOnline } = storeToRefs(appStore);
 const historyStore = useHistoryStore();
-const { history } = storeToRefs(historyStore);
+// const { history } = storeToRefs(historyStore);
 
 listen('sendebarcode', (event) => {
     processBarcode(event.payload as string);
@@ -40,14 +37,14 @@ onMounted(async () => {
 
 });
 
-const bringWindowToFront = async () => {
-    const currentWindow = getCurrentWindow();
-    const isminimized = await currentWindow.isMinimized();
-    if (isminimized) {
-        await currentWindow.maximize();
-        await currentWindow.setFocus();
-    }
-};
+// const bringWindowToFront = async () => {
+//     const currentWindow = getCurrentWindow();
+//     const isminimized = await currentWindow.isMinimized();
+//     if (isminimized) {
+//         await currentWindow.maximize();
+//         await currentWindow.setFocus();
+//     }
+// };
 
 const processBarcode = async (binp = '') => {
     const barcodeStore = useBarcodeStore();
@@ -61,11 +58,6 @@ const processBarcode = async (binp = '') => {
     // Falls es einen Hinweis gibt, muss dieser zuerst Beachtet werden
     if (hinweis.value && !hinweisUmgesetzt.value && userRole.value === 'Lager') {
         const message = 'Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
-        toast.add(getErrorToastMessage(message));
-        // sendNotification({
-        //     title: config.dialog.title,
-        //     body: message,
-        // });
         invoke('show_notification', { message });
         barcodeInput.value = '';
         return;
@@ -81,7 +73,7 @@ const processBarcode = async (binp = '') => {
 
     barcode.value = barcodeValue;
     if (!barcode.value || barcode.value === '') {
-        toast.add(getErrorToastMessage('Bitte Barcode scannen'));
+        invoke('show_notification', { message: 'Bitte Barcode scannen' });
         return;
     }
     barcodeInput.value = '';
@@ -117,17 +109,6 @@ const processBarcode = async (binp = '') => {
     }
 
     historyStore.loadHistory();
-    const lastHistory = history.value[0] as { status: string; barcode: string; timestamp: string };
-    if (lastHistory.status.startsWith('@C88')) {
-        await bringWindowToFront();
-        toast.add(getErrorToastMessage(lastHistory.status.replace('@C88', '')));
-    } else if (lastHistory.status.startsWith('@C03')) {
-        await bringWindowToFront();
-        toast.add(getWarningToastMessage(lastHistory.status.replace('@C03', '')));
-    } else {
-        toast.add(getSuccessToastMessage('Barcode erfolgreich verarbeitet.'));
-    }
-
     hinweisStore.ladeHinweis();
 };
 </script>
