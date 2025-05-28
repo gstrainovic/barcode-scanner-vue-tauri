@@ -57,7 +57,7 @@ const processBarcode = async (binp = '') => {
 
     // Falls es einen Hinweis gibt, muss dieser zuerst Beachtet werden
     if (hinweis.value && !hinweisUmgesetzt.value && userRole.value === 'Lager') {
-        const message = 'Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
+        const message = '❗Bitte Hinweis zu Barcode ' + barcode.value + ' zuerst beachten.';
         invoke('show_notification', { message });
         barcodeInput.value = '';
         return;
@@ -73,7 +73,7 @@ const processBarcode = async (binp = '') => {
 
     barcode.value = barcodeValue;
     if (!barcode.value || barcode.value === '') {
-        invoke('show_notification', { message: 'Bitte Barcode scannen' });
+        invoke('show_notification', { message: '❗Bitte zuerst Barcode scannen.' });
         return;
     }
     barcodeInput.value = '';

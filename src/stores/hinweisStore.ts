@@ -4,7 +4,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { storeToRefs } from 'pinia';
-import { message } from '@tauri-apps/plugin-dialog';
 import { marked } from 'marked';
 import { defineStore } from 'pinia';
 import { strapi } from '@strapi/client';
@@ -57,8 +56,6 @@ export const useHinweisStore = defineStore('hinweis', {
   actions: {
 
     async ladeHinweis() {
-      const authStore = useAuthStore();
-      const { userRole } = storeToRefs(authStore);
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
       const result = await getHinweisFromBarcode(barcode.value);
@@ -71,16 +68,10 @@ export const useHinweisStore = defineStore('hinweis', {
       }
       this.barcodeId = result.id;
       this.hinweis = await marked.parse(result.attributes.hinweis || '');
-      if (result.attributes.hinweis && userRole.value === 'Lager' && !umgesetzt) {
-        message('Es gibt einen Hinweis zu Barcode ' + barcode.value, {
-          title: config.dialog.title,
-          kind: 'warning',
-        });
-      }
     },
 
 
-    async speichereHinweis() {
+    async speichereHinweis(umgesetzt: boolean = false) {
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
       const appStore = useAppStore();
@@ -89,7 +80,7 @@ export const useHinweisStore = defineStore('hinweis', {
       const { userId, userRole } = storeToRefs(authStore);
 
       if (!barcode) {
-        const message = 'Bitte Barcode zuerst scannen';
+        const message = '❗Bitte Barcode zuerst scannen.';
         invoke('show_notification', {message});
       }
 
@@ -107,12 +98,13 @@ export const useHinweisStore = defineStore('hinweis', {
 
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
       if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == this.hinweis) {
+        const gespeichertOderUmgesetzt = umgesetzt ? ' umgesetzt.' : ' gespeichert.';
         invoke('show_notification', {
-          message: 'Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
+          message: ' ✅ Hinweis zu Barcode ' + barcode.value + gespeichertOderUmgesetzt,
         });
       } else {
         invoke('show_notification', {
-          message: 'Fehler beim Speichern des Hinweises.',
+          message: '❗Fehler beim Speichern des Hinweises.',
         });
         this.hinweisUmgesetzt = false;
       }

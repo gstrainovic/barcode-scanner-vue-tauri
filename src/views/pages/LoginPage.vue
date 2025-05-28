@@ -67,7 +67,7 @@ const login = async () => {
                         <Password id="password1" v-model="password" placeholder="Passwort" :toggleMask="true"
                             class="mb-4" fluid :feedback="false"></Password>
                         <Button @click.prevent="login" label="Anmelden" class="w-full p-3 text-xl" />
-                        <Message v-if="loginFailed" severity="error">Anmeldung fehlgeschlagen</Message>
+                        <Message v-if="loginFailed" severity="error">Anmeldung fehlgeschlagen.</Message>
                     </div>
                 </div>
             </div>

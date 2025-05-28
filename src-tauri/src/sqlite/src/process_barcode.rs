@@ -38,9 +38,9 @@ pub fn history_add(
     let prefix_warn_icon = if status.message.starts_with("@C88") {
         "❗"
     } else if status.message.starts_with("@C03") {
-        "⚠️"
+        " ⚠️ "
     } else {
-        "✅"
+        " ✅ "
     };
 
     let new_status_message = status

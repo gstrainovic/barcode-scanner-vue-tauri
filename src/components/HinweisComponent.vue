@@ -25,6 +25,7 @@ const speichereHinweis = async () => {
 
 <template>
     <div class="flex flex-col w-1/2 mt-1">
+        <Message v-if="hinweis && userRole === 'Lager' && !hinweisUmgesetzt" severity="error">Bitte Hinweis beachten und bestätigen.</Message>
         <div class="card flex flex-col mt-1">
             <section>
                 <div class="font-semibold text-xl mb-6 flex items-center justify-between">
@@ -32,7 +33,7 @@ const speichereHinweis = async () => {
                         <i class="pi pi-exclamation-triangle"></i><span class="text-lg"> Hinweis zu: {{ barcode }}</span>
                     </div>
                     <div class="flex items-center gap-2" v-if="userRole === 'Lager'">
-                        <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis"
+                        <ToggleSwitch v-model="hinweisUmgesetzt" @update:modelValue="speichereHinweis(umgesetzt = true)"
                             inputId="hinweis_umgesetzt" name="size" value="Small" size="small" />
                         <label for="hinweis_umgesetzt">Beachtet</label>
                     </div>
