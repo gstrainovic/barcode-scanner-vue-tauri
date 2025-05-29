@@ -1,8 +1,8 @@
 [package]
 name = "barcode-scanner-v2"
 version = "2.0.9"
-description = "A Tauri App"
-authors = ["you"]
+description = "A Tauri application for barcode scanning with Vue.js frontend"
+authors = ["Goran Strainovic - Strainovic IT"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
