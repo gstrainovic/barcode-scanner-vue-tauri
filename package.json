@@ -7,6 +7,7 @@
         "build": "vite build",
         "preview": "vite preview",
         "tauri": "tauri",
+        "tauri-dev": "cp ./.env ./src-tauri/.env && tauri dev",
         "lint:fix": "eslint --ext .js,.ts,.vue src --fix",
         "ts:check": "vue-tsc --noEmit",
         "check": "npm run lint:fix && npm run ts:check"
