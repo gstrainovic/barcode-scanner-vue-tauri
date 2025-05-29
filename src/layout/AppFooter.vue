@@ -1,6 +1,5 @@
 <script setup lang="ts"></script>
 
 <template>
-    <div class="layout-footer">
-    </div>
+  <div class="layout-footer" />
 </template>

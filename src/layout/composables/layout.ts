@@ -1,85 +1,85 @@
 import { computed, reactive, readonly } from 'vue';
 
 const layoutConfig = reactive({
-    preset: 'Aura',
-    primary: 'emerald',
-    surface: null,
-    darkTheme: true,
-    menuMode: 'static'
+  preset: 'Aura',
+  primary: 'emerald',
+  surface: null,
+  darkTheme: true,
+  menuMode: 'static'
 });
 
 const layoutState = reactive<{
-    staticMenuDesktopInactive: boolean;
-    overlayMenuActive: boolean;
-    profileSidebarVisible: boolean;
-    configSidebarVisible: boolean;
-    staticMenuMobileActive: boolean;
-    menuHoverActive: boolean;
-    activeMenuItem: string | null;
+  staticMenuDesktopInactive: boolean,
+  overlayMenuActive: boolean,
+  profileSidebarVisible: boolean,
+  configSidebarVisible: boolean,
+  staticMenuMobileActive: boolean,
+  menuHoverActive: boolean,
+  activeMenuItem: string | null
 }>({
-    staticMenuDesktopInactive: false,
-    overlayMenuActive: false,
-    profileSidebarVisible: false,
-    configSidebarVisible: false,
-    staticMenuMobileActive: false,
-    menuHoverActive: false,
-    activeMenuItem: null
+  staticMenuDesktopInactive: false,
+  overlayMenuActive: false,
+  profileSidebarVisible: false,
+  configSidebarVisible: false,
+  staticMenuMobileActive: false,
+  menuHoverActive: false,
+  activeMenuItem: null
 });
 
 export function useLayout() {
-    const setPrimary = (value: string) => {
-        layoutConfig.primary = value;
-    };
+  const setPrimary = (value: string) => {
+    layoutConfig.primary = value;
+  };
 
-    const setSurface = (value: null) => {
-        layoutConfig.surface = value;
-    };
+  const setSurface = (value: null) => {
+    layoutConfig.surface = value;
+  };
 
-    const setPreset = (value: string) => {
-        layoutConfig.preset = value;
-    };
+  const setPreset = (value: string) => {
+    layoutConfig.preset = value;
+  };
 
     type MenuItem = { value: string } | string;
 
     const setActiveMenuItem = (item: MenuItem) => {
-        layoutState.activeMenuItem = typeof item === 'object' && 'value' in item ? item.value : item;
+      layoutState.activeMenuItem = typeof item === 'object' && 'value' in item ? item.value : item;
     };
 
     const setMenuMode = (mode: string) => {
-        layoutConfig.menuMode = mode;
+      layoutConfig.menuMode = mode;
     };
 
     const toggleDarkMode = () => {
-        if (!document.startViewTransition) {
-            executeDarkModeToggle();
+      if (!document.startViewTransition) {
+        executeDarkModeToggle();
 
-            return;
-        }
+        return;
+      }
 
-        document.startViewTransition(() => executeDarkModeToggle());
+      document.startViewTransition(() => executeDarkModeToggle());
     };
 
     const executeDarkModeToggle = () => {
-        layoutConfig.darkTheme = !layoutConfig.darkTheme;
-        document.documentElement.classList.toggle('app-dark');
+      layoutConfig.darkTheme = !layoutConfig.darkTheme;
+      document.documentElement.classList.toggle('app-dark');
     };
 
     const onMenuToggle = () => {
-        if (layoutConfig.menuMode === 'overlay') {
-            layoutState.overlayMenuActive = !layoutState.overlayMenuActive;
-        }
+      if (layoutConfig.menuMode === 'overlay') {
+        layoutState.overlayMenuActive = !layoutState.overlayMenuActive;
+      }
 
-        if (window.innerWidth > 991) {
-            layoutState.staticMenuDesktopInactive = !layoutState.staticMenuDesktopInactive;
-        } else {
-            layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
-        }
+      if (window.innerWidth > 991) {
+        layoutState.staticMenuDesktopInactive = !layoutState.staticMenuDesktopInactive;
+      } else {
+        layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
+      }
     };
 
     const resetMenu = () => {
-        layoutState.overlayMenuActive = false;
-        layoutState.staticMenuMobileActive = false;
-        layoutState.menuHoverActive = false;
+      layoutState.overlayMenuActive = false;
+      layoutState.staticMenuMobileActive = false;
+      layoutState.menuHoverActive = false;
     };
 
     const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);

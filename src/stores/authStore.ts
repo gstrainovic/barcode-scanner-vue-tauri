@@ -1,6 +1,6 @@
-import { AuthResponse } from '@/interfaces';
-import {config} from '../utils/config';
 import { defineStore } from 'pinia';
+import { config } from '../utils/config';
+import type { AuthResponse } from '@/interfaces';
 
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -9,23 +9,23 @@ export const useAuthStore = defineStore('auth', {
     id: 0 as number | null,
     rolle: '' as string | null,
     token: '' as string | null,
-    username: '' as string | null,
+    username: '' as string | null
   }),
   getters: {
-    userRole: (state) => state.rolle,
-    userName: (state) => state.username,
-    userToken: (state) => state.token,
-    userId: (state) => state.id,
+    userRole: state => state.rolle,
+    userName: state => state.username,
+    userToken: state => state.token,
+    userId: state => state.id
   },
   actions: {
-    async authenticateUser({ identifier, password }: { identifier: string; password: string }) {
+    async authenticateUser({ identifier, password }: { identifier: string, password: string }) {
       if (debounceTimeout) {
         clearTimeout(debounceTimeout);
       }
 
       return new Promise<boolean>((resolve) => {
         debounceTimeout = setTimeout(async () => {
-          const url = config.api.strapi + 'auth/local';
+          const url = `${config.api.strapi}auth/local`;
 
           try {
             const response = await fetch(url, {
@@ -33,10 +33,9 @@ export const useAuthStore = defineStore('auth', {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 identifier,
-                password,
-              }),
+                password
+              })
             });
-
 
             let data: AuthResponse;
             try {
@@ -48,14 +47,14 @@ export const useAuthStore = defineStore('auth', {
             }
 
             if (
-              data &&
-              typeof data === 'object' &&
-              'jwt' in data &&
-              'user' in data &&
-              typeof data.user === 'object' &&
-              'rolle' in data.user &&
-              'username' in data.user &&
-              'id' in data.user
+              data
+              && typeof data === 'object'
+              && 'jwt' in data
+              && 'user' in data
+              && typeof data.user === 'object'
+              && 'rolle' in data.user
+              && 'username' in data.user
+              && 'id' in data.user
             ) {
               this.token = data.jwt;
               this.rolle = data.user.rolle;
@@ -72,9 +71,9 @@ export const useAuthStore = defineStore('auth', {
           }
         }, 300); // Adjust debounce delay as needed
       });
-    },
+    }
   },
   persist: {
-    storage: sessionStorage,
-  },
+    storage: sessionStorage
+  }
 });

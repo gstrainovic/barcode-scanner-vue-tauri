@@ -3,14 +3,14 @@ import { defineStore } from 'pinia';
 
 export const useHistoryStore = defineStore('history', {
   state: () => ({
-    history: [] as { status: string; barcode: string; timestamp: string }[],
+    history: [] as { status: string, barcode: string, timestamp: string }[]
   }),
   actions: {
     async loadHistory() {
-        this.history = await invoke<[]>('load_history');
+      this.history = await invoke<[]>('load_history');
     }
   },
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im sessionStorage
-  },
+    storage: sessionStorage // Speichert den Zustand im sessionStorage
+  }
 });

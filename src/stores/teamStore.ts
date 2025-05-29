@@ -1,16 +1,15 @@
-import { User } from '@/interfaces';
+import { defineStore } from 'pinia';
 import { useAppStore } from './appStore';
 import { useArbeitszeitStore } from './arbeitsZeitStore';
+import type { User } from '@/interfaces';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
-import { defineStore } from 'pinia';
-
 
 export const useTeamStore = defineStore('team', {
   state: () => ({
     checked: true,
     lagerUsers: [] as User[],
     team: [] as User[],
-    teamIds: [] as number[],
+    teamIds: [] as number[]
   }),
   actions: {
     async changeTeam(event: { value: User[] }) {
@@ -43,12 +42,12 @@ export const useTeamStore = defineStore('team', {
       this.lagerUsers = result.map((user: User) => {
         return {
           username: user.username,
-          id: user.id,
-        }
+          id: user.id
+        };
       });
-    },
+    }
   },
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im localStorage
-  },
+    storage: sessionStorage // Speichert den Zustand im localStorage
+  }
 });

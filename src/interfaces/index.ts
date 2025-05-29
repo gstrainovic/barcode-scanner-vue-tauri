@@ -1,39 +1,40 @@
 export interface User {
-    username: string;
-    id: number;
+  username: string;
+  id: number;
 }
 
 export interface HinweisVorlage {
-    id: number;
-    titel: string;
-    text: string;
-    strg: string;
-    barcode?: string;
+  id: number;
+  titel: string;
+  text: string;
+  strg: string;
+  barcode?: string;
 }
 
 export interface AuthResponse {
-    jwt: string;
-    user: {
-    rolle: string;
-    username: string;
-    id: number;
-    [key: string]: unknown;
-    };
-    [key: string]: unknown;
-};
+  jwt: string;
+  user: {
+    rolle: string,
+    username: string,
+    id: number,
+    [key: string]: unknown
+  };
+  [key: string]: unknown;
+}
 
-export interface Attributes { attributes: { [key: string]: unknown } };
-
+export interface Attributes {
+  attributes: { [key: string]: unknown };
+}
 
 export interface Settings {
-    Barcode_Mindestlaenge: number;
-    Leitcodes_Aktiv: boolean;
-    Ausnahmen_Aktiv: boolean;
+  Barcode_Mindestlaenge: number;
+  Leitcodes_Aktiv: boolean;
+  Ausnahmen_Aktiv: boolean;
 }
 
 export interface Ausnahmen {
-    Barcode: string;
-    Bedeutung: string;
+  Barcode: string;
+  Bedeutung: string;
 }
 
 // #[derive(Deserialize, Debug)]
@@ -45,10 +46,10 @@ export interface Ausnahmen {
 //     pub Produktion: bool,
 // }
 export interface Leitcode {
-    Beschreibung?: string;
-    Mindeslaenge: number;
-    Leitcode_Buchstabe: DataBuchstaben;
-    Produktion: boolean;
+  Beschreibung?: string;
+  Mindeslaenge: number;
+  Leitcode_Buchstabe: DataBuchstaben;
+  Produktion: boolean;
 }
 
 // #[derive(Deserialize, Debug)]
@@ -56,7 +57,7 @@ export interface Leitcode {
 //     pub data: Vec<IdAtrBuchstaben>,
 // }
 interface DataBuchstaben {
-    data: IdAtrBuchstaben[];
+  data: IdAtrBuchstaben[];
 }
 
 // #[derive(Deserialize, Debug)]
@@ -65,8 +66,8 @@ interface DataBuchstaben {
 //     pub attributes: LeitcodeBuchstabe,
 // }
 interface IdAtrBuchstaben {
-    id: number;
-    attributes: LeitcodeBuchstabe;
+  id: number;
+  attributes: LeitcodeBuchstabe;
 }
 
 // #[derive(Deserialize, Debug)]
@@ -76,8 +77,8 @@ interface IdAtrBuchstaben {
 //     pub Position_Null_Beginnend: i32,
 // }
 export interface LeitcodeBuchstabe {
-    Buchstabe: string;
-    Position_Null_Beginnend: number;
+  Buchstabe: string;
+  Position_Null_Beginnend: number;
 }
 
 // #[derive(Insertable)]
@@ -93,24 +94,24 @@ export interface LeitcodeBuchstabe {
 //     pub lager_user_ids: &'a str,
 // }
 export interface Barcode2Strapi {
-    barcode: string;
-    users_permissions_user: number;
-    lager_mitarbeiter: number[];
-    hinweis?: string;
-    hinweis_erstellt_von?: number;
-    hinweis_umgesetzt_von?: number[];
+  barcode: string;
+  users_permissions_user: number;
+  lager_mitarbeiter: number[];
+  hinweis?: string;
+  hinweis_erstellt_von?: number;
+  hinweis_umgesetzt_von?: number[];
 }
 
 export interface Zeiterfassung {
-    mitarbeiter: number;
-    typ: string;
-    zeitpunkt: string;
-    login_or_logout: string;
-    geraete_name: string;
-    abteilung: string;
+  mitarbeiter: number;
+  typ: string;
+  zeitpunkt: string;
+  login_or_logout: string;
+  geraete_name: string;
+  abteilung: string;
 }
 
 export interface BarcodeMitHinweise {
-    barcode: string;
-    hinweis: string;
+  barcode: string;
+  hinweis: string;
 }

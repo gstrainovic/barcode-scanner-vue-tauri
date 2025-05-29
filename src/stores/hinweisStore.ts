@@ -1,18 +1,18 @@
-import { config } from '@/utils/config';
-import { useBarcodeStore } from './barcodeStore';
-import { useAuthStore } from '@/stores/authStore';
-import { useAppStore } from '@/stores/appStore';
-import { fetchWithAuth } from '@/utils/fetchWithAuth';
-import { storeToRefs } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
 import { marked } from 'marked';
-import { defineStore } from 'pinia';
+
 import { strapi } from '@strapi/client';
 import { invoke } from '@tauri-apps/api/core';
+import { useBarcodeStore } from './barcodeStore';
+import { fetchWithAuth } from '@/utils/fetchWithAuth';
+import { useAppStore } from '@/stores/appStore';
+import { useAuthStore } from '@/stores/authStore';
+import { config } from '@/utils/config';
 
 const getHinweisFromBarcode = async (barcode: string) => {
   const appStore = useAppStore();
   if (appStore.isOnline) {
-    const response = await fetchWithAuth('barcodes?filters[barcode][$eq]=' + barcode + '&populate=*&pagination[limit]=1&sort=id:asc');
+    const response = await fetchWithAuth(`barcodes?filters[barcode][$eq]=${barcode}&populate=*&pagination[limit]=1&sort=id:asc`);
     return response.data[0];
   } else {
     throw new Error('Offline mode not implemented yet!');
@@ -29,12 +29,12 @@ const postHinweis = async (id: string, hinweis: string, erstelltVon: number | nu
     }
     const client = strapi({
       baseURL: config.api.strapi,
-      auth: userToken.value,
+      auth: userToken.value
     });
 
     const barcodes = client.collection('barcodes');
 
-    const updateData: { hinweis: string; hinweis_erstellt_von?: number; hinweis_umgesetzt_von?: number[] } = { hinweis: hinweis };
+    const updateData: { hinweis: string, hinweis_erstellt_von?: number, hinweis_umgesetzt_von?: number[] } = { hinweis };
     if (erstelltVon !== null && erstelltVon !== undefined) {
       updateData.hinweis_erstellt_von = erstelltVon;
     }
@@ -46,12 +46,11 @@ const postHinweis = async (id: string, hinweis: string, erstelltVon: number | nu
   }
 };
 
-
 export const useHinweisStore = defineStore('hinweis', {
   state: () => ({
     barcodeId: '',
     hinweis: '',
-    hinweisUmgesetzt: false,
+    hinweisUmgesetzt: false
   }),
   actions: {
 
@@ -70,7 +69,6 @@ export const useHinweisStore = defineStore('hinweis', {
       this.hinweis = await marked.parse(result.attributes.hinweis || '');
     },
 
-
     async speichereHinweis() {
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
@@ -81,10 +79,10 @@ export const useHinweisStore = defineStore('hinweis', {
 
       if (!barcode) {
         const message = '❗Bitte Barcode zuerst scannen.';
-        invoke('show_notification', {message});
+        invoke('show_notification', { message });
       }
 
-      const userID: number = Number(userId.value);
+      const userID = Number(userId.value);
       if (!userID) {
         console.error('Fehler: userId ist nicht definiert.');
         return;
@@ -97,19 +95,19 @@ export const useHinweisStore = defineStore('hinweis', {
       const result = await postHinweis(this.barcodeId, this.hinweis, createdBy, hinweisUmgesetztVon);
 
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
-      if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis == this.hinweis) {
+      if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis === this.hinweis) {
         invoke('show_notification', {
-          message: ' ✅ Hinweis zu Barcode ' + barcode.value + ' gespeichert.',
+          message: ` ✅ Hinweis zu Barcode ${barcode.value} gespeichert.`
         });
       } else {
         invoke('show_notification', {
-          message: '❗Fehler beim Speichern des Hinweises.',
+          message: '❗Fehler beim Speichern des Hinweises.'
         });
         this.hinweisUmgesetzt = false;
       }
-    },
+    }
   },
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im sessionStorage
-  },
+    storage: sessionStorage // Speichert den Zustand im sessionStorage
+  }
 });

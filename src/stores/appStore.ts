@@ -1,12 +1,12 @@
-import {config} from '@/utils/config';
 import { defineStore, storeToRefs } from 'pinia';
 import { useAuthStore } from './authStore';
 import { useTeamStore } from './teamStore';
+import { config } from '@/utils/config';
 
 export const useAppStore = defineStore('app', {
   state: () => ({
     isOnline: true as boolean,
-    teamAndUserIds: [] as number[],
+    teamAndUserIds: [] as number[]
   }),
   actions: {
     async onlineCheck() {
@@ -44,6 +44,6 @@ export const useAppStore = defineStore('app', {
     }
   },
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im sessionStorage
-  },
+    storage: sessionStorage // Speichert den Zustand im sessionStorage
+  }
 });

@@ -2,9 +2,9 @@ import { defineStore } from 'pinia';
 
 export const useBarcodeStore = defineStore('barcode', {
   state: () => ({
-    barcode: '',
+    barcode: ''
   }),
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im sessionStorage
-  },
+    storage: sessionStorage // Speichert den Zustand im sessionStorage
+  }
 });

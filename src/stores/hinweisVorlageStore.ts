@@ -1,19 +1,19 @@
 import { defineStore, storeToRefs } from 'pinia';
-import { HinweisVorlage } from '@/interfaces';
+import { marked } from 'marked';
+import type { HinweisVorlage } from '@/interfaces';
 import { useHinweisStore } from '@/stores/hinweisStore';
 import { useLocalStore } from '@/stores/localStore';
-import { marked } from 'marked';
 
 export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
   state: () => ({
-    selectedVorlage: '',
+    selectedVorlage: ''
   }),
   actions: {
     async checkBarcodeMatchWithVorlageBarcode(barcodeInput: string) {
       const localStore = useLocalStore();
       const { hinweisVorlagen } = storeToRefs(localStore);
       if (hinweisVorlagen.value.length > 0 && barcodeInput) {
-        const barcodeVorlage = hinweisVorlagen.value.find((vorlage) => vorlage.barcode === barcodeInput);
+        const barcodeVorlage = hinweisVorlagen.value.find(vorlage => vorlage.barcode === barcodeInput);
         if (barcodeVorlage) {
           await this.setHinweis(barcodeVorlage);
           return true;
@@ -21,7 +21,7 @@ export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
       }
       return false;
     },
-    async setHinweis(event: HinweisVorlage | { text?: string; value?: string }) {
+    async setHinweis(event: HinweisVorlage | { text?: string, value?: string }) {
       const hinweisStore = useHinweisStore();
       const { hinweis } = storeToRefs(hinweisStore);
       const hinweisInput = (event as HinweisVorlage).text || (event as { value?: string }).value;
@@ -32,9 +32,9 @@ export const useHinweisVorlageStore = defineStore('hinweisVorlage', {
       }
       this.selectedVorlage = hinweisInput ?? '';
       await hinweisStore.speichereHinweis();
-    },
+    }
   },
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im sessionStorage
-  },
+    storage: sessionStorage // Speichert den Zustand im sessionStorage
+  }
 });

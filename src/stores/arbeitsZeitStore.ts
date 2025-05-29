@@ -4,22 +4,21 @@ import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 
-
 export enum ZeiterfassungTypEnum {
-  Login = "login",
-  Logout = "logout",
-  Nutzerwechsel = "nutzerwechsel",
-  AppSchliessung = "app_schliessung"
+  Login = 'login',
+  Logout = 'logout',
+  Nutzerwechsel = 'nutzerwechsel',
+  AppSchliessung = 'app_schliessung'
 }
 
 export enum LoginOrLogoutEnum {
-  Login = "login",
-  Logout = "logout"
+  Login = 'login',
+  Logout = 'logout'
 }
 
 export enum AbteilungEnum {
-  Produktion = "produktion",
-  Lager = "lager",
+  Produktion = 'produktion',
+  Lager = 'lager'
 }
 
 interface ZeiterfassungBody {
@@ -37,11 +36,11 @@ const protokolliereArbeitszeit = async (body: ZeiterfassungBody) => {
   };
 
   await fetchWithAuth('zeit-erfassungen', data);
-}
+};
 
 export const useArbeitszeitStore = defineStore('arbeitszeit', {
   state: () => ({
-    deviceName: null as string | null,
+    deviceName: null as string | null
   }),
   actions: {
     async setDeviceName() {
@@ -100,9 +99,9 @@ export const useArbeitszeitStore = defineStore('arbeitszeit', {
     async nutzerWechsel() {
       await this.logout(ZeiterfassungTypEnum.Nutzerwechsel);
       await this.login(ZeiterfassungTypEnum.Nutzerwechsel);
-    },
+    }
   },
   persist: {
-    storage: sessionStorage, // Speichert den Zustand im sessionStorage
-  },
+    storage: sessionStorage // Speichert den Zustand im sessionStorage
+  }
 });
