@@ -50,6 +50,7 @@ fn show_notification(message: String) -> () {
 fn update(app: AppHandle) {
     let config = config::Config::from_env();
     println!("Checking for updates...");
+    println!("Current version: {}", config.version);
     if let Ok(update) = self_update::backends::github::Update::configure()
         .repo_owner("gstrainovic")
         .repo_name("barcode-scanner-vue-tauri")
