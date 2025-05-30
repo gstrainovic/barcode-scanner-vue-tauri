@@ -1,6 +1,7 @@
 export interface User {
-  username: string;
   id: number;
+  username: string;
+  rolle?: string;
 }
 
 export interface HinweisVorlage {

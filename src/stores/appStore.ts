@@ -13,18 +13,21 @@ export const useAppStore = defineStore('app', {
       const url = config.api.strapi.replace('/api', '');
       try {
         const response = await fetch(url, { method: 'GET' });
+        console.log('Überprüfe Serververbindung', response);
         const text = await response.text();
         if (response.status === 200 && text.includes('The server is running successfully')) {
+          console.log('Online-Modus: Server ist erreichbar');
           this.isOnline = true;
           return true;
         }
-      } catch (error) {
-        console.error(`An error occurred while accessing ${url}:`, error);
+        console.log('Offline-Modus: Server ist nicht erreichbar');
+        this.isOnline = false;
+        return false;
+      } catch (_) {
+        console.log('Offline-Modus: Server ist nicht erreichbar');
         this.isOnline = false;
         return false;
       }
-      this.isOnline = false;
-      return false;
     },
     async setTeamAndUserIds() {
       const authStore = useAuthStore();

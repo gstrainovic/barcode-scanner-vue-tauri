@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { useAppStore } from './appStore';
 import { useArbeitszeitStore } from './arbeitsZeitStore';
+import { useLocalStore } from './localStore';
 import type { User } from '@/interfaces';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 
@@ -35,9 +36,13 @@ export const useTeamStore = defineStore('team', {
         const response = await fetchWithAuth('users?filters[rolle][$eq]=Lager');
         result = Array.isArray(response) ? response : [];
       } else {
-        // result = await window.pywebview.api.get_lager_users();
-        throw new Error('Offline mode not implemented yet!');
-        // TODO: Implement offline mode for getUsersLager
+        console.log('Offline-Modus: Verwende lokale Benutzerdaten');
+        const localStore = useLocalStore();
+        const users = localStore.users.filter(u => u.rolle === 'Lager').map(u => ({
+          username: u.username,
+          id: u.id
+        }));
+        result = Array.isArray(users) ? users : [];
       }
       this.lagerUsers = result.map((user: User) => {
         return {
@@ -45,6 +50,7 @@ export const useTeamStore = defineStore('team', {
           id: user.id
         };
       });
+      console.log('Lager Users:', this.lagerUsers);
     }
   },
   persist: {

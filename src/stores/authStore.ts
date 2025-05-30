@@ -1,13 +1,14 @@
-import { defineStore } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
 import { config } from '../utils/config';
+import { useLocalStore } from './localStore';
 import type { AuthResponse } from '@/interfaces';
-
+import { useAppStore } from '@/stores/appStore';
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     id: 0 as number | null,
-    rolle: '' as string | null,
+    rolle: '' as string | undefined | null,
     token: '' as string | null,
     username: '' as string | null
   }),
@@ -19,6 +20,21 @@ export const useAuthStore = defineStore('auth', {
   },
   actions: {
     async authenticateUser({ identifier, password }: { identifier: string, password: string }) {
+      const appStore = useAppStore();
+      const { isOnline } = storeToRefs(appStore);
+      if (!isOnline.value) {
+        const localStore = useLocalStore();
+        const user = localStore.users.find(u => u.username === identifier);
+        if (user) {
+          this.id = user.id;
+          this.rolle = user.rolle;
+          this.username = user.username;
+          this.token = 'local-token'; // Placeholder for local token
+          return true;
+        }
+        return false;
+      }
+
       if (debounceTimeout) {
         clearTimeout(debounceTimeout);
       }
@@ -77,3 +93,4 @@ export const useAuthStore = defineStore('auth', {
     storage: sessionStorage
   }
 });
+

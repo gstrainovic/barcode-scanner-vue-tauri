@@ -3,6 +3,7 @@ import { hostname } from '@tauri-apps/plugin-os';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
+import { useLocalStore } from '@/stores/localStore';
 
 export enum ZeiterfassungTypEnum {
   Login = 'login',
@@ -34,7 +35,13 @@ const protokolliereArbeitszeit = async (body: ZeiterfassungBody) => {
     ...body,
     zeitpunkt: new Date().toISOString()
   };
-
+  const { isOnline } = storeToRefs(useAppStore());
+  if (!isOnline.value) {
+    const localStore = useLocalStore();
+    localStore.zeiterfassung2strapi.push(data);
+    console.log('Arbeitszeit im Offline-Modus protokolliert:', data);
+    return;
+  }
   await fetchWithAuth('zeit-erfassungen', data);
 };
 
