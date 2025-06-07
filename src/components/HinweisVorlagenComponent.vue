@@ -40,7 +40,7 @@ const registerHinweisVorlagenShortcuts = async () => {
 
 onMounted(async () => {
   if (userRole.value === 'Produktion') {
-    await localStore.ladeHinweisVorlagen();
+    await localStore.fetchHinweisVorlagen();
     await registerHinweisVorlagenShortcuts();
   }
 });

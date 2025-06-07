@@ -28,7 +28,7 @@ fn check_single_instance() {
     let hwnd_of_barcode_scanner = get_hwnd_barcode_scanner();
     if hwnd_of_barcode_scanner != std::ptr::null_mut() {
         let message = "Die Anwendung ist bereits geöffnet.";
-        println!("{}", message);
+        eprintln!("{}", message);
         let _ = DialogBuilder::message()
             .set_title(config.dialog.title)
             .set_text(message)
@@ -80,7 +80,7 @@ fn update(app: AppHandle) {
             }
         } else {
             let message = "Fehler beim Aktualisieren der Anwendung.";
-            println!("{}", message);
+            eprintln!("{}", message);
         }
     }
 }
@@ -210,6 +210,7 @@ fn process_barcode(
     einstellungen: Einstellungen,
     ausnahmen: Vec<Ausnahmen>,
     leitcodes: Vec<Leitcode>,
+    offline: bool,
 ) -> sqlite::errors::Error {
     let result = sqlite::process_barcode::process_barcode(
         barcode,
@@ -220,6 +221,7 @@ fn process_barcode(
         einstellungen,
         ausnahmen,
         leitcodes,
+        offline,
     );
     return result;
 }

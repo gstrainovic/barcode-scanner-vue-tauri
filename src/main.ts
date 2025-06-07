@@ -9,6 +9,7 @@ import router from './router';
 import App from './App.vue';
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
+import config from './utils/config';
 import { useLayout } from '@/layout/composables/layout';
 const { layoutConfig } = useLayout();
 if (layoutConfig.darkTheme) {
@@ -31,6 +32,11 @@ app.use(ConfirmationService);
 app.use(pinia);
 
 invoke('update');
-invoke('start_looper');
+if (config.dev.disableLooper) {
+  console.warn('Looper is disabled in development mode.');
+} else {
+  console.log('Starting looper...');
+  invoke('start_looper');
+}
 
 app.mount('#app');

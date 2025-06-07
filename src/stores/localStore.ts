@@ -1,4 +1,5 @@
-import { defineStore } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
+import { useAppStore } from './appStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import type { Attributes, Ausnahmen, Barcode2Strapi, BarcodeMitHinweise, HinweisVorlage, Leitcode, Settings, User, Zeiterfassung } from '@/interfaces';
 
@@ -27,6 +28,14 @@ const isLeitcodeArray = (arr: unknown): arr is Leitcode[] => {
   );
 };
 
+const isHinweisVorlageArray = (arr: unknown): arr is HinweisVorlage[] => {
+  return Array.isArray(arr) && arr.every(
+    vorlage => typeof vorlage.titel === 'string'
+      && typeof vorlage.text === 'string'
+      && typeof vorlage.strg === 'string'
+  );
+};
+
 export const useLocalStore = defineStore('local', {
   state: () => ({
     users: [] as User[],
@@ -47,8 +56,17 @@ export const useLocalStore = defineStore('local', {
       }));
       this.barcodeMitHinweise = Array.isArray(data) ? data : [];
     },
-    async ladeHinweisVorlagen() {
+    async fetchHinweisVorlagen() {
+      const appStore = useAppStore();
+      const { isOnline } = storeToRefs(appStore);
+      if (!isOnline.value) {
+        console.log('Offline-Modus: Hinweisvorlagen werden nicht geladen.');
+        return;
+      }
       const response = await fetchWithAuth('hinweis-vorlagen?sort=strg:asc');
+      if (isHinweisVorlageArray(response.data)) {
+        throw new Error('Ungültige Antwort von Strapi für Hinweisvorlagen!');
+      }
       const attributes = response.data.map((item: Attributes) => item.attributes);
       this.hinweisVorlagen = Array.isArray(attributes) ? attributes : [];
     },
@@ -88,12 +106,18 @@ export const useLocalStore = defineStore('local', {
       }
     },
     async strapi2localStorage() {
+      const appStore = useAppStore();
+      const { isOnline } = storeToRefs(appStore);
+      if (!isOnline.value) {
+        console.log('Offline-Modus: Daten werden nicht synchronisiert.');
+        return;
+      }
       Promise.all([
         this.fetchUsers(),
         this.fetchEinstellungen(),
         this.fetchAusnahmen(),
         this.fetchLeitcodes(),
-        this.ladeHinweisVorlagen(),
+        this.fetchHinweisVorlagen(),
         this.fetchBarcodeMitHinweise()
       ]).then(() => {
       }).catch((error) => {

@@ -49,13 +49,6 @@ pub fn history_add(
         .replace("@C03", "")
         .replace("@C00", "");
 
-    // app.notification()
-    //         .builder()
-    //         .title(config.dialog.title)
-    //         .body(&format!("{} {} ist {}", prefix_warn_icon, barcode_c, new_status_message))
-    //         .show()
-    //         .unwrap();
-
         Notification::new()
         .summary(&format!("{} {} ist {}", prefix_warn_icon, barcode_c, new_status_message))
         .show()
@@ -114,9 +107,8 @@ pub fn process_barcode(
     settings: Einstellungen,
     ausnahmen: Vec<Ausnahmen>,
     leitcodes: Vec<Leitcode>,
+    offline: bool
 ) -> super::errors::Error {
-    let offline = jwt.is_empty();
-
     if settings.Ausnahmen_Aktiv {
         // if barcode ends with a string from barcode_ausnahmen, then send it directly to server
         for barcode_ausnahme in ausnahmen {
@@ -230,8 +222,6 @@ pub fn process_barcode(
     } else {
         is_barcode_duplicate(&jwt, &cleaned_barcode, &user_id).unwrap()
     };
-
-    // println!("is_barcode_duplicate_bool: {:?}", is_barcode_duplicate_bool);
 
     if !is_barcode_duplicate_bool {
         super::send_barcode::send_barcode(cleaned_barcode.clone(), user_id, &jwt, lager_user_ids);

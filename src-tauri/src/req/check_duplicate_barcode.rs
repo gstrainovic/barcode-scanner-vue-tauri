@@ -31,8 +31,6 @@ pub async fn is_barcode_duplicate(jwt: &str, barcode: &str, user_id: &i32) -> Re
         .await?
         .json::<Response>()
         .await?;
-    
-    // println!("is_barcode_duplicate: res: {:?}", res);
 
     if res.data.len() > 0 {
         return Ok(true);

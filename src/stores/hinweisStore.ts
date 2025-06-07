@@ -1,9 +1,9 @@
 import { defineStore, storeToRefs } from 'pinia';
 import { marked } from 'marked';
-
 import { strapi } from '@strapi/client';
 import { invoke } from '@tauri-apps/api/core';
 import { useBarcodeStore } from './barcodeStore';
+import { useLocalStore } from './localStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useAppStore } from '@/stores/appStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -15,7 +15,9 @@ const getHinweisFromBarcode = async (barcode: string) => {
     const response = await fetchWithAuth(`barcodes?filters[barcode][$eq]=${barcode}&populate=*&pagination[limit]=1&sort=id:asc`);
     return response.data[0];
   } else {
-    throw new Error('Offline mode not implemented yet!');
+    const localStore = useLocalStore();
+    const { barcodeMitHinweise } = storeToRefs(localStore);
+    return barcodeMitHinweise.value.find(item => item.barcode === barcode) || null;
   }
 };
 
