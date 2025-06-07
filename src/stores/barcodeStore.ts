@@ -72,6 +72,12 @@ export const useBarcodeStore = defineStore('barcode', {
       });
       console.log('Result from process_barcode:', result);
 
+      // Wenn der status Error ist, verhindere das Hinzufügen von Hinweisen
+      if (result && typeof result === 'object' && 'status' in result && result.status === 'Error') {
+        this.barcodeInput = '';
+        this.barcode = '';
+      }
+
       if (!isOnline.value) {
         const barcode2strapi: Barcode2Strapi = {
           barcode: this.barcode,
