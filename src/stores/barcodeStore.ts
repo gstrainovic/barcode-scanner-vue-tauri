@@ -72,10 +72,12 @@ export const useBarcodeStore = defineStore('barcode', {
       });
       console.log('Result from process_barcode:', result);
 
-      // Wenn der status Error ist, verhindere das Hinzufügen von Hinweisen
-      if (result && typeof result === 'object' && 'status' in result && result.status === 'Error') {
+      const errorType = (result as any)?.error_type;
+      console.log('Error Type:', errorType);
+      if (errorType === 'Ausnahme' || errorType === 'ZuKurz' || errorType === 'Leitcode') {
         this.barcodeInput = '';
         this.barcode = '';
+        return;
       }
 
       if (!isOnline.value) {

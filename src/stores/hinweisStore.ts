@@ -69,6 +69,12 @@ export const useHinweisStore = defineStore('hinweis', {
       }
       this.barcodeId = result.id;
       this.hinweis = await marked.parse(result.attributes.hinweis || '');
+
+      if (!this.hinweisUmgesetzt) {
+        invoke('show_notification', {
+          message: `🔍 Bitte Hinweis beachten: ${this.hinweis}`
+        });
+      }
     },
 
     async speichereHinweis() {
