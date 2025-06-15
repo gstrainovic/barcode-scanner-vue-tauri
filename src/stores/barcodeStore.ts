@@ -17,7 +17,7 @@ export const useBarcodeStore = defineStore('barcode', {
   actions: {
     async processBarcode(binp = '') {
       const hinweisStore = useHinweisStore();
-      const { hinweis, hinweisUmgesetzt } = storeToRefs(hinweisStore);
+      const { hinweis, hinweisUmgesetzt, allowChangeHinweis } = storeToRefs(hinweisStore);
       const hinweisVorlageStore = useHinweisVorlageStore();
       const { selectedVorlage } = storeToRefs(hinweisVorlageStore);
       const authStore = useAuthStore();
@@ -74,11 +74,14 @@ export const useBarcodeStore = defineStore('barcode', {
 
       const errorType = (result as any)?.error_type;
       console.log('Error Type:', errorType);
-      if (errorType === 'Ausnahme' || errorType === 'ZuKurz' || errorType === 'Leitcode') {
+      if (errorType === 'Ok' || errorType === 'KeineNummern' || errorType === 'BereitsGesendet') {
+        allowChangeHinweis.value = true;
+      } else {
+        allowChangeHinweis.value = false;
         this.barcodeInput = '';
         this.barcode = '';
-        return;
       }
+      console.log('allowChangeHinweis:', allowChangeHinweis.value);
 
       if (!isOnline.value) {
         const barcode2strapi: Barcode2Strapi = {

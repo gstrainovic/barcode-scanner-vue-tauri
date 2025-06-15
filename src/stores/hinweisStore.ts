@@ -52,7 +52,8 @@ export const useHinweisStore = defineStore('hinweis', {
   state: () => ({
     barcodeId: '',
     hinweis: '',
-    hinweisUmgesetzt: false
+    hinweisUmgesetzt: false,
+    allowChangeHinweis: false
   }),
   actions: {
 
@@ -60,6 +61,8 @@ export const useHinweisStore = defineStore('hinweis', {
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
       const result = await getHinweisFromBarcode(barcode.value);
+      const authStore = useAuthStore();
+      const { userRole } = storeToRefs(authStore);
       const umgesetzt: boolean = result?.attributes?.hinweis_umgesetzt_von?.data?.length > 0;
       this.hinweisUmgesetzt = umgesetzt;
 
@@ -70,7 +73,7 @@ export const useHinweisStore = defineStore('hinweis', {
       this.barcodeId = result.id;
       this.hinweis = await marked.parse(result.attributes.hinweis || '');
 
-      if (!this.hinweisUmgesetzt) {
+      if (!this.hinweisUmgesetzt && userRole.value === 'Lager') {
         invoke('show_notification', {
           message: `🔍 Bitte Hinweis beachten: ${this.hinweis}`
         });
@@ -84,6 +87,10 @@ export const useHinweisStore = defineStore('hinweis', {
       const { teamAndUserIds } = storeToRefs(appStore);
       const authStore = useAuthStore();
       const { userId, userRole } = storeToRefs(authStore);
+
+      if (!this.allowChangeHinweis) {
+        return;
+      }
 
       if (!barcode) {
         const message = '❗Bitte Barcode zuerst scannen.';

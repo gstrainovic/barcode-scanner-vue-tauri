@@ -46,12 +46,12 @@ onMounted(async () => {
             <InputIcon class="pi pi-qrcode" />
             <InputText id="barcodei" v-model="barcodeInput" type="text" placeholder="Barcode" />
           </IconField>
-          <Button
-            id="sendButton" label="Absenden" class="w-full"
-            icon="pi pi-send"
-            @click="barcodeStore.processBarcode()"
-          />
         </div>
+        <Button
+          id="sendButton" label="Absenden" class="w-full"
+          icon="pi pi-send"
+          @click="barcodeStore.processBarcode()"
+        />
       </div>
 
       <div v-if="userRole === 'Lager'">
