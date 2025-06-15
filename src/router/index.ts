@@ -18,20 +18,25 @@ const router = createRouter({
           path: '/team',
           name: 'Team',
           component: () => import('@/views/pages/TeamPage.vue')
+        },
+        {
+          path: '/anleitung',
+          name: 'Anleitung',
+          component: () => import('@/views/pages/AnleitungPage.vue')
+        },
+        {
+          path: '/login',
+          name: 'login',
+          component: () => import('@/views/pages/LoginPage.vue')
         }
       ]
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/pages/LoginPage.vue')
     }
   ]
 });
 
 router.beforeEach((to, _, next) => {
   const authStore = useAuthStore();
-  const publicPages = ['/login'];
+  const publicPages = ['/login', '/anleitung'];
   const authRequired = !publicPages.includes(to.path);
 
   if (authRequired && !authStore.token) {
