@@ -6,10 +6,6 @@
     "main"
   ],
     "plugins": {
-    "opener": {
-      "allow": true,
-      "scope": ["resource://BarcodeScannerAnleitung.pdf"]
-    }
   },
   "permissions": [
     "core:default",
@@ -25,8 +21,6 @@
     "global-shortcut:allow-register",
     "global-shortcut:allow-unregister",
     "global-shortcut:allow-unregister-all",
-    "os:allow-hostname",
-    "opener:allow-open-path",
-    "opener:allow-open-url"
+    "os:allow-hostname"
   ]
 }

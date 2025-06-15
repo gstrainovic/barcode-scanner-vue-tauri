@@ -72,7 +72,7 @@ onMounted(async () => {
       >
     </div>
 
-    <div class="flex items-center justify-between w-full px-4">
+    <div class="flex items-center justify-between w-full px-4 pl-[150px]">
       <!-- Links: Logo -->
       <div class="flex items-center" />
       <!-- Mitte: Zentrierte Elemente -->
@@ -97,33 +97,47 @@ onMounted(async () => {
 
     <div class="layout-topbar-actions">
       <div class="layout-config-menu">
-        <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
+        <button
+          v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+          type="button" class="layout-topbar-action layout-topbar-action-highlight"
+          @click="router.push('/')"
+        >
+          <i class="pi pi-home" />
+        </button>
+        <button
+          v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+          type="button" class="layout-topbar-action layout-topbar-action-highlight"
+          @click="router.push('/anleitung')"
+        >
+          <i class="pi pi-book" />
+        </button>
+        <button
+          v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+          type="button" class="layout-topbar-action layout-topbar-action-highlight"
+          @click="toggleDarkMode"
+        >
           <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]" />
         </button>
-        <div class="relative">
-          <button
-            v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
-            type="button" class="layout-topbar-action layout-topbar-action-highlight"
-          >
-            <i class="pi pi-palette" />
-          </button>
-          <AppConfigurator />
-        </div>
-      </div>
-
-      <button
-        v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
-        class="layout-topbar-menu-button layout-topbar-action"
-      >
-        <i class="pi pi-ellipsis-v" />
-      </button>
-
-      <div class="layout-topbar-menu hidden lg:block">
-        <div class="layout-topbar-menu-content">
-          <button type="button" class="layout-topbar-action" @click="logout">
-            <i class="pi pi-sign-out" />
-          </button>
-        </div>
+        <button
+          v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+          type="button" class="layout-topbar-action layout-topbar-action-highlight"
+        >
+          <i class="pi pi-palette" />
+        </button>
+        <AppConfigurator />
+        <button
+          v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+          class="layout-topbar-menu-button layout-topbar-action"
+        >
+          <i class="pi pi-ellipsis-v" />
+        </button>
+        <button
+          v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+          type="button" class="layout-topbar-action layout-topbar-action-highlight"
+          @click="logout"
+        >
+          <i class="pi pi-sign-out" />
+        </button>
       </div>
     </div>
   </div>

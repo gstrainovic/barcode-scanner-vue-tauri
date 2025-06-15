@@ -2,13 +2,11 @@
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
-import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
 import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
-import config from '@/utils/config';
 const appStore = useAppStore();
 const router = useRouter();
 const password = ref('');
@@ -16,7 +14,6 @@ const loginFailed = ref(false);
 const email = ref('');
 const { isDarkTheme } = useLayout();
 const arbeitszeitStore = useArbeitszeitStore();
-const { isOnline } = storeToRefs(appStore);
 
 onMounted(async () => {
   await arbeitszeitStore.setDeviceName(); // einmalig den Gerätenamen setzen
@@ -45,10 +42,9 @@ const login = async () => {
 
 <template>
   <div
-    tabindex="0" class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden"
+    tabindex="0" class="pt-8 bg-surface-50 dark:bg-surface-950 flex items-center justify-center overflow-hidden"
     @keyup.enter="login"
   >
-    <FloatingConfigurator />
     <div class="flex flex-col items-center justify-center">
       <div
         style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)"
@@ -59,13 +55,6 @@ const login = async () => {
               :src="isDarkTheme ? '/images/logo.svg' : '/images/logo-white.svg'"
               class="b-8 w-16 shrink-0 mx-auto mb-12" style="width:300px; height:100px;"
             >
-            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">
-              Barcode Scanner {{
-                config.version }}
-            </div>
-            {{ isOnline ? 'Online' : 'Offline' }}
-            <br>
-            <br>
           </div>
           <div>
             <label

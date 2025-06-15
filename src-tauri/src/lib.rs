@@ -1,10 +1,12 @@
 use multiinput::{KeyId, RawEvent, RawInputManager, State};
 use native_dialog::DialogBuilder;
+use notify_rust::Notification;
 use sqlite::get_history;
 use sqlite::process_barcode::Ausnahmen;
 use sqlite::process_barcode::Einstellungen;
 use sqlite::process_barcode::Leitcode;
 use sqlite::reduce_history;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 use tauri::AppHandle;
@@ -12,8 +14,6 @@ use tauri::Emitter;
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
-use notify_rust::Notification;
-use std::sync::atomic::{AtomicBool, Ordering};
 static LOOPER_RUNNING: AtomicBool = AtomicBool::new(false);
 
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
@@ -40,10 +40,7 @@ fn check_single_instance() {
 
 #[tauri::command]
 fn show_notification(message: String) -> () {
-    Notification::new()
-        .summary(&message)
-        .show()
-        .unwrap();
+    Notification::new().summary(&message).show().unwrap();
 }
 
 #[tauri::command]
