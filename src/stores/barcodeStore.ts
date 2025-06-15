@@ -70,10 +70,8 @@ export const useBarcodeStore = defineStore('barcode', {
         leitcodes: leitcodes.value,
         offline: !isOnline.value
       });
-      console.log('Result from process_barcode:', result);
 
       const errorType = (result as any)?.error_type;
-      console.log('Error Type:', errorType);
       if (errorType === 'Ok' || errorType === 'KeineNummern' || errorType === 'BereitsGesendet') {
         allowChangeHinweis.value = true;
       } else {
@@ -81,7 +79,6 @@ export const useBarcodeStore = defineStore('barcode', {
         this.barcodeInput = '';
         this.barcode = '';
       }
-      console.log('allowChangeHinweis:', allowChangeHinweis.value);
 
       if (!isOnline.value) {
         const barcode2strapi: Barcode2Strapi = {

@@ -50,7 +50,6 @@ export const useTeamStore = defineStore('team', {
           id: user.id
         };
       });
-      console.log('Lager Users:', this.lagerUsers);
     }
   },
   persist: {
