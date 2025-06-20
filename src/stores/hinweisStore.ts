@@ -21,7 +21,7 @@ const getHinweisFromBarcode = async (barcode: string) => {
   }
 };
 
-const postHinweis = async (id: string, hinweis: string, erstelltVon: number | null = null, hinweisUmgesetztVon: number[]) => {
+const postHinweis = async (id: string, hinweis: string, erstelltVon: number, hinweisUmgesetztVon: number[]) => {
   const appStore = useAppStore();
   if (appStore.isOnline) {
     const authStore = useAuthStore();
@@ -45,6 +45,19 @@ const postHinweis = async (id: string, hinweis: string, erstelltVon: number | nu
 
     const updatedBarcode = await barcodes.update(id, updateData);
     return updatedBarcode;
+  } else {
+    const localStore = useLocalStore();
+    const { barcodeMitHinweise } = storeToRefs(localStore);
+    const existingBarcode = barcodeMitHinweise.value.find(item => item.barcode === id);
+
+    if (existingBarcode) {
+      existingBarcode.hinweis = hinweis;
+      existingBarcode.hinweis_erstellt_von = erstelltVon;
+      existingBarcode.hinweis_umgesetzt_von = hinweisUmgesetztVon;
+      return existingBarcode;
+    } else {
+      throw new Error('Barcode not found in local storage');
+    }
   }
 };
 
@@ -86,7 +99,7 @@ export const useHinweisStore = defineStore('hinweis', {
       const appStore = useAppStore();
       const { teamAndUserIds } = storeToRefs(appStore);
       const authStore = useAuthStore();
-      const { userId, userRole } = storeToRefs(authStore);
+      const { userId } = storeToRefs(authStore);
 
       if (!this.allowChangeHinweis) {
         return;
@@ -105,9 +118,9 @@ export const useHinweisStore = defineStore('hinweis', {
 
       // const teamUndUserIds = teamIds.value.concat(userID);
       const teamUndUserIds = teamAndUserIds.value;
-      const createdBy = userRole.value === 'Produktion' ? userID : null;
+      // const createdBy = userRole.value === 'Produktion' ? userID : null;
       const hinweisUmgesetztVon = this.hinweisUmgesetzt ? teamUndUserIds : [];
-      const result = await postHinweis(this.barcodeId, this.hinweis, createdBy, hinweisUmgesetztVon);
+      const result = await postHinweis(this.barcodeId, this.hinweis, userID, hinweisUmgesetztVon);
 
       // wenn der result den barcode und die hinweis enthält, dann ist es erfolgreich
       if (result?.data?.attributes?.barcode && result?.data?.attributes?.hinweis === this.hinweis) {

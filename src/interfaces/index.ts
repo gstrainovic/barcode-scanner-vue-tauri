@@ -115,4 +115,7 @@ export interface Zeiterfassung {
 export interface BarcodeMitHinweise {
   barcode: string;
   hinweis: string;
+  hinweis_erstellt_von: number;
+  hinweis_umgesetzt_von?: number[];
+  data?: Attributes;
 }
