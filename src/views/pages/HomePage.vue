@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { listen } from '@tauri-apps/api/event';
-import { onMounted } from 'vue';
 import HistoryComponent from '@/components/HistoryComponent.vue';
 import HinweisComponent from '@/components/HinweisComponent.vue';
 import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
 import { useTeamStore } from '@/stores/teamStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useLocalStore } from '@/stores/localStore';
 import { useBarcodeStore } from '@/stores/barcodeStore';
 // import { getCurrentWindow } from '@tauri-apps/api/window';
 const teamStore = useTeamStore();
-const localStore = useLocalStore();
 const authStore = useAuthStore();
 const { userRole } = storeToRefs(authStore);
 const { team, checked, lagerUsers } = storeToRefs(teamStore);
@@ -21,10 +18,6 @@ const { barcodeInput } = storeToRefs(barcodeStore);
 
 listen('sendebarcode', (event) => {
   barcodeStore.processBarcode(event.payload as string);
-});
-
-onMounted(async () => {
-  await localStore.strapi2localStorage();
 });
 
 // const bringWindowToFront = async () => {

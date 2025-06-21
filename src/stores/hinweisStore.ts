@@ -11,7 +11,8 @@ import { config } from '@/utils/config';
 
 const getHinweisFromBarcode = async (barcode: string) => {
   const appStore = useAppStore();
-  if (appStore.isOnline) {
+  const isOnline = await appStore.onlineCheck();
+  if (isOnline) {
     const response = await fetchWithAuth(`barcodes?filters[barcode][$eq]=${barcode}&populate=*&pagination[limit]=1&sort=id:asc`);
     return response.data[0];
   } else {
@@ -23,7 +24,8 @@ const getHinweisFromBarcode = async (barcode: string) => {
 
 const postHinweis = async (id: string, hinweis: string, erstelltVon: number, hinweisUmgesetztVon: number[]) => {
   const appStore = useAppStore();
-  if (appStore.isOnline) {
+  const isOnline = await appStore.onlineCheck();
+  if (isOnline) {
     const authStore = useAuthStore();
     const { userToken } = storeToRefs(authStore);
     if (!userToken.value) {

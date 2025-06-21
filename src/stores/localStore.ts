@@ -1,4 +1,4 @@
-import { defineStore, storeToRefs } from 'pinia';
+import { defineStore } from 'pinia';
 import { useAppStore } from './appStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import type { Attributes, Ausnahmen, Barcode2Strapi, BarcodeMitHinweise, HinweisVorlage, Leitcode, Settings, User, Zeiterfassung } from '@/interfaces';
@@ -36,6 +36,15 @@ const isHinweisVorlageArray = (arr: unknown): arr is HinweisVorlage[] => {
   );
 };
 
+const isBarcode2StrapiArray = (arr: unknown): arr is Barcode2Strapi[] => {
+  return Array.isArray(arr) && arr.every(
+    barcode => typeof barcode.barcode === 'string'
+      && typeof barcode.hinweis === 'string'
+      && typeof barcode.hinweis_erstellt_von === 'number'
+      && Array.isArray(barcode.hinweis_umgesetzt_von)
+  );
+};
+
 export const useLocalStore = defineStore('local', {
   state: () => ({
     users: [] as User[],
@@ -50,21 +59,60 @@ export const useLocalStore = defineStore('local', {
   actions: {
     async fetchBarcodeMitHinweise() {
       const response = await fetchWithAuth('barcodes?filters[hinweis][$notNull]=true&pagination[limit]=1000');
+      if (!isBarcode2StrapiArray(response.data)) {
+        throw new Error('Ungültige Antwort von Strapi für Barcodes mit Hinweisen!');
+      }
       const data = response.data.map((item: { attributes: { barcode: string, hinweis: string } }) => ({
         barcode: item.attributes.barcode,
         hinweis: item.attributes.hinweis
       }));
       this.barcodeMitHinweise = Array.isArray(data) ? data : [];
     },
-    async fetchHinweisVorlagen() {
-      const appStore = useAppStore();
-      const { isOnline } = storeToRefs(appStore);
-      if (!isOnline.value) {
-        console.log('Offline-Modus: Hinweisvorlagen werden nicht geladen.');
-        return;
+    async postBarcodes() {
+      // Kopie, damit das Array beim Entfernen nicht beeinflusst wird
+      for (const barcode of [...this.barcode2strapi]) {
+        const response = await fetchWithAuth('barcodes', {
+          method: 'POST',
+          body: JSON.stringify(barcode),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`Fehler beim Posten des Barcodes: ${response.statusText}`);
+        }
+        // Lösche den Barcode anhand einer eindeutigen Eigenschaft (z.B. barcode oder id)
+        const index = this.barcode2strapi.findIndex(item => item.barcode === barcode.barcode);
+        if (index > -1) {
+          this.barcode2strapi.splice(index, 1);
+        }
       }
+    },
+    async postZeiterfassung() {
+      // Kopie, damit das Array beim Entfernen nicht beeinflusst wird
+      for (const zeiterfassung of [...this.zeiterfassung2strapi]) {
+        const response = await fetchWithAuth('zeiterfassung', {
+          method: 'POST',
+          body: JSON.stringify(zeiterfassung),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`Fehler beim Posten der Zeiterfassung: ${response.statusText}`);
+        }
+        // Lösche die Zeiterfassung anhand einer eindeutigen Eigenschaft (z.B. id)
+        const index = this.zeiterfassung2strapi.findIndex(
+          item => item.zeitpunkt === zeiterfassung.zeitpunkt
+        );
+        if (index > -1) {
+          this.zeiterfassung2strapi.splice(index, 1);
+        }
+      }
+    },
+    async fetchHinweisVorlagen() {
       const response = await fetchWithAuth('hinweis-vorlagen?sort=strg:asc');
-      if (isHinweisVorlageArray(response.data)) {
+      if (!isHinweisVorlageArray(response.data)) {
         throw new Error('Ungültige Antwort von Strapi für Hinweisvorlagen!');
       }
       const attributes = response.data.map((item: Attributes) => item.attributes);
@@ -72,11 +120,10 @@ export const useLocalStore = defineStore('local', {
     },
     async fetchUsers() {
       const usersResponse = await fetchWithAuth('users');
-      if (isUserArray(usersResponse)) {
-        this.users = usersResponse;
-      } else {
+      if (!isUserArray(usersResponse)) {
         throw new Error('Ungültiges User-Array!');
       }
+      this.users = usersResponse;
     },
     async fetchEinstellungen() {
       const settingsResponseDataAttributes = await fetchWithAuth('einstellung');
@@ -90,25 +137,23 @@ export const useLocalStore = defineStore('local', {
     async fetchAusnahmen() {
       const ausnahmenData = await fetchWithAuth('ausnahmen');
       const ausnahmen = ausnahmenData.data.map((item: { attributes: Ausnahmen }) => item.attributes);
-      if (isAusnahmenArray(ausnahmen)) {
-        this.ausnahmen = ausnahmen;
-      } else {
+      if (!isAusnahmenArray(ausnahmen)) {
         throw new Error('Ungültiges Ausnahmen-Array!');
       }
+      this.ausnahmen = ausnahmen;
     },
     async fetchLeitcodes() {
       const leitcodesData = await fetchWithAuth('leitcodes?populate=*');
       const leitcodes = leitcodesData.data.map((item: { attributes: Leitcode }) => item.attributes);
-      if (isLeitcodeArray(leitcodes)) {
-        this.leitcodes = leitcodes;
-      } else {
+      if (!isLeitcodeArray(leitcodes)) {
         throw new Error('Ungültiges Leitcode-Array!');
       }
+      this.leitcodes = leitcodes;
     },
     async strapi2localStorage() {
       const appStore = useAppStore();
-      const { isOnline } = storeToRefs(appStore);
-      if (!isOnline.value) {
+      const isOnline = await appStore.onlineCheck();
+      if (!isOnline) {
         console.log('Offline-Modus: Daten werden nicht synchronisiert.');
         return;
       }
@@ -119,6 +164,16 @@ export const useLocalStore = defineStore('local', {
         this.fetchLeitcodes(),
         this.fetchHinweisVorlagen(),
         this.fetchBarcodeMitHinweise()
+      ]).then(() => {
+      }).catch((error) => {
+        console.error('Fehler beim Synchronisieren der Daten:', error);
+      });
+    },
+    async localStorage2strapi() {
+      console.log('Synchronisiere lokale Daten mit Strapi...');
+      Promise.all([
+        this.postBarcodes(),
+        this.postZeiterfassung()
       ]).then(() => {
       }).catch((error) => {
         console.error('Fehler beim Synchronisieren der Daten:', error);

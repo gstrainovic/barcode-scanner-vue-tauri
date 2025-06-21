@@ -1,6 +1,7 @@
 import { defineStore, storeToRefs } from 'pinia';
 import { useAuthStore } from './authStore';
 import { useTeamStore } from './teamStore';
+import { useLocalStore } from './localStore';
 import { config } from '@/utils/config';
 
 export const useAppStore = defineStore('app', {
@@ -10,6 +11,7 @@ export const useAppStore = defineStore('app', {
   }),
   actions: {
     async onlineCheck() {
+      const localStore = useLocalStore();
       const url = config.api.strapi.replace('/api', '');
       try {
         const response = await fetch(url, { method: 'GET' });
@@ -18,14 +20,17 @@ export const useAppStore = defineStore('app', {
         if (response.status === 200 && text.includes('The server is running successfully')) {
           console.log('Online-Modus: Server ist erreichbar');
           this.isOnline = true;
+          await localStore.localStorage2strapi();
           return true;
         }
         console.log('Offline-Modus: Server ist nicht erreichbar');
         this.isOnline = false;
+        await localStore.strapi2localStorage();
         return false;
       } catch (_) {
         console.log('Offline-Modus: Server ist nicht erreichbar');
         this.isOnline = false;
+        await localStore.strapi2localStorage();
         return false;
       }
     },
