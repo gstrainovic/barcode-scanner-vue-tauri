@@ -29,12 +29,13 @@ else
     exit 1
 fi
 
-#.env VITE_VERSION
-if [ -f "./.env" ]; then
-    sed -i.bak -E "s/VITE_VERSION=.*/VITE_VERSION=$NEW_VERSION/" ./.env
-    echo "Version in .env auf $NEW_VERSION geändert."
+#src-tauri\src\config\lib.rs
+if [ -f "./src-tauri/src/config/lib.rs" ]; then
+    # sed -i.bak -E "s/version = \".*\"/version = \"$NEW_VERSION\"/" ./src-tauri/src/config/lib.rs
+    sed -i.bak -E "s/version: \".*\"\.to_string\(\)/version: \"$NEW_VERSION\".to_string()/" ./src-tauri/src/config/lib.rs
+    echo "Version in src-tauri/src/config/lib.rs auf $NEW_VERSION geändert."
 else
-    echo "./.env nicht gefunden!"
+    echo "./src-tauri/src/config/lib.rs nicht gefunden!"
     exit 1
 fi
 
