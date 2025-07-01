@@ -23,7 +23,6 @@ export const useBarcodeStore = defineStore('barcode', {
       const authStore = useAuthStore();
       const { userRole, userId, userToken } = storeToRefs(authStore);
       const appStore = useAppStore();
-      await appStore.onlineCheck();
       const { isOnline } = storeToRefs(appStore);
       const teamStore = useTeamStore();
       const { teamIds } = storeToRefs(teamStore);
@@ -38,7 +37,6 @@ export const useBarcodeStore = defineStore('barcode', {
         this.barcodeInput = '';
         return;
       }
-
       selectedVorlage.value = '';
       const barcodeValue = binp || this.barcodeInput;
       const barcodeMatch = await hinweisVorlageStore.checkBarcodeMatchWithVorlageBarcode(barcodeValue);

@@ -71,7 +71,6 @@ export const useHinweisStore = defineStore('hinweis', {
     allowChangeHinweis: false
   }),
   actions: {
-
     async ladeHinweis() {
       const barcodeStore = useBarcodeStore();
       const { barcode } = storeToRefs(barcodeStore);
@@ -88,7 +87,7 @@ export const useHinweisStore = defineStore('hinweis', {
       this.barcodeId = result.id;
       this.hinweis = await marked.parse(result.attributes.hinweis || '');
 
-      if (!this.hinweisUmgesetzt && userRole.value === 'Lager') {
+      if (!this.hinweisUmgesetzt && userRole.value === 'Lager' && this.hinweis) {
         invoke('show_notification', {
           message: `🔍 Bitte Hinweis beachten: ${this.hinweis}`
         });

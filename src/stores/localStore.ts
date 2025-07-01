@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { useAppStore } from './appStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import type { Attributes, Ausnahmen, Barcode2Strapi, BarcodeMitHinweise, HinweisVorlage, Leitcode, Settings, User, Zeiterfassung } from '@/interfaces';
 
@@ -8,7 +7,6 @@ const isUserArray = (arr: unknown): arr is User[] => {
     user => typeof user.id === 'number' && typeof user.username === 'string'
   );
 };
-
 const isSettingsObject = (obj: unknown): obj is Settings => {
   return typeof obj === 'object' && obj !== null && 'Barcode_Mindestlaenge' in obj && 'Leitcodes_Aktiv' in obj && 'Ausnahmen_Aktiv' in obj;
 };
@@ -32,7 +30,7 @@ const isHinweisVorlageArray = (arr: unknown): arr is HinweisVorlage[] => {
   return Array.isArray(arr) && arr.every(
     vorlage => typeof vorlage.titel === 'string'
       && typeof vorlage.text === 'string'
-      && typeof vorlage.strg === 'string'
+      && typeof vorlage.strg === 'number'
   );
 };
 
@@ -69,22 +67,20 @@ export const useLocalStore = defineStore('local', {
       this.barcodeMitHinweise = Array.isArray(data) ? data : [];
     },
     async postBarcodes() {
+      // bereinige die barcode2strapi Liste von leeren Barcodes
+      this.barcode2strapi = this.barcode2strapi.filter(barcode => barcode.barcode.trim() !== '');
       // Kopie, damit das Array beim Entfernen nicht beeinflusst wird
-      for (const barcode of [...this.barcode2strapi]) {
-        const response = await fetchWithAuth('barcodes', {
-          method: 'POST',
-          body: JSON.stringify(barcode),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        if (!response.ok) {
-          throw new Error(`Fehler beim Posten des Barcodes: ${response.statusText}`);
+      for (const data of [...this.barcode2strapi]) {
+        const response = await fetchWithAuth('barcodes', data);
+        if (response.data.attributes.barcode !== data.barcode) {
+          throw new Error(`Fehler beim Posten des Barcodes: ${response}`);
         }
         // Lösche den Barcode anhand einer eindeutigen Eigenschaft (z.B. barcode oder id)
-        const index = this.barcode2strapi.findIndex(item => item.barcode === barcode.barcode);
+        const index = this.barcode2strapi.findIndex(item => item.barcode === data.barcode);
         if (index > -1) {
           this.barcode2strapi.splice(index, 1);
+        } else {
+          console.warn(`Barcode ${data.barcode} nicht gefunden zum Entfernen.`);
         }
       }
     },
@@ -112,11 +108,11 @@ export const useLocalStore = defineStore('local', {
     },
     async fetchHinweisVorlagen() {
       const response = await fetchWithAuth('hinweis-vorlagen?sort=strg:asc');
-      if (!isHinweisVorlageArray(response.data)) {
+      const data = response.data.map((item: Attributes) => item.attributes);
+      if (!isHinweisVorlageArray(data)) {
         throw new Error('Ungültige Antwort von Strapi für Hinweisvorlagen!');
       }
-      const attributes = response.data.map((item: Attributes) => item.attributes);
-      this.hinweisVorlagen = Array.isArray(attributes) ? attributes : [];
+      this.hinweisVorlagen = data;
     },
     async fetchUsers() {
       const usersResponse = await fetchWithAuth('users');
@@ -151,12 +147,6 @@ export const useLocalStore = defineStore('local', {
       this.leitcodes = leitcodes;
     },
     async strapi2localStorage() {
-      const appStore = useAppStore();
-      const isOnline = await appStore.onlineCheck();
-      if (!isOnline) {
-        console.log('Offline-Modus: Daten werden nicht synchronisiert.');
-        return;
-      }
       Promise.all([
         this.fetchUsers(),
         this.fetchEinstellungen(),
@@ -170,7 +160,6 @@ export const useLocalStore = defineStore('local', {
       });
     },
     async localStorage2strapi() {
-      console.log('Synchronisiere lokale Daten mit Strapi...');
       Promise.all([
         this.postBarcodes(),
         this.postZeiterfassung()

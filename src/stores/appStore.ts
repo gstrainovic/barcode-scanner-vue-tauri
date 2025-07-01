@@ -11,29 +11,31 @@ export const useAppStore = defineStore('app', {
   }),
   actions: {
     async onlineCheck() {
-      const localStore = useLocalStore();
       const url = config.api.strapi.replace('/api', '');
       try {
         const response = await fetch(url, { method: 'GET' });
-        console.log('Überprüfe Serververbindung', response);
         const text = await response.text();
         if (response.status === 200 && text.includes('The server is running successfully')) {
-          console.log('Online-Modus: Server ist erreichbar');
           this.isOnline = true;
+          const localStore = useLocalStore();
           await localStore.localStorage2strapi();
+          await localStore.strapi2localStorage();
           return true;
         }
-        console.log('Offline-Modus: Server ist nicht erreichbar');
         this.isOnline = false;
-        await localStore.strapi2localStorage();
         return false;
       } catch (_) {
-        console.log('Offline-Modus: Server ist nicht erreichbar');
         this.isOnline = false;
-        await localStore.strapi2localStorage();
         return false;
       }
     },
+    // async sync() {
+    //   const localStore = useLocalStore();
+    //   if (this.isOnline) {
+    //     await localStore.localStorage2strapi();
+    //     await localStore.strapi2localStorage();
+    //   }
+    // },
     async setTeamAndUserIds() {
       const authStore = useAuthStore();
       const { userId } = storeToRefs(authStore);

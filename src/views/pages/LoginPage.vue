@@ -18,6 +18,7 @@ const arbeitszeitStore = useArbeitszeitStore();
 onMounted(async () => {
   await arbeitszeitStore.setDeviceName(); // einmalig den Gerätenamen setzen
   await appStore.onlineCheck(); // einmalig den Online-Status setzen
+  // await appStore.sync(); // einmalig die App synchronisieren
 });
 
 const login = async () => {
