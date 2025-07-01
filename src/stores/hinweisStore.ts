@@ -7,7 +7,7 @@ import { useLocalStore } from './localStore';
 import { fetchWithAuth } from '@/utils/fetchWithAuth';
 import { useAppStore } from '@/stores/appStore';
 import { useAuthStore } from '@/stores/authStore';
-import { config } from '@/utils/config';
+import { getConfig } from '@/utils/config';
 
 const getHinweisFromBarcode = async (barcode: string) => {
   const appStore = useAppStore();
@@ -25,6 +25,7 @@ const getHinweisFromBarcode = async (barcode: string) => {
 const postHinweis = async (id: string, hinweis: string, erstelltVon: number, hinweisUmgesetztVon: number[]) => {
   const appStore = useAppStore();
   const isOnline = await appStore.onlineCheck();
+  const config = await getConfig();
   if (isOnline) {
     const authStore = useAuthStore();
     const { userToken } = storeToRefs(authStore);

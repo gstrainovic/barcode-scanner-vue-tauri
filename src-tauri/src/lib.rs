@@ -15,6 +15,7 @@ use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use winapi::shared::windef::HWND__;
 static LOOPER_RUNNING: AtomicBool = AtomicBool::new(false);
+use config;
 
 pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
     let my_windows_hwnd = unsafe {
@@ -24,7 +25,7 @@ pub fn get_hwnd_barcode_scanner() -> *mut HWND__ {
 }
 
 fn check_single_instance() {
-    let config = config::Config::from_env();
+    let config = config::cfg();
     let hwnd_of_barcode_scanner = get_hwnd_barcode_scanner();
     if hwnd_of_barcode_scanner != std::ptr::null_mut() {
         let message = "Die Anwendung ist bereits geöffnet.";
@@ -39,13 +40,18 @@ fn check_single_instance() {
 }
 
 #[tauri::command]
+fn get_config() -> serde_json::Value {
+    serde_json::to_value(config::get_config_as_json()).unwrap()
+}
+
+#[tauri::command]
 fn show_notification(message: String) -> () {
     Notification::new().summary(&message).show().unwrap();
 }
 
 #[tauri::command]
 fn update(app: AppHandle) {
-    let config = config::Config::from_env();
+    let config = config::cfg();
     println!("Checking for updates...");
     println!("Current version: {}", config.version);
     if let Ok(update) = self_update::backends::github::Update::configure()
@@ -62,7 +68,7 @@ fn update(app: AppHandle) {
                 if std::path::Path::new(".env").exists() {
                     std::fs::remove_file(".env").expect("Failed to remove old .env file");
                 }
-                let config = config::Config::from_env();
+                let config = config::cfg();
                 println!("Update successful to version: {}", status.version());
                 let message = format!(
                     "Aktualisiert zu {}. Anwendung wird neu gestartet.",
@@ -93,7 +99,7 @@ fn start_looper(app: AppHandle) {
     }
     LOOPER_RUNNING.store(true, Ordering::SeqCst);
     println!("Starting looper...");
-    let config = config::Config::from_env();
+    let config = config::cfg();
     let app_clone = app.clone();
     thread::spawn(move || {
         let mut manager = RawInputManager::new().unwrap();
@@ -245,10 +251,11 @@ pub fn run() {
             process_barcode,
             update,
             show_notification,
+            get_config,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                let config = config::Config::from_env();
+                let config = config::cfg();
                 api.prevent_close();
                 let window = window.clone();
                 let ans = window

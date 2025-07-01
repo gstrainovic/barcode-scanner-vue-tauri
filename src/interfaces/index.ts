@@ -119,3 +119,13 @@ export interface BarcodeMitHinweise {
   hinweis_umgesetzt_von?: number[];
   data?: Attributes;
 }
+
+export interface ConfigInterface {
+  api: {
+    strapi: string
+  };
+  version: string;
+  dialog: {
+    title: string
+  };
+}

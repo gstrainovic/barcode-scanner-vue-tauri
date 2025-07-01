@@ -1,45 +1,46 @@
-use std::fs;
+use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ApiConfig {
     pub strapi: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct DialogConfig {
     pub title: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub api: ApiConfig,
     pub version: String,
     pub dialog: DialogConfig,
 }
 
-pub fn download_env_file() -> std::io::Result<()> {
-    let url = "https://raw.githubusercontent.com/gstrainovic/barcode-scanner-vue-tauri/refs/heads/main/.env";
-    let response = reqwest::blocking::get(url)
-        .expect("Failed to download .env file");
-    let content = response.text().expect("Failed to read response text");
-    fs::write(".env", content)?;
-    Ok(())
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ConfigAsJson {
+    pub api: ApiConfig,
+    pub version: String,
+    pub dialog: DialogConfig,
 }
 
-impl Config {
-    pub fn from_env() -> Self {
-        if !std::path::Path::new(".env").exists() {
-            download_env_file()
-                .expect("Failed to download or write .env file");
-        }
+pub fn get_config_as_json() -> ConfigAsJson {
+    let config = cfg();
+    ConfigAsJson {
+        api: config.api,
+        version: config.version,
+        dialog: config.dialog,
+    }
+}
 
-        dotenv::dotenv().ok();
-
-        Self {
-            api: ApiConfig {
-                strapi: std::env::var("VITE_STRAPI_URL").expect("VITE_STRAPI_URL not set"),
-            },
-            version: std::env::var("VITE_VERSION").expect("VITE_VERSION not set"),
-            dialog: DialogConfig {
-                title: std::env::var("VITE_DIALOG_TITLE").expect("VITE_DIALOG_TITLE not set"),
-            },
-        }
+pub fn cfg() -> Config {
+    Config {
+        api: ApiConfig {
+            strapi: "https://gz-strapi.strainovic-it.ch".to_string(),
+        },
+        version: "2.0.12".to_string(),
+        dialog: DialogConfig {
+            title: "BarcodeScannerV2-Dialog".to_string(),
+        },
     }
 }

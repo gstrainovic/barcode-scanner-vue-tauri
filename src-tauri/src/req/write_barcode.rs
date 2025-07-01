@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use serde_json::{Map, Value, json};
-use config::{self, Config};
+use config::cfg;
 
 #[derive(Deserialize, Debug)]
 pub struct IdAtr {
@@ -22,7 +22,7 @@ pub async fn write_barcode(
     sync: bool,
 ) -> Result<BarcodeData, reqwest::Error> {
 
-    let config = Config::from_env();
+    let config = cfg();
     let url = format!("{}/api/barcodes", config.api.strapi);
 
     let client = reqwest::Client::builder().build()?;

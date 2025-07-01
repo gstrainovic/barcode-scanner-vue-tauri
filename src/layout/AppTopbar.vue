@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useArbeitszeitStore } from '@/stores/arbeitsZeitStore';
 import { useAppStore } from '@/stores/appStore';
 import { useTeamStore } from '@/stores/teamStore';
-import { config } from '@/utils/config';
+import { getConfig } from '@/utils/config';
 const version = ref('0.0.0');
 const router = useRouter();
 const teamStore = useTeamStore();
@@ -59,6 +59,7 @@ listen('closeapp', () => {
 });
 
 onMounted(async () => {
+  const config = await getConfig();
   version.value = config.version;
 });
 </script>

@@ -1,14 +1,13 @@
-export const config = {
-  api: {
-    strapi: `${import.meta.env.VITE_STRAPI_URL}/api/`
-  },
-  version: import.meta.env.VITE_VERSION,
-  dialog: {
-    title: import.meta.env.VITE_DIALOG_TITLE
-  },
-  dev: {
-    disableLooper: import.meta.env.VITE_DISABLE_LOOPER === 'true'
-  }
-};
+import { invoke } from '@tauri-apps/api/core';
+import type { ConfigInterface } from '@/interfaces';
 
-export default config;
+export async function getConfig(): Promise<ConfigInterface & { api: { strapi: string } }> {
+  const cfgJson: ConfigInterface = await invoke('get_config');
+  return {
+    ...cfgJson,
+    api: {
+      ...cfgJson.api,
+      strapi: `${cfgJson.api.strapi}/api/`
+    }
+  };
+}
