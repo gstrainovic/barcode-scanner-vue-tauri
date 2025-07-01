@@ -2,9 +2,8 @@ import { storeToRefs } from 'pinia';
 import { getConfig } from './config';
 import { useAuthStore } from '@/stores/authStore';
 
-const config = await getConfig();
-
 export const fetchWithAuth = async (endpoint: string, data: unknown = null) => {
+  const config = await getConfig();
   const authStore = useAuthStore();
   const { userToken } = storeToRefs(authStore);
 
