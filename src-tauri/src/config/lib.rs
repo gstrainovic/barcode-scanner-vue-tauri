@@ -14,17 +14,20 @@ pub struct Config {
     pub dialog: DialogConfig,
 }
 
+pub fn download_env_file() -> std::io::Result<()> {
+    let url = "https://raw.githubusercontent.com/gstrainovic/barcode-scanner-vue-tauri/refs/heads/main/.env";
+    let response = reqwest::blocking::get(url)
+        .expect("Failed to download .env file");
+    let content = response.text().expect("Failed to read response text");
+    fs::write(".env", content)?;
+    Ok(())
+}
+
 impl Config {
     pub fn from_env() -> Self {
-        // Prüfe ob .env Datei existiert,
-        // falls nein, lade es herunter von https://raw.githubusercontent.com/gstrainovic/barcode-scanner-vue-tauri/refs/heads/main/.env
-        // und speichere es im aktuellen Verzeichnis.
         if !std::path::Path::new(".env").exists() {
-            let url = "https://raw.githubusercontent.com/gstrainovic/barcode-scanner-vue-tauri/refs/heads/main/.env";
-            let response = reqwest::blocking::get(url)
-                .expect("Failed to download .env file");
-            let content = response.text().expect("Failed to read response text");
-            fs::write(".env", content).expect("Failed to write .env file");
+            download_env_file()
+                .expect("Failed to download or write .env file");
         }
 
         dotenv::dotenv().ok();

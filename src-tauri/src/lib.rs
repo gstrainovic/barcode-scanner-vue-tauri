@@ -59,17 +59,20 @@ fn update(app: AppHandle) {
     {
         if let Ok(status) = update.update() {
             if status.updated() {
+                if std::path::Path::new(".env").exists() {
+                    std::fs::remove_file(".env").expect("Failed to remove old .env file");
+                }
+                let config = config::Config::from_env();
+                println!("Update successful to version: {}", status.version());
                 let message = format!(
                     "Aktualisiert zu {}. Anwendung wird neu gestartet.",
                     status.version()
                 );
-
                 app.dialog()
                     .message(message.as_str())
                     .kind(tauri_plugin_dialog::MessageDialogKind::Info)
                     .title(config.dialog.title)
                     .blocking_show();
-
                 app.restart();
             } else {
                 let message = "Keine neuen Updates verfügbar.";
