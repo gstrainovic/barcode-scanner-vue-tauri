@@ -38,7 +38,7 @@ pub fn cfg() -> Config {
         api: ApiConfig {
             strapi: "https://gz-strapi.strainovic-it.ch".to_string(),
         },
-        version: "2.0.12".to_string(),
+        version: "2.0.13".to_string(),
         dialog: DialogConfig {
             title: "BarcodeScannerV2-Dialog".to_string(),
         },

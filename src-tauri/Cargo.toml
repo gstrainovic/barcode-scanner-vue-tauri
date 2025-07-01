@@ -1,6 +1,6 @@
 [package]
 name = "barcode-scanner-v2"
-version = "2.0.12"
+version = "2.0.13"
 description = "A Tauri application for barcode scanning with Vue.js frontend"
 authors = ["Goran Strainovic - Strainovic IT"]
 edition = "2021"
