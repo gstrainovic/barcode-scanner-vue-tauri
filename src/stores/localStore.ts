@@ -56,7 +56,7 @@ export const useLocalStore = defineStore('local', {
   }),
   actions: {
     async fetchBarcodeMitHinweise() {
-      const response = await fetchWithAuth('barcodes?filters[hinweis][$notNull]=true&pagination[limit]=1000');
+      const response = await fetchWithAuth('barcodes?filters[hinweis][$notNull]=true&pagination[limit]=1000&sort=id:desc');
       if (!isBarcode2StrapiArray(response.data)) {
         throw new Error('Ungültige Antwort von Strapi für Barcodes mit Hinweisen!');
       }
@@ -87,13 +87,7 @@ export const useLocalStore = defineStore('local', {
     async postZeiterfassung() {
       // Kopie, damit das Array beim Entfernen nicht beeinflusst wird
       for (const zeiterfassung of [...this.zeiterfassung2strapi]) {
-        const response = await fetchWithAuth('zeiterfassung', {
-          method: 'POST',
-          body: JSON.stringify(zeiterfassung),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+        const response = await fetchWithAuth('zeit-erfassungen', zeiterfassung);
         if (!response.ok) {
           throw new Error(`Fehler beim Posten der Zeiterfassung: ${response.statusText}`);
         }
@@ -152,8 +146,8 @@ export const useLocalStore = defineStore('local', {
         this.fetchEinstellungen(),
         this.fetchAusnahmen(),
         this.fetchLeitcodes(),
-        this.fetchHinweisVorlagen(),
-        this.fetchBarcodeMitHinweise()
+        this.fetchHinweisVorlagen()
+        // this.fetchBarcodeMitHinweise()
       ]).then(() => {
       }).catch((error) => {
         console.error('Fehler beim Synchronisieren der Daten:', error);
@@ -161,8 +155,8 @@ export const useLocalStore = defineStore('local', {
     },
     async localStorage2strapi() {
       Promise.all([
-        this.postBarcodes(),
-        this.postZeiterfassung()
+        this.postBarcodes()
+        // this.postZeiterfassung()
       ]).then(() => {
       }).catch((error) => {
         console.error('Fehler beim Synchronisieren der Daten:', error);

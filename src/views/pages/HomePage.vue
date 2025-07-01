@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { listen } from '@tauri-apps/api/event';
+import { onMounted } from 'vue';
 import HistoryComponent from '@/components/HistoryComponent.vue';
 import HinweisComponent from '@/components/HinweisComponent.vue';
 import HinweisVorlagenComponent from '@/components/HinweisVorlagenComponent.vue';
+import { useAppStore } from '@/stores/appStore';
 import { useTeamStore } from '@/stores/teamStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useBarcodeStore } from '@/stores/barcodeStore';
@@ -18,6 +20,11 @@ const { barcodeInput } = storeToRefs(barcodeStore);
 
 listen('sendebarcode', (event) => {
   barcodeStore.processBarcode(event.payload as string);
+});
+
+onMounted(async () => {
+  const appStore = useAppStore();
+  await appStore.onlineCheck(); // einmalig den Online-Status setzen
 });
 
 // const bringWindowToFront = async () => {

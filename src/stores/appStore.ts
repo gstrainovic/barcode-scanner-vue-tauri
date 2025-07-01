@@ -17,9 +17,14 @@ export const useAppStore = defineStore('app', {
         const text = await response.text();
         if (response.status === 200 && text.includes('The server is running successfully')) {
           this.isOnline = true;
-          const localStore = useLocalStore();
-          await localStore.localStorage2strapi();
-          await localStore.strapi2localStorage();
+          // is user authenticated?
+          const authStore = useAuthStore();
+          const { token } = storeToRefs(authStore);
+          if (token.value) {
+            const localStore = useLocalStore();
+            await localStore.localStorage2strapi();
+            await localStore.strapi2localStorage();
+          }
           return true;
         }
         this.isOnline = false;
